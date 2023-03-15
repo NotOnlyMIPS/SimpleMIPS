@@ -15,7 +15,7 @@ module pre_mem_stage(
     // cp0 and exception
     input   wr_disable,
     output  pms_wr_disable,
-    pipeline_flush_t    pipeline_flush,
+    input  pipeline_flush_t    pipeline_flush,
     // MMU
     output logic        load_op,
     output logic        store_op,
@@ -91,7 +91,7 @@ mem_req u_mem_req (
     .data_wr        (data_wr   ),
     .data_size      (data_size ),
     .data_wstrb     (data_wstrb),
-    .data_addr      (data_vaddr),
+    .data_vaddr     (data_vaddr),
     .data_wdata     (data_wdata)
 );
 assign data_addr = data_result.phy_addr;

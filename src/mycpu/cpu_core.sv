@@ -59,8 +59,6 @@ always @(posedge clk) reset <= ~resetn;
 // pipeline control
 logic fs_allowin, ds_allowin, es_allowin, pms_allowin, ms_allowin, ws_allowin;
 // branch
-logic    pfs_db;
-virt_t   pfs_pc;
 logic    fs_valid;
 logic    br_bus_en;
 br_bus_t br_bus;
@@ -213,9 +211,6 @@ pre_if_stage u_pre_if_stage (
     .br_bus         (br_bus         ),
     // to IF
     .pfs_to_fs_bus  (pfs_to_fs_bus  ),
-    // to ID
-    .pfs_bd         (pfs_bd         ),
-    .pfs_pc         (pfs_pc         ),
     // cp0 and exception
     .pipeline_flush (pipeline_flush ),
     .c0_epc         (c0_epc         ),
@@ -262,9 +257,6 @@ id_stage u_idstage (
     // pipeline control
     .es_allowin     (es_allowin     ),
     .ds_allowin     (ds_allowin     ),
-    // from pre_IF
-    .pfs_bd         (pfs_bd         ),
-    .pfs_pc         (pfs_pc         ),
     // from IF
     .fs_to_ds_bus   (fs_to_ds_bus   ),
     // from WB to regfile

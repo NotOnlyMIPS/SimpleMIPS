@@ -6,9 +6,6 @@ module id_stage (
     // pipeline
     input  es_allowin,
     output ds_allowin,
-    // from pre_IF
-    input        pfs_bd,
-    input virt_t pfs_pc,
     // from IF
     input fs_to_ds_bus_t fs_to_ds_bus,
     // from WB
@@ -108,27 +105,28 @@ register_forward u_register_forward(
 );
 
 // branch control
-assign br_bus_en    = br_bus.br_op & ds_ready_go & es_allowin;
-assign br_bus.br_op = (|inst_d.br_op) & ds_valid;
-assign fs_pc        = pfs_bd ? pfs_pc : fs_to_ds_bus.pc;
+virt_t delay_slot_pc;
+assign br_bus_en     = br_bus.br_op & ds_ready_go & es_allowin;
+assign br_bus.br_op  = (|inst_d.br_op) & ds_valid;
+assign delay_slot_pc = fs_to_ds_bus_r.pc+3'd4;
 
 branch_control u_branch_control (
-    .ds_valid   (ds_valid     ),
+    .ds_valid       (ds_valid     ),
 
-    .br_op      (inst_d.br_op ),
+    .br_op          (inst_d.br_op ),
 
-    .rs_value   (rs_value     ),
-    .rt_value   (rt_value     ),
+    .rs_value       (rs_value     ),
+    .rt_value       (rt_value     ),
 
-    .fs_pc      (fs_pc        ),
-    .imm        (inst_d.imm   ),
-    .jidx       (inst_d.jidx  ),
+    .delay_slot_pc  (delay_slot_pc),
+    .imm            (inst_d.imm   ),
+    .jidx           (inst_d.jidx  ),
 
-    .ds_stall   (ds_stall     ),
+    .ds_stall       (ds_stall     ),
 
-    .br_stall   (br_bus.stall ),
-    .br_taken   (br_bus.taken ),
-    .br_target  (br_bus.target)
+    .br_stall       (br_bus.stall ),
+    .br_taken       (br_bus.taken ),
+    .br_target      (br_bus.target)
 );
 
 // ID stage

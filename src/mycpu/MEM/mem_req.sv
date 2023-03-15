@@ -14,7 +14,7 @@ module mem_req (
     output logic        data_wr,
     output logic [1:0]  data_size,
     output logic [3:0]  data_wstrb,
-    output virt_t       data_addr,
+    output virt_t       data_vaddr,
     output uint32_t     data_wdata
 );
 
@@ -77,7 +77,7 @@ assign data_size  = {2{op_sb | op_lb | op_lbu | ((op_swl | op_lwl) & mem_addr[1:
                   | {2{op_sh | op_lh | op_lhu | ((op_swl | op_lwl) & mem_addr[1:0] == 2'd1) | ((op_swr | op_lwr) & mem_addr[1:0] == 2'd1)}} & 2'd1
                   | {2{op_sw | op_lw | ((op_swl | op_lwl) & mem_addr[1] == 1'b1) | ((op_swr | op_lwr) & mem_addr[1] == 1'b0) }} & 2'd2;
 assign data_wstrb = mem_we;
-assign data_addr  = op_lwl || op_lwr || op_swl || op_swr ? mem_addr&32'hffff_fffc : mem_addr;
+assign data_vaddr = op_lwl || op_lwr || op_swl || op_swr ? mem_addr&32'hffff_fffc : mem_addr;
 assign data_wdata = op_sb  ? {4{mem_wdata[ 7:0]}} :
                     op_sh  ? {2{mem_wdata[15:0]}} :
                     op_swl ? mem_addr[1] ? mem_addr[0] ?  mem_wdata                : { 8'h0, mem_wdata[31: 8]} :

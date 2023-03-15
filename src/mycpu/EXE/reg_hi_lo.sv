@@ -37,12 +37,39 @@ assign op_mtlo  = hi_lo_op[5];
 assign op_mfhi  = hi_lo_op[6];
 assign op_mflo  = hi_lo_op[7];
 
+// mul
+logic        is_signed;
+logic        negtive_result;
+logic        mul_ready;
+uint32_t     abs_src1, abs_src2;
+uint64_t     abs_prod;
+uint64_t     mul_res;
+
+assign is_signed = op_mult;
+assign negtive_result = is_signed && (src1[31] ^ src2[31]);
+assign abs_src1 = (is_signed && src1[31]) ? -src1 : src1;
+assign abs_src2 = (is_signed && src2[31]) ? -src2 : src2;
+
+always_ff @(posedge clk) begin
+    if(reset)
+        mul_ready <= 1'b0;
+    else if(op_mult | op_multu)
+        mul_ready <= 1'b1;
+    else
+        mul_ready <= 1'b0;
+
+    if(reset)
+        abs_prod <= 64'b0;
+    else
+        abs_prod <= abs_src1 * abs_src2;
+end
+
+assign mul_res = negtive_result ? -abs_prod : abs_prod;
+
 wire [63:0] unsigned_prod ;
 wire [63:0] signed_prod   ;
 
-assign unsigned_prod = src1 * src2;
-assign signed_prod   = $signed(src1) * $signed(src2);
-
+// div
 reg         div_in_valid     ;
 wire        dividend_tvalid  ;
 wire        dividend_tvalid_u;
@@ -76,15 +103,13 @@ always @(posedge clk) begin
     if(hi_we) begin
         hi <= ({32{op_div  & div_res_tvalid }} & div_res[31:0]       )
             | ({32{op_divu & divu_res_tvalid}} & divu_res[31:0]      )
-            | ({32{op_mult                  }} & signed_prod[63:32]  )
-            | ({32{op_multu                 }} & unsigned_prod[63:32])
+            | ({32{op_mult | op_multu       }} & mul_res[63:32]      )
             | ({32{op_mthi                  }} & src1                );
     end
     if(lo_we) begin
         lo <= ({32{op_div  & div_res_tvalid }} & div_res[63:32]     )
             | ({32{op_divu & divu_res_tvalid}} & divu_res[63:32]    )
-            | ({32{op_mult                  }} & signed_prod[31:0]  )
-            | ({32{op_multu                 }} & unsigned_prod[31:0])
+            | ({32{op_mult | op_multu       }} & mul_res[31:0]      )
             | ({32{op_mtlo                  }} & src1               );
     end
 end
@@ -118,14 +143,16 @@ divu u_divu(
     .m_axis_dout_tdata      (divu_res         )
 );
 
-assign hi_lo_ready = op_div && div_res_tvalid || op_divu && divu_res_tvalid || hi_lo_op[1:0] == 2'h0;
+assign hi_lo_ready = op_div  && div_res_tvalid 
+                  || op_divu && divu_res_tvalid 
+                  || (op_mult || op_multu) && mul_ready
+                  || hi_lo_op[3:0] == 4'h0;
 
-assign hi_lo_result = ({32{op_mfhi          }} & hi                 )
-                    | ({32{op_mflo          }} & lo                 )
-                    | ({32{op_div           }} & div_res[63:32]     )
-                    | ({32{op_divu          }} & divu_res[63:32]    )
-                    | ({32{op_mult          }} & signed_prod[31:0]  )
-                    | ({32{op_multu         }} & unsigned_prod[31:0])
-                    | ({32{op_mthi | op_mtlo}} & src1               );
+assign hi_lo_result = ({32{op_mfhi           }} & hi                 )
+                    | ({32{op_mflo           }} & lo                 )
+                    | ({32{op_div            }} & div_res[63:32]     )
+                    | ({32{op_divu           }} & divu_res[63:32]    )
+                    | ({32{op_mult | op_multu}} & mul_res[31:0]      )
+                    | ({32{op_mthi | op_mtlo }} & src1               );
 
 endmodule

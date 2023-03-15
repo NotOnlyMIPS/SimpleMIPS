@@ -5,7 +5,7 @@ module branch_control (
     input logic [11:0] br_op,
     input uint32_t rs_value,
     input uint32_t rt_value,
-    input virt_t fs_pc,
+    input virt_t delay_slot_pc,
     input uint16_t imm,
     input logic [25:0] jidx,
     input  ds_stall,
@@ -59,7 +59,7 @@ assign br_taken = (    inst_beq                  &&  rs_eq_rt
                    ||  inst_jr
                    ||  inst_jalr
                   ) && ds_valid;
-assign br_target = (inst_j  || inst_jal ) ? {fs_pc[31:28], jidx[25:0], 2'b0}:
+assign br_target = (inst_j  || inst_jal ) ? {delay_slot_pc[31:28], jidx[25:0], 2'b0}:
                    (inst_jr || inst_jalr) ? rs_value :
-                  /*inst_bXX*/              (fs_pc + {{14{imm[15]}}, imm[15:0], 2'b0});
+                  /*inst_bXX*/              (delay_slot_pc + {{14{imm[15]}}, imm[15:0], 2'b0});
 endmodule
