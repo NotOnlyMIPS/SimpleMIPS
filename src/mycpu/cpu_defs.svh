@@ -87,6 +87,12 @@ typedef struct packed {
 	br_result_t    correct_result;
 } verify_result_t;
 
+// RAS
+typedef struct packed {
+	logic valid;
+	virt_t data;	
+} ras_t;
+
 // pre_IF stage
 typedef struct packed {
 	// pipeline
