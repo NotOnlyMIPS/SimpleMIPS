@@ -5,6 +5,12 @@
 /*
 cpu_defs:定义在cpu核中使用的常量和数据结构
 */
+//BPU
+`define B_IS_J		0
+`define B_IS_CALL   1
+`define B_IS_RET    2
+`define B_IS_BRA    3
+
 //MMU
 `define CPU_MMU_ENABLED 0
 
@@ -62,6 +68,24 @@ typedef struct packed {
 	logic tlb_op;
 	logic tlb_refill;
 } pipeline_flush_t;
+
+// BPU
+typedef struct packed {
+	logic [3:0]    br_op;
+	logic 		   br_verify_ready;
+	virt_t         pc;
+} ds_to_bpu_bus_t;
+
+typedef struct packed {
+	logic          taken;
+	virt_t 		   target;
+} br_result_t;
+
+typedef struct packed {
+	logic [3:0]    br_op;
+	logic          predict_sucess;
+	br_result_t    correct_result;
+} verify_result_t;
 
 // pre_IF stage
 typedef struct packed {
