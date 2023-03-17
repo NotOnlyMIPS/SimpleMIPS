@@ -6,10 +6,18 @@
 cpu_defs:定义在cpu核中使用的常量和数据结构
 */
 //BPU
-`define B_IS_J		0
-`define B_IS_CALL   1
-`define B_IS_RET    2
-`define B_IS_BRA    3
+`define B_IS_J		3'h1
+`define B_IS_CALL   3'h2
+`define B_IS_RET    3'h3
+`define B_IS_BRA    3'h4
+
+`define IDLE        1'b0
+`define CORRECTION  1'b1
+
+`define NT      2'b00  //not taken
+`define WNT     2'b01  //weakly not taken
+`define WT      2'b10  //weakly taken
+`define T       2'b11  //taken
 
 //MMU
 `define CPU_MMU_ENABLED 0
@@ -71,21 +79,33 @@ typedef struct packed {
 
 // BPU
 typedef struct packed {
-	logic [3:0]    br_op;
+	logic [31:10]	tag;
+	virt_t          target;
+	logic [2:0]     br_type;
+	logic [1:0]     count;
+} BHT_entry_t;
+
+typedef struct packed {
+	logic [2:0]    br_type;
 	logic 		   br_verify_ready;
 	virt_t         pc;
 } ds_to_bpu_bus_t;
 
 typedef struct packed {
-	logic          taken;
-	virt_t 		   target;
-} br_result_t;
+	logic          br_taken;
+	logic          valid;
+	virt_t         target;
+	BHT_entry_t    predict_entry;
+} predict_result_t;
 
 typedef struct packed {
-	logic [3:0]    br_op;
 	logic          predict_sucess;
-	br_result_t    correct_result;
+	logic          ready;
+	BHT_entry_t    predict_entry;
+	logic          is_taken;
+	virt_t         correct_target;
 } verify_result_t;
+
 
 // RAS
 typedef struct packed {
