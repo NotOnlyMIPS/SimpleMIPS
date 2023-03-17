@@ -129,6 +129,7 @@ assign bpu_predict_bus.valid         = valid;
 assign bpu_predict_bus.target        = target;
 assign bpu_predict_bus.predict_entry = r_entry;
 
+assign flush                         = es_verify_valid && ~es_to_bpu_bus.predict_sucess;
 assign is_correction                 = (state == `CORRECTION);
 assign correct_target                = correction_target;
 
