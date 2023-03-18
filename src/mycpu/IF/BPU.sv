@@ -80,7 +80,7 @@ always_ff @(posedge clk) begin
     end else if (~es_to_bpu_bus.predict_sucess && es_verify_valid && state == `IDLE) begin
         state               <= `CORRECTION;
         correction_is_taken <= es_to_bpu_bus.is_taken;
-        correct_target      <= es_to_bpu_bus.correct_target;
+        correction_target   <= es_to_bpu_bus.correct_target;
     end
 end
 
