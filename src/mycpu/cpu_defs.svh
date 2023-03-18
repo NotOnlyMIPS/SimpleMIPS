@@ -92,18 +92,20 @@ typedef struct packed {
 } ds_to_bpu_bus_t;
 
 typedef struct packed {
-	logic          br_taken;
 	logic          valid;
+	logic          br_op;
+	logic          br_taken;
 	virt_t         target;
-	BHT_entry_t    predict_entry;
 } predict_result_t;
 
 typedef struct packed {
 	logic          predict_sucess;
+	logic [2:0]	   br_type;
 	logic          ready;
 	BHT_entry_t    predict_entry;
 	logic          is_taken;
 	virt_t         correct_target;
+	virt_t		   pc;
 } verify_result_t;
 
 
@@ -116,12 +118,11 @@ typedef struct packed {
 // pre_IF stage
 typedef struct packed {
 	// pipeline
-	logic 	 valid;
+	logic 	 	valid;
 	// pre_IF to IF
-	logic    stall;
-	logic    req;
-	logic 	 br_op;
-	virt_t	 pc;
+	logic   	req;
+	logic 	 	br_op;
+	virt_t	 	pc;
 	// exception
 	exception_t exception;
 } pfs_to_fs_bus_t;
@@ -138,13 +139,6 @@ typedef struct packed {
 } fs_to_ds_bus_t;
 
 // ID stage
-typedef struct packed {
-	logic  stall;
-	logic  br_op;
-	logic  taken;
-	virt_t target;
-} br_bus_t;
-
 typedef struct packed {
 	logic 		 invalid;
 
@@ -184,6 +178,8 @@ typedef struct packed {
 	// ID to EXE
 	logic [11:0] alu_op;
 	logic 		 alu_ov;
+	logic [ 2:0] br_type;
+	logic [11:0] br_op;
 	logic [ 6:0] load_op;
 	logic [ 4:0] store_op;
 	logic [ 7:0] hi_lo_op;
@@ -199,9 +195,14 @@ typedef struct packed {
 	logic 		 rf_we;
 	reg_addr_t 	 dest;
 	uint16_t 	 imm;
+	logic [25:0] jidx;
 	uint32_t 	 rs_value;
 	uint32_t 	 rt_value;
 	virt_t 	 	 pc;
+	// branch prediction
+	logic  		 predict_is_taken;
+	virt_t		 predict_target;
+	BHT_entry_t  predict_entry;
     // ex
 	exception_t  exception;
 	// tlb

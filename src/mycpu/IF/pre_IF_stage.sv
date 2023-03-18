@@ -4,33 +4,33 @@ module pre_if_stage (
     input clk,
     input reset,
     // pipeline
-    input fs_allowin,
+    input  logic fs_allowin,
     // from IF
     input  logic fs_valid,
-    // br_bus
-    input  logic        br_bus_en,
-    input  br_bus_t     br_bus,
+    // branch prediction
+    input  logic            bpu_flush,
+    input  predict_result_t predict_result,
+    input  logic            is_correction,
+    input  virt_t           correct_target,
+    output logic            branch_resolved,
     // to IF
-    output pfs_to_fs_bus_t pfs_to_fs_bus,
-    // to ID
-    output        pfs_bd,
-    output virt_t pfs_pc,
+    output pfs_to_fs_bus_t  pfs_to_fs_bus,
     // cp0 and exception
-    input pipeline_flush_t pipeline_flush,
-    input virt_t c0_epc,
+    input  pipeline_flush_t pipeline_flush,
+    input  virt_t           c0_epc,
     // tlb/mmu
-    input  virt_t       tlb_pc,
-    output virt_t       inst_vaddr,
-    input  mmu_result_t inst_result,
-    input  exception_t  inst_tlb_ex,
+    input  virt_t           tlb_pc,
+    output virt_t           inst_vaddr,
+    input  mmu_result_t     inst_result,
+    input  exception_t      inst_tlb_ex,
     // inst_sram insterface
-    output logic        inst_req,
-    output logic        inst_wr,
-    output logic [1:0]  inst_size,
-    output logic [3:0]  inst_wstrb,
-    output virt_t       inst_addr,
-    output uint32_t     inst_wdata,
-    input  logic        inst_addr_ok
+    output logic            inst_req,
+    output logic            inst_wr,
+    output logic [1:0]      inst_size,
+    output logic [3:0]      inst_wstrb,
+    output virt_t           inst_addr,
+    output uint32_t         inst_wdata,
+    input  logic            inst_addr_ok
 );
 
 // pre_IF
@@ -44,17 +44,12 @@ virt_t  seq_pc;
 virt_t  next_pc;
 virt_t  pc;
 
-// br_bus
-logic    br_bus_r_valid;
-br_bus_t br_bus_r;
-br_bus_t final_br_bus;
-
 // exception
 exception_t exception;
 
 // inst_sram interface
 logic   req;
-assign  req = !exception.ex & pfs_valid & ~final_br_bus.stall & fs_allowin;
+assign  req = !exception.ex & pfs_valid & fs_allowin & ~bpu_flush;
 
 // pre_IF stage
 assign to_pfs_valid = ~reset;
@@ -62,11 +57,12 @@ assign pfs_ready_go = (req & inst_addr_ok) | exception.ex;
 assign pfs_allowin  = !pfs_valid || pfs_ready_go && fs_allowin;
 assign pfs_to_fs_valid  = pfs_valid && pfs_ready_go;
 
-assign pfs_bd    = final_br_bus.br_op & ~fs_valid;
+assign pfs_bd    = predict_result.br_op & ~fs_valid;
 assign seq_pc    = pc + 4;
-assign next_pc   = pfs_bd          ? seq_pc              :
-                   final_br_bus.taken ? final_br_bus.target :
-                                        seq_pc;
+assign next_pc   = pfs_bd               ? seq_pc                :
+                   predict_result.valid ? (predict_result.br_taken ? predict_result.target : seq_pc) :
+                   is_correction        ? correct_target        :
+                                          seq_pc;
 
 always_ff @(posedge clk) begin
     if(reset)
@@ -91,28 +87,13 @@ always_ff @(posedge clk) begin
     end
 end
 
-// br_bus
-assign final_br_bus.stall = br_bus.stall;
-assign final_br_bus.br_op = br_bus_r_valid ? br_bus_r.br_op  : br_bus.br_op;
-assign final_br_bus.taken = br_bus_r_valid ? br_bus_r.taken  : br_bus.taken;
-assign final_br_bus.target= br_bus_r_valid ? br_bus_r.target : br_bus.target;
-
-always_ff @(posedge clk) begin
-    if(reset || pipeline_flush.ex || pipeline_flush.eret || pipeline_flush.tlb_op)
-        br_bus_r_valid <= 1'b0;
-    else if(!pfs_bd && pfs_ready_go && fs_allowin)
-        br_bus_r_valid <= 1'b0;
-    else if(final_br_bus.br_op && br_bus_en) begin
-        br_bus_r_valid <= 1'b1;
-        br_bus_r <= br_bus;
-    end
-end
+// branch_prediction
+assign branch_resolved = !pfs_bd && pfs_ready_go && fs_allowin;
 
 // to IF
 assign pfs_to_fs_bus = {pfs_to_fs_valid,
-                        final_br_bus.stall,
                         req & inst_addr_ok,
-                        final_br_bus.br_op,
+                        predict_result.br_op,
                         next_pc,
                         exception
                         };

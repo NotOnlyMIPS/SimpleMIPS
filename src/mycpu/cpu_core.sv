@@ -58,10 +58,16 @@ always @(posedge clk) reset <= ~resetn;
 
 // pipeline control
 logic fs_allowin, ds_allowin, es_allowin, pms_allowin, ms_allowin, ws_allowin;
-// branch
-logic    fs_valid;
-logic    br_bus_en;
-br_bus_t br_bus;
+// branch prediction
+logic   fs_valid;
+logic   bpu_flush;
+logic   is_correction;
+logic   branch_resolved;
+virt_t  correct_target;
+BHT_entry_t      predict_entry;
+predict_result_t predict_result;
+ds_to_bpu_bus_t  ds_to_bpu_bus;
+es_to_pms_bus_t  es_to_bpu_bus;
 // pipeline bus
 pfs_to_fs_bus_t pfs_to_fs_bus;
 fs_to_ds_bus_t  fs_to_ds_bus;
@@ -198,6 +204,21 @@ cpu_axi_interface u_cpu_axi_interface(
     .bready         (bready           )
 );
 
+// BPU
+BPU u_BPU (
+    .clk            (clk            ),
+    .reset          (reset          ),
+    .pipeline_flush (pipeline_flush ),
+    .correct_finish (branch_resolved),
+    .ds_to_bpu_bus  (ds_to_bpu_bus  ),
+    .es_to_bpu_bus  (es_to_bpu_bus  ),
+    .predict_entry  (predict_entry  ),
+    .bpu_predict_bus(predict_result ),
+    .flush          (bpu_flush      ),
+    .is_correction  (is_correction  ),
+    .correct_target (correct_target )
+);
+
 // pre_IF stage
 pre_if_stage u_pre_if_stage (
     .clk            (clk            ),
@@ -206,9 +227,12 @@ pre_if_stage u_pre_if_stage (
     .fs_allowin     (fs_allowin     ),
     // from IF
     .fs_valid       (fs_valid       ),
-    // br_bus
-    .br_bus_en      (br_bus_en      ),
-    .br_bus         (br_bus         ),
+    // branch prediction
+    .bpu_flush      (bpu_flush      ),
+    .predict_result (predict_result ),
+    .is_correction  (is_correction  ),
+    .correct_target (correct_target ),
+    .branch_resolved(branch_resolved),
     // to IF
     .pfs_to_fs_bus  (pfs_to_fs_bus  ),
     // cp0 and exception
@@ -236,8 +260,10 @@ if_stage u_if_stage (
     // pipeline control
     .ds_allowin     (ds_allowin     ),
     .fs_allowin     (fs_allowin     ),
-    // from IF
+    // from pre_IF
     .pfs_to_fs_bus  (pfs_to_fs_bus  ),
+    // branch prediction
+    .bpu_flush      (bpu_flush      ),
     // to IF
     .fs_to_pfs_valid(fs_valid       ),
     // to ID
@@ -266,11 +292,14 @@ id_stage u_idstage (
     .pms_forward_bus(pms_forward_bus),
     .ms_forward_bus (ms_forward_bus ),
     .ws_forward_bus (ws_forward_bus ),
+    // branch prediction
+    .branch_resolved    (branch_resolved        ),
+    .predict_is_taken   (predict_result.br_taken),
+    .predict_target     (predict_result.target  ),
+    .predict_entry      (predict_entry          ),
+    .ds_to_bpu_bus      (ds_to_bpu_bus          ),
     // to EXE
     .ds_to_es_bus   (ds_to_es_bus   ),
-    // br bus
-    .br_bus_en      (br_bus_en      ),
-    .br_bus         (br_bus         ),
     // cp0 and exception
     .c0_hw          (c0_hw          ),
     .c0_sw          (c0_sw          ),
@@ -286,6 +315,8 @@ exe_stage u_exe_stage (
     .es_allowin     (es_allowin     ),
     // from ID
     .ds_to_es_bus   (ds_to_es_bus   ),
+    // branch prediction
+    .es_to_bpu_bus  (es_to_bpu_bus  ),
     // to pre_MEM
     .es_to_pms_bus  (es_to_pms_bus  ),
     // forward bus

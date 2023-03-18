@@ -15,11 +15,14 @@ module id_stage (
     input pms_forward_bus_t pms_forward_bus,
     input ms_forward_bus_t  ms_forward_bus,
     input ws_forward_bus_t  ws_forward_bus,
+    // branch prediction
+    input  logic            branch_resolved,
+    input  logic            predict_is_taken,
+    input  virt_t           predict_target,
+    input  BHT_entry_t      predict_entry,
+    output ds_to_bpu_bus_t  ds_to_bpu_bus,
     // to EXE
-    output ds_to_es_bus_t ds_to_es_bus,
-    // branch bus
-    output logic    br_bus_en,
-    output br_bus_t br_bus,
+    output ds_to_es_bus_t   ds_to_es_bus,
     // cp0 and exception
     input logic [5:0] c0_hw,
     input logic [1:0] c0_sw,
@@ -32,7 +35,6 @@ logic ds_ready_go;
 logic ds_to_es_valid;
 
 // from IF
-virt_t fs_pc;
 fs_to_ds_bus_t fs_to_ds_bus_r;
 
 // cp0 and exception
@@ -104,31 +106,6 @@ register_forward u_register_forward(
     .ds_stall   (ds_stall)
 );
 
-// branch control
-virt_t delay_slot_pc;
-assign br_bus_en     = br_bus.br_op & ds_ready_go & es_allowin;
-assign br_bus.br_op  = (|inst_d.br_op) & ds_valid;
-assign delay_slot_pc = fs_to_ds_bus_r.pc+3'd4;
-
-branch_control u_branch_control (
-    .ds_valid       (ds_valid     ),
-
-    .br_op          (inst_d.br_op ),
-
-    .rs_value       (rs_value     ),
-    .rt_value       (rt_value     ),
-
-    .delay_slot_pc  (delay_slot_pc),
-    .imm            (inst_d.imm   ),
-    .jidx           (inst_d.jidx  ),
-
-    .ds_stall       (ds_stall     ),
-
-    .br_stall       (br_bus.stall ),
-    .br_taken       (br_bus.taken ),
-    .br_target      (br_bus.target)
-);
-
 // ID stage
 assign ds_ready_go  = ds_valid && !ds_stall;
 assign ds_allowin   = !ds_valid || ds_ready_go && es_allowin;
@@ -160,10 +137,39 @@ assign {exception.ex, exception.exccode} = {6{ds_valid}} & ((|c0_hw) | (|c0_sw) 
 assign exception.badvaddr = fs_to_ds_bus_r.exception.badvaddr;
 assign exception.tlb_refill =  exception.exccode == `EXCCODE_TLBL ?
                                fs_to_ds_bus_r.exception.tlb_refill : 1'b0;
+
+// br_bus
+logic       is_branch, is_call, is_ret, is_jump;
+logic       br_bus_en;
+logic       br_bus_r_valid;
+logic [2:0] br_op_r;
+logic [2:0] br_type;
+assign is_branch = |inst_d.br_op[7:0];
+assign is_ret    = inst_d.br_op[10];
+assign is_call   = inst_d.br_op[11] | inst_d.br_op[9];
+assign is_jump   = inst_d.br_op[8];
+assign br_bus_en = (|inst_d.br_op) & ds_ready_go & es_allowin & ds_valid;
+always_ff @(posedge clk) begin
+    if(reset || pipeline_flush.ex || pipeline_flush.eret || pipeline_flush.tlb_op || branch_resolved)
+        br_bus_r_valid <= 1'b0;
+    else if(br_bus_en) begin
+        br_bus_r_valid <= 1'b1;
+        br_op_r        <= {3{is_jump}} & 3'h1 | {3{is_call}} & 3'h2 | {3{is_ret}} & 3'h3 |{3{is_branch}} & 3'h4;
+    end
+end
+assign br_type = br_bus_r_valid ? br_op_r : {3{ds_valid}} & ({3{is_jump}} & 3'h1 | {3{is_call}} & 3'h2 | {3{is_ret}} & 3'h3 |{3{is_branch}} & 3'h4);
+
+// to BPU
+assign ds_to_bpu_bus = { br_type,
+                         br_bus_en,
+                         fs_to_ds_bus_r.pc};
+
 // to EXE
 assign ds_to_es_bus = { ds_to_es_valid,
                         inst_d.alu_op,
                         inst_d.alu_ov,
+                        br_type,
+                        inst_d.br_op,
                         inst_d.load_op,
                         inst_d.store_op,
                         inst_d.hi_lo_op,
@@ -179,9 +185,13 @@ assign ds_to_es_bus = { ds_to_es_valid,
                         inst_d.rf_we,
                         inst_d.dest,
                         inst_d.imm,
+                        inst_d.jidx,
                         rs_value,
                         rt_value,
                         fs_to_ds_bus_r.pc,
+                        predict_is_taken,
+                        predict_target,
+                        predict_entry,
                         exception,
                         inst_d.tlb_op
                         };

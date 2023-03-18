@@ -8,13 +8,15 @@ module exe_stage (
     output es_allowin,
     // from ID
     input   ds_to_es_bus_t   ds_to_es_bus,
+    // to BPU
+    output  verify_result_t  es_to_bpu_bus,
     //to MEM
     output  es_to_pms_bus_t  es_to_pms_bus,
     // forward bus
-    input  pms_wr_disable,
-    input  wr_disable,
     output  es_forward_bus_t es_forward_bus,
     // cp0 and exception
+    input  pms_wr_disable,
+    input  wr_disable,
     input pipeline_flush_t pipeline_flush
 );
 
@@ -101,6 +103,34 @@ reg_hi_lo u_reg_hi_lo(
 
     .wr_disable (wr_disable | pms_wr_disable | ~es_valid | exception.ex)
 );
+
+// branch_control
+virt_t delay_slot_pc;
+assign delay_slot_pc = ds_to_es_bus_r.pc+3'd4;
+
+branch_control u_branch_control (
+    .es_valid       (es_valid     ),
+
+    .br_op          (ds_to_es_bus_r.br_op ),
+
+    .rs_value       (ds_to_es_bus_r.rs_value),
+    .rt_value       (ds_to_es_bus_r.rt_value),
+
+    .delay_slot_pc  (delay_slot_pc),
+    .imm            (ds_to_es_bus_r.imm ),
+    .jidx           (ds_to_es_bus_r.jidx),
+
+    .predict_is_taken(ds_to_es_bus_r.predict_is_taken),
+    .predict_target  (ds_to_es_bus_r.predict_target  ),
+    .predict_sucess  (es_to_bpu_bus.predict_sucess),
+    .br_taken        (es_to_bpu_bus.is_taken      ),
+    .br_target       (es_to_bpu_bus.correct_target)
+);
+
+assign es_to_bpu_bus.br_type = ds_to_es_bus_r.br_type & {3{es_valid}};
+assign es_to_bpu_bus.ready = es_ready_go;
+assign es_to_bpu_bus.predict_entry = ds_to_es_bus_r.predict_entry;
+assign es_to_bpu_bus.pc = ds_to_es_bus_r.pc;
 
 // forward
 assign op_mfc0 = ds_to_es_bus_r.c0_op[2] & es_valid;

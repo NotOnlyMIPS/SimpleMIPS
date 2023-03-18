@@ -6,6 +6,7 @@ module BPU (
     input   logic               correct_finish,
     input   ds_to_bpu_bus_t     ds_to_bpu_bus,
     input   verify_result_t     es_to_bpu_bus,
+    output  BHT_entry_t         predict_entry,
     output  predict_result_t    bpu_predict_bus,
     output  logic               flush,
     output  logic               is_correction,
@@ -58,7 +59,7 @@ always_ff @(posedge clk) begin
 end
 
 virt_t         pc_add8;
-logic          target;
+virt_t         target;
 logic          is_taken;
 logic          valid;
 
@@ -104,7 +105,7 @@ always_comb begin
         end
         `B_IS_BRA: begin
             if(r_entry.count[1]) begin
-                target = r_entry.addr;
+                target = r_entry.target;
                 is_taken = 1'b1;
             end
             else begin
@@ -124,10 +125,11 @@ always_comb begin
     end
 end
 
-assign bpu_predict_bus.br_taken      = is_taken;
 assign bpu_predict_bus.valid         = valid;
+assign bpu_predict_bus.br_op         = (ds_to_bpu_bus.br_type != 3'b0);
+assign bpu_predict_bus.br_taken      = is_taken;
 assign bpu_predict_bus.target        = target;
-assign bpu_predict_bus.predict_entry = r_entry;
+assign predict_entry = r_entry;
 
 assign flush                         = es_verify_valid && ~es_to_bpu_bus.predict_sucess;
 assign is_correction                 = (state == `CORRECTION);

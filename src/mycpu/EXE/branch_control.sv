@@ -1,17 +1,22 @@
 `include "..\cpu_defs.svh"
 
 module branch_control (
-    input  ds_valid,
-    input logic [11:0] br_op,
-    input uint32_t rs_value,
-    input uint32_t rt_value,
-    input virt_t delay_slot_pc,
-    input uint16_t imm,
-    input logic [25:0] jidx,
-    input  ds_stall,
-    output br_stall,
-    output br_taken,
-    output virt_t br_target
+    input  es_valid,
+
+    input  logic [11:0] br_op,
+
+    input  uint32_t rs_value,
+    input  uint32_t rt_value,
+
+    input  virt_t       delay_slot_pc,
+    input  uint16_t     imm,
+    input  logic [25:0] jidx,
+
+    input  logic        predict_is_taken,
+    input  virt_t       predict_target  ,
+    output logic        predict_sucess  ,
+    output logic        br_taken,
+    output virt_t       br_target
 );
 
 logic  inst_beq;
@@ -47,7 +52,6 @@ assign rs_ge_z  = ~rs_lt_z;
 assign rs_gt_z  = ~rs_lt_z & ~rs_eq_z;
 assign rs_le_z  = rs_lt_z | rs_eq_z;
 
-assign br_stall = (|br_op) & ds_stall;
 assign br_taken = (    inst_beq                  &&  rs_eq_rt
                    ||  inst_bne                  && !rs_eq_rt
                    || (inst_bgez | inst_bgezal)  &&  rs_ge_z
@@ -58,8 +62,11 @@ assign br_taken = (    inst_beq                  &&  rs_eq_rt
                    ||  inst_jal
                    ||  inst_jr
                    ||  inst_jalr
-                  ) && ds_valid;
+                  ) && es_valid;
 assign br_target = (inst_j  || inst_jal ) ? {delay_slot_pc[31:28], jidx[25:0], 2'b0}:
                    (inst_jr || inst_jalr) ? rs_value :
                   /*inst_bXX*/              (delay_slot_pc + {{14{imm[15]}}, imm[15:0], 2'b0});
+
+assign predict_sucess = br_taken && predict_is_taken && (br_target == predict_target) || !(br_taken || predict_is_taken);
+
 endmodule
