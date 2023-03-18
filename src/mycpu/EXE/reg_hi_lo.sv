@@ -40,6 +40,7 @@ assign op_mflo  = hi_lo_op[7];
 // mul
 logic        is_signed;
 logic        negtive_result;
+logic [1:0]  mul_count;
 logic        mul_ready;
 uint32_t     abs_src1, abs_src2;
 uint64_t     abs_prod;
@@ -49,20 +50,23 @@ assign is_signed = op_mult;
 assign negtive_result = is_signed && (src1[31] ^ src2[31]);
 assign abs_src1 = (is_signed && src1[31]) ? -src1 : src1;
 assign abs_src2 = (is_signed && src2[31]) ? -src2 : src2;
+assign mul_ready = mul_count == 2;
 
 always_ff @(posedge clk) begin
     if(reset)
-        mul_ready <= 1'b0;
-    else if(op_mult | op_multu)
-        mul_ready <= 1'b1;
-    else
-        mul_ready <= 1'b0;
-
-    if(reset)
-        abs_prod <= 64'b0;
-    else
-        abs_prod <= abs_src1 * abs_src2;
+        mul_count <= 2'b0;
+    else if(op_mult || op_multu)
+        mul_count <= mul_count + 2'd1;
+    else 
+        mul_count <= 2'd0;
 end
+
+multu u_multu (
+    .CLK(clk     ),
+    .A  (abs_src1),
+    .B  (abs_src2),
+    .P  (abs_prod)
+);
 
 assign mul_res = negtive_result ? -abs_prod : abs_prod;
 
