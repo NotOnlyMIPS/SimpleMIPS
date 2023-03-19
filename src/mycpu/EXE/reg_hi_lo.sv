@@ -50,7 +50,7 @@ assign is_signed = op_mult;
 assign negtive_result = is_signed && (src1[31] ^ src2[31]);
 assign abs_src1 = (is_signed && src1[31]) ? -src1 : src1;
 assign abs_src2 = (is_signed && src2[31]) ? -src2 : src2;
-assign mul_ready = mul_count == 2;
+assign mul_ready = mul_count == 3;
 
 always_ff @(posedge clk) begin
     if(reset)

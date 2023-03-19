@@ -13,7 +13,6 @@ module BPU (
     output  virt_t              correct_target
 );
 
-BHT_entry_t [255:0] entries;
 BHT_entry_t         w_entry;
 BHT_entry_t         r_entry;
 
@@ -22,10 +21,30 @@ ras_t               ras_data;
 logic  es_verify_valid;
 assign es_verify_valid = (es_to_bpu_bus.br_type != 3'b0 && es_to_bpu_bus.ready);
 
-assign r_entry = entries[ds_to_bpu_bus.pc[9:2]];
 assign w_entry.tag     = es_to_bpu_bus.predict_entry.tag;
 assign w_entry.target  = es_to_bpu_bus.predict_entry.target;
 assign w_entry.br_type = es_to_bpu_bus.predict_entry.br_type;
+
+
+simple_port_ram_without_bypass #(
+    .LATENCY(0),
+    .SIZE(256),
+    .dtype(BHT_entry_t)
+)mem_data(
+    .clk(clk),
+    .rst(~reset),
+    //write port
+    .ena(1'b1),
+    .wea(es_verify_valid),
+    // .addra(EXE_BResult.Index),
+    .addra(es_to_bpu_bus.pc[11:2]),
+    .dina(w_entry),
+    //read port
+    .enb(1'b1), 
+    // .addrb(Index),
+    .addrb(ds_to_bpu_bus.pc[11:2]),
+    .doutb(r_entry)
+);
 
 always_comb begin
     if(es_to_bpu_bus.predict_sucess) begin
@@ -50,13 +69,6 @@ always_comb begin
     end
 end
 
-always_ff @(posedge clk) begin
-    if(reset) begin
-        entries <= '0;
-    end else if (es_verify_valid) begin
-        entries[es_to_bpu_bus.pc[11:2]] <= w_entry;
-    end
-end
 
 virt_t         pc_add8;
 virt_t         target;
