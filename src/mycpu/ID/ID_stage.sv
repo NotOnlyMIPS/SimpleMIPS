@@ -21,6 +21,8 @@ module id_stage (
     input  virt_t           predict_target,
     input  BHT_entry_t      predict_entry,
     output ds_to_bpu_bus_t  ds_to_bpu_bus,
+    // branch bus
+    output logic br_op,
     // to EXE
     output ds_to_es_bus_t   ds_to_es_bus,
     // cp0 and exception
@@ -144,6 +146,7 @@ logic       br_bus_en;
 logic       br_bus_r_valid;
 logic [2:0] br_op_r;
 logic [2:0] br_type;
+assign br_op     = (br_type != 3'd0 );
 assign is_branch = |inst_d.br_op[7:0];
 assign is_ret    = inst_d.br_op[10];
 assign is_call   = inst_d.br_op[11] | inst_d.br_op[9];

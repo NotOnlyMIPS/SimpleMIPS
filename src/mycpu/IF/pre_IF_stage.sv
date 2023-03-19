@@ -7,6 +7,8 @@ module pre_if_stage (
     input  logic fs_allowin,
     // from IF
     input  logic fs_valid,
+    // branch bus
+    input  logic br_op,
     // branch prediction
     input  logic            bpu_flush,
     input  predict_result_t predict_result,
@@ -57,7 +59,7 @@ assign pfs_ready_go = (req & inst_addr_ok) | exception.ex;
 assign pfs_allowin  = !pfs_valid || pfs_ready_go && fs_allowin;
 assign pfs_to_fs_valid  = pfs_valid && pfs_ready_go;
 
-assign pfs_bd    = predict_result.br_op & ~fs_valid;
+assign pfs_bd    = br_op & ~fs_valid;
 assign seq_pc    = pc + 4;
 assign next_pc   = pfs_bd               ? seq_pc                :
                    predict_result.valid ? (predict_result.br_taken ? predict_result.target : seq_pc) :
@@ -93,7 +95,7 @@ assign branch_resolved = !pfs_bd && pfs_ready_go && fs_allowin;
 // to IF
 assign pfs_to_fs_bus = {pfs_to_fs_valid,
                         req & inst_addr_ok,
-                        predict_result.br_op,
+                        br_op,
                         next_pc,
                         exception
                         };

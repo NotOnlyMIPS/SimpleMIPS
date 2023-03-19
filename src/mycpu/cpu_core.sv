@@ -59,6 +59,7 @@ always @(posedge clk) reset <= ~resetn;
 // pipeline control
 logic fs_allowin, ds_allowin, es_allowin, pms_allowin, ms_allowin, ws_allowin;
 // branch prediction
+logic   br_op;
 logic   fs_valid;
 logic   bpu_flush;
 logic   is_correction;
@@ -227,6 +228,8 @@ pre_if_stage u_pre_if_stage (
     .fs_allowin     (fs_allowin     ),
     // from IF
     .fs_valid       (fs_valid       ),
+    // branch bus
+    .br_op          (br_op          ),
     // branch prediction
     .bpu_flush      (bpu_flush      ),
     .predict_result (predict_result ),
@@ -298,6 +301,8 @@ id_stage u_idstage (
     .predict_target     (predict_result.target  ),
     .predict_entry      (predict_entry          ),
     .ds_to_bpu_bus      (ds_to_bpu_bus          ),
+    // branch bus
+    .br_op          (br_op          ),
     // to EXE
     .ds_to_es_bus   (ds_to_es_bus   ),
     // cp0 and exception
