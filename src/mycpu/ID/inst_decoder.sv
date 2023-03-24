@@ -9,7 +9,7 @@ wire        alu_ov;
 wire [11:0] alu_op;
 wire [11:0] br_op;
 wire [ 2:0] tlb_op;
-wire [ 7:0] hi_lo_op;
+wire [12:0] hi_lo_op;
 wire [ 6:0] load_op;
 wire [ 4:0] store_op;
 wire [ 2:0] c0_op;
@@ -31,7 +31,6 @@ wire [ 4:0] rs;
 wire [ 4:0] rt;
 wire [ 4:0] rd;
 wire [ 4:0] sa;
-wire [19:0] code;
 wire [ 2:0] sel;
 wire [ 5:0] func;
 wire [25:0] jidx;
@@ -49,7 +48,7 @@ wire        inst_add, inst_addi, inst_addu, inst_addiu, inst_sub, inst_subu;
 // compare and set
 wire        inst_slt, inst_slti, inst_sltu, inst_sltiu;
 // multiplication and division
-wire        inst_div, inst_divu, inst_mult, inst_multu;
+wire        inst_div, inst_divu, inst_mult, inst_multu, inst_mul, inst_madd, inst_maddu, inst_msub, inst_msubu;
 // logical
 wire        inst_and, inst_andi, inst_or, inst_ori, inst_xor, inst_xori, inst_nor;
 // shift
@@ -80,7 +79,6 @@ assign rs   = inst[25:21];
 assign rt   = inst[20:16];
 assign rd   = inst[15:11];
 assign sa   = inst[10: 6];
-assign code = inst[25: 6];
 assign sel  = inst[ 2: 0];
 assign func = inst[ 5: 0];
 assign imm  = inst[15: 0];
@@ -93,8 +91,6 @@ decoder_5_32 u_dec2(.in(rs  ), .out(rs_d  ));
 decoder_5_32 u_dec3(.in(rt  ), .out(rt_d  ));
 decoder_5_32 u_dec4(.in(rd  ), .out(rd_d  ));
 decoder_5_32 u_dec5(.in(sa  ), .out(sa_d  ));
-
-assign code_d = code == 20'h80000;
 
 // add and substract
 assign inst_add    = op_d[6'h00] & func_d[6'h20] & sa_d[5'h00];
@@ -109,10 +105,15 @@ assign inst_slti   = op_d[6'h0a];
 assign inst_sltu   = op_d[6'h00] & func_d[6'h2b] & sa_d[5'h00];
 assign inst_sltiu  = op_d[6'h0b];
 // multiplication and division
-assign inst_div    = op_d[6'h00] & func_d[6'h1a] & rd_d[5'h00] & sa_d[5'h00];
-assign inst_divu   = op_d[6'h00] & func_d[6'h1b] & rd_d[5'h00] & sa_d[5'h00];
-assign inst_mult   = op_d[6'h00] & func_d[6'h18] & rd_d[5'h00] & sa_d[5'h00];
-assign inst_multu  = op_d[6'h00] & func_d[6'h19] & rd_d[5'h00] & sa_d[5'h00];
+assign inst_div    = op_d[6'h00] & func_d[6'h1a];
+assign inst_divu   = op_d[6'h00] & func_d[6'h1b];
+assign inst_mult   = op_d[6'h00] & func_d[6'h18];
+assign inst_multu  = op_d[6'h00] & func_d[6'h19];
+assign inst_mul    = op_d[6'h1c] & func_d[6'h02];
+assign inst_madd   = op_d[6'h1c] & func_d[6'h00];
+assign inst_maddu  = op_d[6'h1c] & func_d[6'h01];
+assign inst_msub   = op_d[6'h1c] & func_d[6'h04];
+assign inst_msubu  = op_d[6'h1c] & func_d[6'h05];
 // logical
 assign inst_and    = op_d[6'h00] & func_d[6'h24] & sa_d[5'h00];
 assign inst_andi   = op_d[6'h0c];
@@ -139,9 +140,9 @@ assign inst_lui    = op_d[6'h0f] & rs_d[5'h00];
 assign inst_break  = op_d[6'h00] & func_d[6'h0d];
 assign inst_syscall= op_d[6'h00] & func_d[6'h0c];
 // privileged instructions
-assign inst_eret   = op_d[6'h10] & func_d[6'h18] & code_d;
-assign inst_mfc0   = op_d[6'h10] & (~|func[5:3]) & rs_d[5'h00] & sa_d[5'h00];
-assign inst_mtc0   = op_d[6'h10] & (~|func[5:3]) & rs_d[5'h04] & sa_d[5'h00];
+assign inst_eret   = op_d[6'h10] & func_d[6'h18];
+assign inst_mfc0   = op_d[6'h10] & rs_d[5'h00];
+assign inst_mtc0   = op_d[6'h10] & rs_d[5'h04];
 // load
 assign inst_lb     = op_d[6'h20];
 assign inst_lbu    = op_d[6'h24];
@@ -208,16 +209,21 @@ assign br_op[ 9] = inst_jal   ;
 assign br_op[10] = inst_jr    ;
 assign br_op[11] = inst_jalr  ;
 
-assign hi_lo_op[0] = inst_div;
-assign hi_lo_op[1] = inst_divu;
-assign hi_lo_op[2] = inst_mult;
-assign hi_lo_op[3] = inst_multu;
-assign hi_lo_op[4] = inst_mthi;
-assign hi_lo_op[5] = inst_mtlo;
-assign hi_lo_op[6] = inst_mfhi;
-assign hi_lo_op[7] = inst_mflo;
+assign hi_lo_op[ 0] = inst_mthi;
+assign hi_lo_op[ 1] = inst_mtlo;
+assign hi_lo_op[ 2] = inst_mfhi;
+assign hi_lo_op[ 3] = inst_mflo;
+assign hi_lo_op[ 4] = inst_div;
+assign hi_lo_op[ 5] = inst_divu;
+assign hi_lo_op[ 6] = inst_mult;
+assign hi_lo_op[ 7] = inst_multu;
+assign hi_lo_op[ 8] = inst_mul;
+assign hi_lo_op[ 9] = inst_madd;
+assign hi_lo_op[10] = inst_maddu;
+assign hi_lo_op[11] = inst_madd;
+assign hi_lo_op[12] = inst_maddu;
 
-assign load_op[0] = inst_lb; //* 增加load_op相应控制
+assign load_op[0] = inst_lb; 
 assign load_op[1] = inst_lbu;
 assign load_op[2] = inst_lh;
 assign load_op[3] = inst_lhu;
@@ -239,13 +245,13 @@ assign tlb_op[0] = inst_tlbp;
 assign tlb_op[1] = inst_tlbr;
 assign tlb_op[2] = inst_tlbwi;
 
-assign src1_is_sa   = inst_sll   | inst_srl    | inst_sra;
-assign src1_is_pc   = inst_jal   | inst_jalr   | inst_bgezal | inst_bltzal;
-assign src2_is_simm = inst_addiu | inst_addi   | 
-                      inst_lui   | res_from_mem| res_to_mem  |
+assign src1_is_sa   = inst_sll   | inst_srl     | inst_sra;
+assign src1_is_pc   = inst_jal   | inst_jalr    | inst_bgezal | inst_bltzal;
+assign src2_is_simm = inst_addiu | inst_addi    | 
+                      inst_lui   | res_from_mem | res_to_mem  |
                       inst_slti  | inst_sltiu;
-assign src2_is_zimm = inst_andi  | inst_ori    | inst_xori;
-assign src2_is_8    = inst_jal   | inst_jalr   | inst_bgezal | inst_bltzal;
+assign src2_is_zimm = inst_andi  | inst_ori     | inst_xori;
+assign src2_is_8    = inst_jal   | inst_jalr    | inst_bgezal | inst_bltzal;
 assign res_from_mem = |load_op;
 assign res_to_mem   = |store_op;
 assign dst_is_r31   = inst_jal   | inst_bgezal | inst_bltzal;
@@ -254,10 +260,11 @@ assign dst_is_rt    = inst_addiu | inst_addi   |
                       inst_slti  | inst_sltiu  |
                       inst_andi  | inst_ori    | inst_xori;
 assign rf_we        = ~(res_to_mem)
-                    & ~inst_beq  & ~inst_bne  & ~inst_bgez & ~inst_bgtz
-                    & ~inst_blez & ~inst_bltz & ~inst_j    & ~inst_jr
-                    & ~inst_div  & ~inst_divu & ~inst_mult & ~inst_multu
-                    & ~inst_mthi & ~inst_mtlo & ~inst_mtc0 & ~inst_eret;
+                    & ~inst_beq  & ~inst_bne   & ~inst_bgez & ~inst_bgtz
+                    & ~inst_blez & ~inst_bltz  & ~inst_j    & ~inst_jr
+                    & ~inst_div  & ~inst_divu  & ~inst_mult & ~inst_multu
+                    & ~inst_madd & ~inst_maddu & ~inst_msub & ~inst_msubu
+                    & ~inst_mthi & ~inst_mtlo  & ~inst_mtc0 & ~inst_eret;
 
 assign dest         = dst_is_r31 ? 5'd31 :
                       dst_is_rt  ? rt    : 

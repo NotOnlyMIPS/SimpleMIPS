@@ -150,7 +150,7 @@ typedef struct packed {
 	logic    	 alu_ov;
 	logic [11:0] br_op;
 	logic [ 2:0] tlb_op;
-	logic [ 7:0] hi_lo_op;
+	logic [12:0] hi_lo_op;
 	logic [ 6:0] load_op;
 	logic [ 4:0] store_op;
 	logic [ 2:0] c0_op;
@@ -182,7 +182,7 @@ typedef struct packed {
 	logic [11:0] br_op;
 	logic [ 6:0] load_op;
 	logic [ 4:0] store_op;
-	logic [ 7:0] hi_lo_op;
+	logic [12:0] hi_lo_op;
 	logic [ 2:0] c0_op;
 	logic [ 7:0] c0_addr;
 	logic 		 src1_is_sa;
