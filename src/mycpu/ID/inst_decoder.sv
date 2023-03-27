@@ -1,3 +1,8 @@
+/*!
+ * \file inst_decoder.sv
+ * \brief instruction decoder
+ */
+
 `include "..\cpu_defs.svh"
 
 module inst_decoder (
@@ -21,8 +26,8 @@ wire        src2_is_8;
 wire        res_from_mem;
 wire        res_to_mem;
 wire        rf_we;
-wire        dst_is_r31;  
-wire        dst_is_rt;   
+wire        dst_is_r31;
+wire        dst_is_rt;
 wire [ 4:0] dest;
 wire [15:0] imm;
 
@@ -43,39 +48,69 @@ wire [31:0] sa_d;
 wire        code_d;
 wire [63:0] func_d;
 
-// add and substract
-wire        inst_add, inst_addi, inst_addu, inst_addiu, inst_sub, inst_subu;
-// compare and set
-wire        inst_slt, inst_slti, inst_sltu, inst_sltiu;
-// multiplication and division
-wire        inst_div, inst_divu, inst_mult, inst_multu, inst_mul, inst_madd, inst_maddu, inst_msub, inst_msubu;
-// logical
-wire        inst_and, inst_andi, inst_or, inst_ori, inst_xor, inst_xori, inst_nor;
-// shift
-wire        inst_sll, inst_sllv, inst_srl, inst_srlv, inst_sra, inst_srav;
-// HI/LO move
-wire        inst_mfhi, inst_mflo, inst_mthi, inst_mtlo;
-// set
-wire        inst_lui;
-// breakpoint and syscall
-wire        inst_break, inst_syscall;
-// privileged instructions
-wire        inst_eret, inst_mfc0, inst_mtc0;
-// load
-wire        inst_lb, inst_lbu, inst_lh, inst_lhu, inst_lw, inst_lwl, inst_lwr;
-// store
-wire        inst_sb, inst_sh, inst_sw, inst_swl, inst_swr;
-// branch
-wire        inst_beq, inst_bne, inst_bgez, inst_bgtz, inst_blez, inst_bltz, inst_bgezal, inst_bltzal;
-// jump
-wire        inst_j, inst_jal, inst_jr, inst_jalr;
-// invalid
+//! arithmetic op inst.
+wire        inst_add, inst_addi, inst_addu, inst_addiu; //!< add
+wire        inst_sub,            inst_subu;             //!< substract
+wire        inst_slt, inst_slti, inst_sltu, inst_sltiu; //!< set if lt
+wire        inst_div,            inst_divu;             //!< div
+wire        inst_mul,            inst_mult, inst_multu; //!< mul
+wire        inst_madd,           inst_maddu;            //!< multiply add
+wire        inst_msub,           inst_msubu;            //!< multiply sub
+// wire inst_clo, inst_clz;                             //!< count leading ones/zeros
+    //!< TODO: complete inst. mul & clo & clz & madd & maddu & msub & msubu
+//! logical op inst.
+wire        inst_and, inst_andi;                        //!< and
+wire        inst_lui;                                   //!< load upper imm.
+wire        inst_nor;                                   //!< nor
+wire        inst_or,  inst_ori;                         //!< or
+wire        inst_xor, inst_xori;                        //!< xor
+//! shift inst.
+wire        inst_sllv, inst_sll;                        //!< lsh
+wire        inst_srav, inst_sra;                        //!< arithmetic rsh
+wire        inst_srlv, inst_srl;                        //!< rsh
+//! branch & jump inst.
+wire        inst_beq,  inst_bne,
+            inst_bgez, inst_bgtz, inst_blez, inst_bltz,
+            inst_bgezal,          inst_bltzal;          //!< branch
+wire        inst_j,    inst_jal,
+            inst_jr,   inst_jalr;                       //!< jump
+//! data move inst.
+wire        inst_mfhi, inst_mflo;                       //!< move from
+wire        inst_mthi, inst_mtlo;                       //!< move to
+// wire inst_movn, inst_movz;                           //!< move conditional non-zero/zero
+    //!< TODO: complete inst. movn & movz
+//! trap inst.
+wire        inst_break;                                 //!< trigger breakpoint
+wire        inst_syscall;                               //!< trigger syscall
+// wire inst_teq, inst_teqi;                            //!< trap if eq
+// wire inst_tge, inst_tgei, inst_tgeu, inst_tgeiu;     //!< trap if ge
+// wire inst_tlt, inst_tlti, inst_tltu, inst_tltiu;     //!< trap if lt
+// wire inst_tne, inst_tnei;                            //!< trap if ne
+    //!< TODO: complete inst. trap
+//! memory inst.
+wire        inst_lb, inst_lbu;                          //!< load byte
+wire        inst_lh, inst_lhu;                          //!< load half-word
+wire        inst_lw, inst_lwl, inst_lwr;                //!< load word
+wire        inst_sb;                                    //!< store byte
+wire        inst_sh;                                    //!< store half-word
+wire        inst_sw, inst_swl, inst_swr;                //!< store word
+    //!< NOTE: inst. lwl & lwr & swl & swr are ignored in func perf.,
+    //!< but necessary for os startup.
+// wire inst_ll;                                        //!< load linked
+// wire inst_sc;                                        //!< store conditional
+    //!< TODO: complete inst. ll & sc
+//! privileged & non-privileged inst.
+wire        inst_eret;                                  //!< ret from error trap, etc.
+wire        inst_mfc0;                                  //!< move from c0
+wire        inst_mtc0;                                  //!< move to c0
+//! invalid inst.
 wire        inst_invalid;
-// tlb
+//! TLB inst.
 wire        inst_tlbp, inst_tlbr, inst_tlbwi;
-// cache
+// wire inst_tlbwr;
+    //!< TODO: complete inst. tlbwr
+//! cache
 CacheCodeType inst_cache;
-
 
 assign op   = inst[31:26];
 assign rs   = inst[25:21];
@@ -195,13 +230,13 @@ always_comb begin
     endcase
 end
 // invalid
-assign inst_invalid= (~|alu_op) & (~|hi_lo_op) & (~|br_op) 
+assign inst_invalid= (~|alu_op) & (~|hi_lo_op) & (~|br_op)
                     & ~inst_syscall & ~inst_break & ~inst_mfc0 & ~inst_mtc0 & ~inst_eret
                     & ~inst_tlbp    & ~inst_tlbr  & ~inst_tlbwi & (inst_cache == EMPTY);
 
 
 assign alu_ov     = inst_add  | inst_addi | inst_sub;
-assign alu_op[ 0] = inst_addu | inst_add  | inst_addiu  | inst_addi  | res_from_mem | res_to_mem | 
+assign alu_op[ 0] = inst_addu | inst_add  | inst_addiu  | inst_addi  | res_from_mem | res_to_mem |
                     inst_jal  | inst_jalr | inst_bltzal | inst_bgezal| (inst_cache != EMPTY);
 assign alu_op[ 1] = inst_subu | inst_sub;
 assign alu_op[ 2] = inst_slt  | inst_slti;
@@ -242,7 +277,7 @@ assign hi_lo_op[10] = inst_maddu;
 assign hi_lo_op[11] = inst_madd;
 assign hi_lo_op[12] = inst_maddu;
 
-assign load_op[0] = inst_lb; 
+assign load_op[0] = inst_lb;
 assign load_op[1] = inst_lbu;
 assign load_op[2] = inst_lh;
 assign load_op[3] = inst_lhu;
@@ -266,7 +301,7 @@ assign tlb_op[2] = inst_tlbwi;
 
 assign src1_is_sa   = inst_sll   | inst_srl     | inst_sra;
 assign src1_is_pc   = inst_jal   | inst_jalr    | inst_bgezal | inst_bltzal;
-assign src2_is_simm = inst_addiu | inst_addi    | 
+assign src2_is_simm = inst_addiu | inst_addi    |
                       inst_lui   | res_from_mem | res_to_mem  |
                       inst_slti  | inst_sltiu   | (inst_cache != EMPTY);
 assign src2_is_zimm = inst_andi  | inst_ori     | inst_xori;
@@ -286,8 +321,8 @@ assign rf_we        = ~(res_to_mem) & (inst_cache == EMPTY)
                     & ~inst_mthi & ~inst_mtlo  & ~inst_mtc0 & ~inst_eret;
 
 assign dest         = dst_is_r31 ? 5'd31 :
-                      dst_is_rt  ? rt    : 
-                      !rf_we     ? 5'd0  : //* 不写回时目的寄存器号默认为0
+                      dst_is_rt  ? rt    :
+                      !rf_we     ? 5'd0  : //!< 不写回时目的寄存器号默认为 0
                                    rd    ;
 
 assign inst_d = {inst_invalid,
