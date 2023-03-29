@@ -413,5 +413,38 @@ interface WB_C0_Interface();
 
 endinterface
 
+/*  icache */
+interface CPU_ICache_Interface();
+	logic 	     req;
+	logic 		 addr_ok;
+	logic 		 iscache;
+	logic [ 3:0] offset;
+	logic [ 7:0] index;
+	logic [19:0] tag;
+	logic 		 data_ok;
+	uint32_t	 rdata;
+
+	modport	ICache(
+		input  req,
+		input  iscache,
+		input  offset,
+		input  index,
+		input  tag,
+		output addr_ok,
+		output data_ok,
+		output rdata
+	);
+
+	modport CPU(
+		output req,
+		output iscache,
+		output offset,
+		output index,
+		output tag,
+		input  addr_ok,
+		input  data_ok,
+		input  rdata
+	);
+endinterface
 
 `endif

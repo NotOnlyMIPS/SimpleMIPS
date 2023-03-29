@@ -1,6 +1,8 @@
 `include "..\cpu_defs.svh"
 
 module mem_req (
+    input             pms_valid,
+
     input             res_from_mem,
     input logic [6:0] load_op,
     input             res_to_mem,
@@ -72,19 +74,19 @@ assign ex_ades = (op_sh  && mem_addr[0]  )
 assign {mem_ex, mem_exccode} = ({6{ex_adel}} & {1'b1, `EXCCODE_ADEL}) | ({6{ex_ades}} & {1'b1, `EXCCODE_ADES});
 
 // data_sram interface
-assign data_wr    = res_to_mem;
-assign data_size  = {2{op_sb | op_lb | op_lbu | ((op_swl | op_lwl) & mem_addr[1:0] == 2'd0) | ((op_swr | op_lwr) & mem_addr[1:0] == 2'd3)}} & 2'd0
-                  | {2{op_sh | op_lh | op_lhu | ((op_swl | op_lwl) & mem_addr[1:0] == 2'd1) | ((op_swr | op_lwr) & mem_addr[1:0] == 2'd1)}} & 2'd1
-                  | {2{op_sw | op_lw | ((op_swl | op_lwl) & mem_addr[1] == 1'b1) | ((op_swr | op_lwr) & mem_addr[1] == 1'b0) }} & 2'd2;
-assign data_wstrb = mem_we;
-assign data_vaddr = op_lwl || op_lwr || op_swl || op_swr ? mem_addr&32'hffff_fffc : mem_addr;
-assign data_wdata = op_sb  ? {4{mem_wdata[ 7:0]}} :
-                    op_sh  ? {2{mem_wdata[15:0]}} :
-                    op_swl ? mem_addr[1] ? mem_addr[0] ?  mem_wdata                : { 8'h0, mem_wdata[31: 8]} :
-                                           mem_addr[0] ? {16'h0, mem_wdata[31:16]} : {24'h0, mem_wdata[31:24]} :
-                    op_swr ? mem_addr[1] ? mem_addr[0] ? {mem_wdata[ 7: 0], 24'h0} : {mem_wdata[15: 0], 16'h0} :
-                                           mem_addr[0] ? {mem_wdata[23: 0],  8'h0} :  mem_wdata                :
-                             mem_wdata;
+assign data_wr    = pms_valid & res_to_mem;
+assign data_size  = {2{pms_valid}} &({2{op_sb | op_lb | op_lbu | ((op_swl | op_lwl) & mem_addr[1:0] == 2'd0) | ((op_swr | op_lwr) & mem_addr[1:0] == 2'd3)}} & 2'd0
+                                   | {2{op_sh | op_lh | op_lhu | ((op_swl | op_lwl) & mem_addr[1:0] == 2'd1) | ((op_swr | op_lwr) & mem_addr[1:0] == 2'd1)}} & 2'd1
+                                   | {2{op_sw | op_lw | ((op_swl | op_lwl) & mem_addr[1] == 1'b1) | ((op_swr | op_lwr) & mem_addr[1] == 1'b0) }} & 2'd2 );
+assign data_wstrb = { 4{pms_valid}} & mem_we;
+assign data_vaddr = {32{pms_valid}} & (op_lwl || op_lwr || op_swl || op_swr ? mem_addr&32'hffff_fffc : mem_addr);
+assign data_wdata = {32{pms_valid}} & (op_sb  ? {4{mem_wdata[ 7:0]}} :
+                                       op_sh  ? {2{mem_wdata[15:0]}} :
+                                       op_swl ? mem_addr[1] ? mem_addr[0] ?  mem_wdata                : { 8'h0, mem_wdata[31: 8]} :
+                                                mem_addr[0] ? {16'h0, mem_wdata[31:16]} : {24'h0, mem_wdata[31:24]} :
+                                       op_swr ? mem_addr[1] ? mem_addr[0] ? {mem_wdata[ 7: 0], 24'h0} : {mem_wdata[15: 0], 16'h0} :
+                                                mem_addr[0] ? {mem_wdata[23: 0],  8'h0} :  mem_wdata                :
+                                                mem_wdata);
 
 
 endmodule

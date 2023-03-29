@@ -78,6 +78,8 @@ end
 // mem_req
 assign data_req   = req;
 mem_req u_mem_req (
+    .pms_valid      (pms_valid),
+
     .res_from_mem   (es_to_pms_bus_r.res_from_mem),
     .load_op        (es_to_pms_bus_r.load_op     ),
     .res_to_mem     (es_to_pms_bus_r.res_to_mem  ),

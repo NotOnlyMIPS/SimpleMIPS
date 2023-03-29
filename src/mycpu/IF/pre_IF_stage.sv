@@ -25,14 +25,13 @@ module pre_if_stage (
     output virt_t           inst_vaddr,
     input  mmu_result_t     inst_result,
     input  exception_t      inst_tlb_ex,
-    // inst_sram insterface
-    output logic            inst_req,
-    output logic            inst_wr,
-    output logic [1:0]      inst_size,
-    output logic [3:0]      inst_wstrb,
-    output virt_t           inst_addr,
-    output uint32_t         inst_wdata,
-    input  logic            inst_addr_ok
+    // icache
+    output logic            icache_req,
+    output logic            icache_iscache,
+    output logic [ 3:0]     icache_offset,
+    output logic [ 7:0]     icache_index,
+    output logic [19:0]     icache_tag,
+    input  logic            icache_addr_ok
 );
 
 // pre_IF
@@ -55,7 +54,7 @@ assign  req = !exception.ex & pfs_valid & fs_allowin & ~bpu_flush;
 
 // pre_IF stage
 assign to_pfs_valid = ~reset;
-assign pfs_ready_go = (req & inst_addr_ok) | exception.ex;
+assign pfs_ready_go = (req & icache_addr_ok) | exception.ex;
 assign pfs_allowin  = !pfs_valid || pfs_ready_go && fs_allowin;
 assign pfs_to_fs_valid  = pfs_valid && pfs_ready_go;
 
@@ -94,7 +93,7 @@ assign branch_resolved = !pfs_bd && pfs_ready_go && fs_allowin;
 
 // to IF
 assign pfs_to_fs_bus = {pfs_to_fs_valid,
-                        req & inst_addr_ok,
+                        req & icache_addr_ok,
                         br_op,
                         next_pc,
                         exception
@@ -115,11 +114,10 @@ assign exception.tlb_refill =  exception.exccode == `EXCCODE_TLBL ?
                                inst_tlb_ex.tlb_refill : 1'b0;
 
 // inst_sram interface
-assign inst_req   = req;
-assign inst_wr    = 1'b0;
-assign inst_size  = 2'd2;
-assign inst_addr  = inst_result.phy_addr;
-assign inst_wstrb = 4'd0;
-assign inst_wdata = 32'd0;
+assign icache_req     = req;
+assign icache_iscache = ~inst_result.uncached;
+assign icache_offset  = inst_vaddr[ 3:0];
+assign icache_index   = inst_vaddr[11:4];
+assign icache_tag     = inst_result.phy_addr[31:12];
 
 endmodule

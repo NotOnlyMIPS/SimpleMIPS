@@ -2,59 +2,28 @@
 
 module cpu_core(
     input logic clk,
-    input logic resetn,
+    input logic reset,
     // ex
     input logic [5:0] ext_int,
-    // axi
-    //ar
-    output [3 :0]   arid   ,
-    output virt_t   araddr ,
-    output [7 :0]   arlen  ,
-    output [2 :0]   arsize ,
-    output [1 :0]   arburst,
-    output [1 :0]   arlock ,
-    output [3 :0]   arcache,
-    output [2 :0]   arprot ,
-    output          arvalid,
-    input           arready,
-    //r     
-    input  [3 :0]   rid    ,
-    input  uint32_t rdata  ,
-    input  [1 :0]   rresp  ,
-    input           rlast  ,
-    input           rvalid ,
-    output          rready ,
-    //aw    
-    output [3 :0]   awid   ,
-    output virt_t   awaddr ,
-    output [7 :0]   awlen  ,
-    output [2 :0]   awsize ,
-    output [1 :0]   awburst,
-    output [1 :0]   awlock ,
-    output [3 :0]   awcache,
-    output [2 :0]   awprot ,
-    output          awvalid,
-    input           awready,
-    //w    
-    output [3 :0]   wid    ,
-    output uint32_t wdata  ,
-    output [3 :0]   wstrb  ,
-    output          wlast  ,
-    output          wvalid ,
-    input           wready ,
-    //b     
-    input  [3 :0]   bid    ,
-    input  [1 :0]   bresp  ,
-    input           bvalid ,
-    output          bready ,
+    //inst sram-like 
+    CPU_ICache_Interface CPU_ICache_Bus,
+    
+    //data sram-like 
+    output        data_req     ,
+    output        data_wr      ,
+    output [1 :0] data_size    ,
+    output [3 :0] data_wstrb   ,
+    output [31:0] data_addr    ,
+    output [31:0] data_wdata   ,
+    input  [31:0] data_rdata   ,
+    input         data_addr_ok ,
+    input         data_data_ok ,
     // trace debug interface
     output [31:0] debug_wb_pc,
     output [ 3:0] debug_wb_rf_wen,
     output [ 4:0] debug_wb_rf_wnum,
     output [31:0] debug_wb_rf_wdata
 );
-reg reset;
-always @(posedge clk) reset <= ~resetn;
 
 // pipeline control
 logic fs_allowin, ds_allowin, es_allowin, pms_allowin, ms_allowin, ws_allowin;
@@ -68,7 +37,7 @@ virt_t  correct_target;
 BHT_entry_t      predict_entry;
 predict_result_t predict_result;
 ds_to_bpu_bus_t  ds_to_bpu_bus;
-es_to_pms_bus_t  es_to_bpu_bus;
+verify_result_t  es_to_bpu_bus;
 // pipeline bus
 pfs_to_fs_bus_t pfs_to_fs_bus;
 fs_to_ds_bus_t  fs_to_ds_bus;
@@ -115,96 +84,6 @@ uint32_t         tlbp_entry_hi;
 uint32_t         tlbp_index;
 logic[7:0]       tlb_asid;
 
-// cpu axi interface
-
-// inst sram interface
-logic        inst_sram_req    ;
-logic        inst_sram_wr     ;
-logic [1:0]  inst_sram_size   ;
-logic [3:0]  inst_sram_wstrb  ;
-virt_t       inst_sram_addr   ;
-uint32_t     inst_sram_wdata  ;
-logic        inst_sram_addr_ok;
-logic        inst_sram_data_ok;
-uint32_t     inst_sram_rdata  ;
-// data sram interface
-logic        data_sram_req    ;
-logic        data_sram_wr     ;
-logic [1:0]  data_sram_size   ;
-logic [3:0]  data_sram_wstrb  ;
-virt_t       data_sram_addr   ;
-uint32_t     data_sram_wdata  ;
-logic        data_sram_addr_ok;
-logic        data_sram_data_ok;
-uint32_t     data_sram_rdata  ;
-
-cpu_axi_interface u_cpu_axi_interface(
-    .clk            (clk            ),
-    .resetn         (resetn         ),
-    // inst_sram
-    .inst_req       (inst_sram_req    ),
-    .inst_wr        (inst_sram_wr     ),
-    .inst_size      (inst_sram_size   ),
-    .inst_wstrb     (inst_sram_wstrb  ),
-    .inst_addr      (inst_sram_addr   ),
-    .inst_wdata     (inst_sram_wdata  ),
-    .inst_addr_ok   (inst_sram_addr_ok),
-    .inst_data_ok   (inst_sram_data_ok),
-    .inst_rdata     (inst_sram_rdata  ),
-    // data_sram
-    .data_req       (data_sram_req    ),
-    .data_wr        (data_sram_wr     ),
-    .data_size      (data_sram_size   ),
-    .data_wstrb     (data_sram_wstrb  ),
-    .data_addr      (data_sram_addr   ),
-    .data_wdata     (data_sram_wdata  ),
-    .data_addr_ok   (data_sram_addr_ok),
-    .data_data_ok   (data_sram_data_ok),
-    .data_rdata     (data_sram_rdata  ),
-    // axi
-    // ar
-    .arid           (arid             ),
-    .araddr         (araddr           ),
-    .arlen          (arlen            ),
-    .arsize         (arsize           ),
-    .arburst        (arburst          ),
-    .arlock         (arlock           ),
-    .arcache        (arcache          ),
-    .arprot         (arprot           ),
-    .arvalid        (arvalid          ),
-    .arready        (arready          ),
-    // r                
-    .rid            (rid              ),
-    .rdata          (rdata            ),
-    .rresp          (rresp            ),
-    .rlast          (rlast            ),
-    .rvalid         (rvalid           ),
-    .rready         (rready           ),
-    // aw                  
-    .awid           (awid             ),
-    .awaddr         (awaddr           ),
-    .awlen          (awlen            ),
-    .awsize         (awsize           ),
-    .awburst        (awburst          ),
-    .awlock         (awlock           ),
-    .awcache        (awcache          ),
-    .awprot         (awprot           ),
-    .awvalid        (awvalid          ),
-    .awready        (awready          ),
-    // w
-    .wid            (wid              ),
-    .wdata          (wdata            ),
-    .wstrb          (wstrb            ),
-    .wlast          (wlast            ),
-    .wvalid         (wvalid           ),
-    .wready         (wready           ),
-    // b   
-    .bid            (bid              ),
-    .bresp          (bresp            ),
-    .bvalid         (bvalid           ),
-    .bready         (bready           )
-);
-
 // BPU
 BPU u_BPU (
     .clk            (clk            ),
@@ -246,14 +125,14 @@ pre_if_stage u_pre_if_stage (
     .inst_vaddr     (inst_vaddr     ),
     .inst_result    (inst_result    ),
     .inst_tlb_ex    (inst_tlb_ex    ),
-    // inst_sram interface
-    .inst_req       (inst_sram_req    ),
-    .inst_wr        (inst_sram_wr     ),
-    .inst_size      (inst_sram_size   ),
-    .inst_wstrb     (inst_sram_wstrb  ),
-    .inst_addr      (inst_sram_addr   ),
-    .inst_wdata     (inst_sram_wdata  ),
-    .inst_addr_ok   (inst_sram_addr_ok)
+    // ICache
+    .icache_req     (CPU_ICache_Bus.req    ),
+    .icache_iscache (CPU_ICache_Bus.iscache),
+    .icache_offset  (CPU_ICache_Bus.offset ),
+    .icache_index   (CPU_ICache_Bus.index  ),
+    .icache_tag     (CPU_ICache_Bus.tag    ),
+    .icache_addr_ok (CPU_ICache_Bus.addr_ok)
+
 );
 
 // IF stage
@@ -274,9 +153,9 @@ if_stage u_if_stage (
     // cp0 and exception
     .pipeline_flush (pipeline_flush ),
     .c0_epc         (c0_epc         ),
-    // inst sram interface
-    .inst_data_ok   (inst_sram_data_ok),
-    .inst_rdata     (inst_sram_rdata  )
+    // ICache
+    .icache_data_ok   (CPU_ICache_Bus.data_ok),
+    .icache_rdata     (CPU_ICache_Bus.rdata  )
 );
 
 // ID stage
@@ -356,13 +235,13 @@ pre_mem_stage u_pre_mem_stage (
     .data_result    (data_result    ),
     .data_tlb_ex    (data_tlb_ex    ),
     // data_sram interface
-    .data_req       (data_sram_req    ),
-    .data_wr        (data_sram_wr     ),
-    .data_size      (data_sram_size   ),
-    .data_wstrb     (data_sram_wstrb  ),
-    .data_addr      (data_sram_addr   ),
-    .data_wdata     (data_sram_wdata  ),
-    .data_addr_ok   (data_sram_addr_ok)
+    .data_req    ,
+    .data_wr     ,
+    .data_size   ,
+    .data_wstrb  ,
+    .data_addr   ,
+    .data_wdata  ,
+    .data_addr_ok 
 );
 
 // MEM stage
@@ -382,8 +261,8 @@ mem_stage mem_stage(
     .ms_wr_disable  (ms_wr_disable  ),
     .pipeline_flush (pipeline_flush ),
     //from data-sram
-    .data_data_ok   (data_sram_data_ok),
-    .data_rdata     (data_sram_rdata  )
+    .data_data_ok,
+    .data_rdata   
 );
 
 // WB stage
@@ -442,7 +321,7 @@ mmu u_mmu (
     .clk            (clk            ),
     .reset          (reset          ),
     .asid           (tlb_asid       ),
-    .kseg0_uncached (1'b1           ),
+    .kseg0_uncached (1'b0           ),
     .is_user_mode   (1'b1           ),
     .inst_vaddr     (inst_vaddr     ),
     .data_vaddr     (data_vaddr     ),

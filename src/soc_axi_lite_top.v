@@ -265,7 +265,7 @@ wire [4 :0] ram_random_mask;
 
 //cpu axi
 //debug_*
-cpu_core u_cpu(
+Simple_MIPS u_Simple_MIPS(
     .ext_int   (6'd0          ),   //high active
 
     .clk      (cpu_clk       ),
