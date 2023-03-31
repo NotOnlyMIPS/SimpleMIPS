@@ -28,7 +28,7 @@ module dcache #(
     input  logic           wr_bvalid,
     //uncache
     output logic           urd_req,
-    output logic [  2:0]   urd_type,//
+    output logic [  2:0]   urd_size,//
     output logic [ 31:0]   urd_addr,
     input  logic           urd_rdy,
     input  logic           uret_valid,
@@ -213,7 +213,7 @@ assign fifo_rd_en = (uwr_rdy && (!fifo_empty) && (!fifo_rd_rst_busy)) ? 1'b1 :1'
 assign DBus.addr_ok   = ( state_next == LOOKUP) && DBus.req;
 //闂傚倷娴囧銊╂嚄閼稿灚娅犳俊銈傚亾闁伙絽鐏氱粭鐔煎焵椤掑嫮宓侀柟鎹愵嚙閻掓椽鏌涢幇鐢靛帥闁哄顫夌换娑㈡晲閸涱喚顦遍梺閫炲苯澧柛鐔稿缁绘盯鏁撻敓锟�
 assign DBus.data_ok   = req_buffer.isCache ? ((state == LOOKUP || state == REFILLDONE) && state_next == LOOKUP && req_buffer.valid) 
-                                           : (req_buffer.wr ? req_buffer.valid : (uncache_state == UNCACHE_READ_DONE && uncache_state_next == UNCACHE_IDLE && req_buffer.valid));
+                                           : (req_buffer.wr ? req_buffer.valid : (uncache_state == UNCACHE_READ_DONE  && req_buffer.valid));
 
 assign DBus.rdata     =  ( req_buffer.valid ) ? data_rdata_final1 : '0;
 //axi
@@ -551,7 +551,7 @@ always_comb begin : uncache_state_next_blockName
 
     case (uncache_state)
         UNCACHE_IDLE:begin
-            if (DBus.req & (~DBus.iscache) & req_buffer_en) begin //婵犵數濮烽。浠嬪焵椤掆偓閸熷潡鍩€椤掆偓缂嶅﹪骞冨Ο璇茬窞闁归偊鍓涢悡鎴濐渻閵堝棛澧柣鐔村€楅懞杈ㄥ鐎涙鍘甸梺璇″幗鐢帡宕濆杈ㄥ枑闁哄娉曟晶娑氱磼鐎ｎ亶妲洪柍褜鍓ㄧ徊娲疾濠靛鏁傞柛妤冨亹濡插牓鏌熼崹顔兼殨婵炴挳鏀遍妵鍕即閵娿儱顫╅柡浣哥墦閺屻劑鎮ら崒娑橆伓
+            if (DBus.req & (~DBus.iscache)) begin //婵犵數濮烽。浠嬪焵椤掆偓閸熷潡鍩€椤掆偓缂嶅﹪骞冨Ο璇茬窞闁归偊鍓涢悡鎴濐渻閵堝棛澧柣鐔村€楅懞杈ㄥ鐎涙鍘甸梺璇″幗鐢帡宕濆杈ㄥ枑闁哄娉曟晶娑氱磼鐎ｎ亶妲洪柍褜鍓ㄧ徊娲疾濠靛鏁傞柛妤冨亹濡插牓鏌熼崹顔兼殨婵炴挳鏀遍妵鍕即閵娿儱顫╅柡浣哥墦閺屻劑鎮ら崒娑橆伓
                 if (DBus.wr ==1'b0 ) begin
                     uncache_state_next = UNCACHE_READ_WAIT_AXI;
                 end else begin
@@ -572,7 +572,7 @@ always_comb begin : uncache_state_next_blockName
             else uncache_state_next = UNCACHE_READ;
         end
         UNCACHE_READ_DONE:begin
-            if (DBus.req & (~DBus.iscache) & req_buffer_en) begin //闂傚倸饪撮崑鍕洪妶澶婄疇闁圭増婢樼粈澶屾喐鎼达絿鐭欏璺哄閸嬫捇鏁愰崒娑欑彇濡炪倕绻樻禍鍫曞蓟閻旈鏆嬮柟娈垮暕閵夛负浜滈柍鍝勵儑閻ｇ數鈧娲╃紞渚€鐛€ｎ喗鏅查柛鈩冾殜濡兘姊洪懡銈呅＄紒鈧笟鈧幃妯衡攽鐎ｎ偄浠遍梺璺ㄥ櫐閹凤拷
+            if (DBus.req && (~DBus.iscache))  begin //闂傚倸饪撮崑鍕洪妶澶婄疇闁圭増婢樼粈澶屾喐鎼达絿鐭欏璺哄閸嬫捇鏁愰崒娑欑彇濡炪倕绻樻禍鍫曞蓟閻旈鏆嬮柟娈垮暕閵夛负浜滈柍鍝勵儑閻ｇ數鈧娲╃紞渚€鐛€ｎ喗鏅查柛鈩冾殜濡兘姊洪懡銈呅＄紒鈧笟鈧幃妯衡攽鐎ｎ偄浠遍梺璺ㄥ櫐閹凤拷
                 if (DBus.wr ==1'b0) begin
                     uncache_state_next = UNCACHE_READ_WAIT_AXI;
                 end else begin
