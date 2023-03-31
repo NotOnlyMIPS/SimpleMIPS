@@ -13,8 +13,8 @@ module pre_mem_stage(
     // forward bus
     output pms_forward_bus_t pms_forward_bus,
     // cp0 and exception
-    input   wr_disable,
-    output  pms_wr_disable,
+    input  wr_disable,
+    output pms_wr_disable,
     input  pipeline_flush_t    pipeline_flush,
     // MMU
     output logic        load_op,
@@ -24,10 +24,13 @@ module pre_mem_stage(
     input  exception_t  data_tlb_ex,
     // data sram interface
     output logic        data_req,
+    output logic        data_iscache,
     output logic        data_wr,
-    output logic [1:0]  data_size,
-    output logic [3:0]  data_wstrb,
-    output virt_t       data_addr,
+	output logic [ 3:0] data_offset,
+	output logic [ 7:0] data_index,
+	output logic [19:0] data_tag,
+    output logic [ 2:0]  data_size,
+    output logic [ 3:0]  data_wstrb,
     output uint32_t     data_wdata,
     input  logic        data_addr_ok
 );
@@ -76,7 +79,9 @@ always_ff @(posedge clk) begin
 end
 
 // mem_req
-assign data_req   = req;
+assign data_req     = req;
+assign data_iscache = ~data_result.uncached;
+assign data_tag     = data_result.phy_addr[31:12];
 mem_req u_mem_req (
     .pms_valid      (pms_valid),
 
@@ -90,13 +95,14 @@ mem_req u_mem_req (
     .mem_ex         (mem_ex     ),
     .mem_exccode    (mem_exccode),
     // data_sram interface
-    .data_wr        (data_wr   ),
-    .data_size      (data_size ),
-    .data_wstrb     (data_wstrb),
-    .data_vaddr     (data_vaddr),
-    .data_wdata     (data_wdata)
+    .data_wr,
+    .data_size,
+    .data_wstrb,
+    .data_vaddr,
+	.data_offset,
+	.data_index,
+    .data_wdata
 );
-assign data_addr = data_result.phy_addr;
 
 // exception
 assign op_mfc0 = es_to_pms_bus_r.c0_op[2] & pms_valid;

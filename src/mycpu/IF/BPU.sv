@@ -28,7 +28,6 @@ assign w_entry.br_type = es_to_bpu_bus.predict_entry.br_type;
 
 simple_port_ram_without_bypass #(
     .LATENCY(0),
-    .SIZE(256),
     .dtype(BHT_entry_t)
 )mem_data(
     .clk(clk),

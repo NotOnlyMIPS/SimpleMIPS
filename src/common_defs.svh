@@ -70,7 +70,7 @@ typedef struct packed {
     // master
     logic [3 :0] arid;
     logic [31:0] araddr;
-    logic [3 :0] arlen;
+    logic [7 :0] arlen;
     logic [2 :0] arsize;
     logic [1 :0] arburst;
     logic [1 :0] arlock;
@@ -94,7 +94,7 @@ typedef struct packed {
     // master
     logic [3 :0] awid;
     logic [31:0] awaddr;
-    logic [3 :0] awlen;
+    logic [7 :0] awlen;
     logic [2 :0] awsize;
     logic [1 :0] awburst;
     logic [1 :0] awlock;

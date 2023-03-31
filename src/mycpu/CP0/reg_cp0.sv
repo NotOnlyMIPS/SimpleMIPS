@@ -6,7 +6,7 @@ module reg_cp0 (
     //from WB
     input ws_to_c0_bus_t ws_to_c0_bus,
     // WB_C0_Interface
-    WB_C0_Interface      c0_wb_bus,
+    WB_C0_Interface.C0   c0_wb_bus,
     // interrupt 
     input  [ 5:0] ext_int_in,
     output [ 5:0] c0_hw,

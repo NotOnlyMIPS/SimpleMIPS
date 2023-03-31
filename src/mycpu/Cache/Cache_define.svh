@@ -20,10 +20,10 @@ typedef struct packed {
 } CacheType;
 
 typedef struct packed {
-    logic 		    	sign;//浣跨敤0琛ㄧずunsigned 1琛ㄧずsigned
-    logic   [1:0]   	size;//杩欎釜琛ㄧず锟�? 00 word 01 half  00 word
-	logic               ReadMem;//鍙湁Load鎵嶈兘瑙﹀彂ReadMem
-	logic   [1:0]       LeftOrRight; // 10琛ㄧずleft 01 琛ㄧずright
+    logic 		    	sign;//婵炶揪缍€濞夋洟寮敓锟�0闁荤偞绋忛崝搴ㄥΦ濮濈signed 1闁荤偞绋忛崝搴ㄥΦ濮濈gned
+    logic   [2:0]   	size;//闁哄鏅滈悷銈夋煂濠婂懏鍋橀柕濞т椒绮甸梺璺ㄥ櫐閹凤拷? 00 word 01 half  00 word
+	logic               ReadMem;//闂佸憡鐟禍婵嗭耿娑擄箰ad闂佸綊娼х粔鐑藉礂濡吋鍠嗛柨鏇楀亾鐟滈绺糴adMem
+	logic   [1:0]       LeftOrRight; // 10闁荤偞绋忛崝搴ㄥΦ濮濈挱ft 01 闁荤偞绋忛崝搴ㄥΦ濮濈牫ght
 } LoadType;//
 
 `endif

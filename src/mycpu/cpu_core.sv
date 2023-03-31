@@ -5,19 +5,10 @@ module cpu_core(
     input logic reset,
     // ex
     input logic [5:0] ext_int,
-    //inst sram-like 
-    CPU_ICache_Interface CPU_ICache_Bus,
-    
-    //data sram-like 
-    output        data_req     ,
-    output        data_wr      ,
-    output [1 :0] data_size    ,
-    output [3 :0] data_wstrb   ,
-    output [31:0] data_addr    ,
-    output [31:0] data_wdata   ,
-    input  [31:0] data_rdata   ,
-    input         data_addr_ok ,
-    input         data_data_ok ,
+    // ICache
+    CPU_ICache_Interface.CPU IBus,
+    // DCache
+    CPU_DCache_Interface.CPU DBus,
     // trace debug interface
     output [31:0] debug_wb_pc,
     output [ 3:0] debug_wb_rf_wen,
@@ -126,12 +117,12 @@ pre_if_stage u_pre_if_stage (
     .inst_result    (inst_result    ),
     .inst_tlb_ex    (inst_tlb_ex    ),
     // ICache
-    .icache_req     (CPU_ICache_Bus.req    ),
-    .icache_iscache (CPU_ICache_Bus.iscache),
-    .icache_offset  (CPU_ICache_Bus.offset ),
-    .icache_index   (CPU_ICache_Bus.index  ),
-    .icache_tag     (CPU_ICache_Bus.tag    ),
-    .icache_addr_ok (CPU_ICache_Bus.addr_ok)
+    .icache_req     (IBus.req       ),
+    .icache_iscache (IBus.iscache   ),
+    .icache_offset  (IBus.offset    ),
+    .icache_index   (IBus.index     ),
+    .icache_tag     (IBus.tag       ),
+    .icache_addr_ok (IBus.addr_ok   )
 
 );
 
@@ -154,8 +145,8 @@ if_stage u_if_stage (
     .pipeline_flush (pipeline_flush ),
     .c0_epc         (c0_epc         ),
     // ICache
-    .icache_data_ok   (CPU_ICache_Bus.data_ok),
-    .icache_rdata     (CPU_ICache_Bus.rdata  )
+    .icache_data_ok (IBus.data_ok   ),
+    .icache_rdata   (IBus.rdata     )
 );
 
 // ID stage
@@ -235,13 +226,16 @@ pre_mem_stage u_pre_mem_stage (
     .data_result    (data_result    ),
     .data_tlb_ex    (data_tlb_ex    ),
     // data_sram interface
-    .data_req    ,
-    .data_wr     ,
-    .data_size   ,
-    .data_wstrb  ,
-    .data_addr   ,
-    .data_wdata  ,
-    .data_addr_ok 
+    .data_req       (DBus.req       ),
+    .data_iscache   (DBus.iscache   ),
+    .data_wr        (DBus.wr        ),
+    .data_offset    (DBus.offset    ),
+    .data_index     (DBus.index     ),
+    .data_tag       (DBus.tag       ),
+    .data_wstrb     (DBus.wstrb     ),
+    .data_size      (DBus.size      ),
+    .data_wdata     (DBus.wdata     ),
+    .data_addr_ok   (DBus.addr_ok   )
 );
 
 // MEM stage
@@ -261,8 +255,8 @@ mem_stage mem_stage(
     .ms_wr_disable  (ms_wr_disable  ),
     .pipeline_flush (pipeline_flush ),
     //from data-sram
-    .data_data_ok,
-    .data_rdata   
+    .data_data_ok   (DBus.data_ok   ),
+    .data_rdata     (DBus.rdata     )
 );
 
 // WB stage

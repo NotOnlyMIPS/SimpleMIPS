@@ -12,15 +12,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="3333267fs"></ZoomStartTime>
-      <ZoomEndTime time="3463668fs"></ZoomEndTime>
-      <Cursor1Time time="3350667fs"></Cursor1Time>
+      <ZoomStartTime time="6067234965fs"></ZoomStartTime>
+      <ZoomEndTime time="6067559007fs"></ZoomEndTime>
+      <Cursor1Time time="6067505000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="152"></NameColumnWidth>
-      <ValueColumnWidth column_width="72"></ValueColumnWidth>
+      <NameColumnWidth column_width="162"></NameColumnWidth>
+      <ValueColumnWidth column_width="60"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="13" />
+   <WVObjectSize size="14" />
    <wave_markers>
       <marker time="72293502638" label="" />
       <marker time="14269500" label="" />
@@ -227,42 +227,6 @@
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/icache_rdata" type="array">
          <obj_property name="ElementShortName">icache_rdata[127:0]</obj_property>
          <obj_property name="ObjectShortName">icache_rdata[127:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/data_sram_req" type="logic">
-         <obj_property name="ElementShortName">data_sram_req</obj_property>
-         <obj_property name="ObjectShortName">data_sram_req</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/data_sram_wr" type="logic">
-         <obj_property name="ElementShortName">data_sram_wr</obj_property>
-         <obj_property name="ObjectShortName">data_sram_wr</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/data_sram_size" type="array">
-         <obj_property name="ElementShortName">data_sram_size[1:0]</obj_property>
-         <obj_property name="ObjectShortName">data_sram_size[1:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/data_sram_wstrb" type="array">
-         <obj_property name="ElementShortName">data_sram_wstrb[3:0]</obj_property>
-         <obj_property name="ObjectShortName">data_sram_wstrb[3:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/data_sram_addr" type="array">
-         <obj_property name="ElementShortName">data_sram_addr[31:0]</obj_property>
-         <obj_property name="ObjectShortName">data_sram_addr[31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/data_sram_wdata" type="array">
-         <obj_property name="ElementShortName">data_sram_wdata[31:0]</obj_property>
-         <obj_property name="ObjectShortName">data_sram_wdata[31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/data_sram_rdata" type="array">
-         <obj_property name="ElementShortName">data_sram_rdata[31:0]</obj_property>
-         <obj_property name="ObjectShortName">data_sram_rdata[31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/data_sram_addr_ok" type="logic">
-         <obj_property name="ElementShortName">data_sram_addr_ok</obj_property>
-         <obj_property name="ObjectShortName">data_sram_addr_ok</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/data_sram_data_ok" type="logic">
-         <obj_property name="ElementShortName">data_sram_data_ok</obj_property>
-         <obj_property name="ObjectShortName">data_sram_data_ok</obj_property>
       </wvobject>
    </wvobject>
    <wvobject fp_name="group466" type="group">
@@ -846,16 +810,12 @@
          <obj_property name="ObjectShortName">data_wr</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_core/u_pre_mem_stage/data_size" type="array">
-         <obj_property name="ElementShortName">data_size[1:0]</obj_property>
-         <obj_property name="ObjectShortName">data_size[1:0]</obj_property>
+         <obj_property name="ElementShortName">data_size[2:0]</obj_property>
+         <obj_property name="ObjectShortName">data_size[2:0]</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_core/u_pre_mem_stage/data_wstrb" type="array">
          <obj_property name="ElementShortName">data_wstrb[3:0]</obj_property>
          <obj_property name="ObjectShortName">data_wstrb[3:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_core/u_pre_mem_stage/data_addr" type="array">
-         <obj_property name="ElementShortName">data_addr[31:0]</obj_property>
-         <obj_property name="ObjectShortName">data_addr[31:0]</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_core/u_pre_mem_stage/data_wdata" type="array">
          <obj_property name="ElementShortName">data_wdata[31:0]</obj_property>
@@ -896,6 +856,7 @@
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_core/u_pre_mem_stage/es_to_pms_bus_r" type="array">
          <obj_property name="ElementShortName">es_to_pms_bus_r</obj_property>
          <obj_property name="ObjectShortName">es_to_pms_bus_r</obj_property>
+         <obj_property name="isExpanded"></obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_core/u_pre_mem_stage/mem_ex" type="logic">
          <obj_property name="ElementShortName">mem_ex</obj_property>
@@ -981,10 +942,6 @@
          <obj_property name="ElementShortName">ms_data_valid</obj_property>
          <obj_property name="ObjectShortName">ms_data_valid</obj_property>
       </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_core/mem_stage/ms_data" type="array">
-         <obj_property name="ElementShortName">ms_data[31:0]</obj_property>
-         <obj_property name="ObjectShortName">ms_data[31:0]</obj_property>
-      </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_core/mem_stage/res_from_mem" type="logic">
          <obj_property name="ElementShortName">res_from_mem</obj_property>
          <obj_property name="ObjectShortName">res_from_mem</obj_property>
@@ -996,6 +953,7 @@
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_core/mem_stage/pms_to_ms_bus_r" type="array">
          <obj_property name="ElementShortName">pms_to_ms_bus_r</obj_property>
          <obj_property name="ObjectShortName">pms_to_ms_bus_r</obj_property>
+         <obj_property name="isExpanded"></obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_core/mem_stage/rf_we" type="array">
          <obj_property name="ElementShortName">rf_we[3:0]</obj_property>
@@ -1449,38 +1407,6 @@
          <obj_property name="ElementShortName">resetn</obj_property>
          <obj_property name="ObjectShortName">resetn</obj_property>
       </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/CPU_ICache_Bus/req" type="logic">
-         <obj_property name="ElementShortName">req</obj_property>
-         <obj_property name="ObjectShortName">req</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/CPU_ICache_Bus/iscache" type="logic">
-         <obj_property name="ElementShortName">iscache</obj_property>
-         <obj_property name="ObjectShortName">iscache</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/CPU_ICache_Bus/offset" type="array">
-         <obj_property name="ElementShortName">offset[3:0]</obj_property>
-         <obj_property name="ObjectShortName">offset[3:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/CPU_ICache_Bus/index" type="array">
-         <obj_property name="ElementShortName">index[7:0]</obj_property>
-         <obj_property name="ObjectShortName">index[7:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/CPU_ICache_Bus/tag" type="array">
-         <obj_property name="ElementShortName">tag[19:0]</obj_property>
-         <obj_property name="ObjectShortName">tag[19:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/CPU_ICache_Bus/addr_ok" type="logic">
-         <obj_property name="ElementShortName">addr_ok</obj_property>
-         <obj_property name="ObjectShortName">addr_ok</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/CPU_ICache_Bus/data_ok" type="logic">
-         <obj_property name="ElementShortName">data_ok</obj_property>
-         <obj_property name="ObjectShortName">data_ok</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/CPU_ICache_Bus/rdata" type="array">
-         <obj_property name="ElementShortName">rdata[31:0]</obj_property>
-         <obj_property name="ObjectShortName">rdata[31:0]</obj_property>
-      </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/rd_uncache" type="logic">
          <obj_property name="ElementShortName">rd_uncache</obj_property>
          <obj_property name="ObjectShortName">rd_uncache</obj_property>
@@ -1557,10 +1483,6 @@
          <obj_property name="ElementShortName">data_we[3:0][3:0]</obj_property>
          <obj_property name="ObjectShortName">data_we[3:0][3:0]</obj_property>
       </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/data_read_en" type="logic">
-         <obj_property name="ElementShortName">data_read_en</obj_property>
-         <obj_property name="ObjectShortName">data_read_en</obj_property>
-      </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/req_buffer" type="array">
          <obj_property name="ElementShortName">req_buffer</obj_property>
          <obj_property name="ObjectShortName">req_buffer</obj_property>
@@ -1599,14 +1521,6 @@
          <obj_property name="ElementShortName">pipe_wr</obj_property>
          <obj_property name="ObjectShortName">pipe_wr</obj_property>
       </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/data_ok_r" type="logic">
-         <obj_property name="ElementShortName">data_ok_r</obj_property>
-         <obj_property name="ObjectShortName">data_ok_r</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/STORE_BUFFER_SIZE" type="array">
-         <obj_property name="ElementShortName">STORE_BUFFER_SIZE[31:0]</obj_property>
-         <obj_property name="ObjectShortName">STORE_BUFFER_SIZE[31:0]</obj_property>
-      </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/DATA_WIDTH" type="array">
          <obj_property name="ElementShortName">DATA_WIDTH[31:0]</obj_property>
          <obj_property name="ObjectShortName">DATA_WIDTH[31:0]</obj_property>
@@ -1627,10 +1541,6 @@
          <obj_property name="ElementShortName">GROUP_NUM[31:0]</obj_property>
          <obj_property name="ObjectShortName">GROUP_NUM[31:0]</obj_property>
       </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/BYTES_PER_WORD" type="array">
-         <obj_property name="ElementShortName">BYTES_PER_WORD[31:0]</obj_property>
-         <obj_property name="ObjectShortName">BYTES_PER_WORD[31:0]</obj_property>
-      </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/INDEX_WIDTH" type="array">
          <obj_property name="ElementShortName">INDEX_WIDTH[31:0]</obj_property>
          <obj_property name="ObjectShortName">INDEX_WIDTH[31:0]</obj_property>
@@ -1640,6 +1550,398 @@
          <obj_property name="ObjectShortName">OFFSET_WIDTH[31:0]</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/TAG_WIDTH" type="array">
+         <obj_property name="ElementShortName">TAG_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">TAG_WIDTH[31:0]</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="group1431" type="group">
+      <obj_property name="label">DCache</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/clk_g" type="logic">
+         <obj_property name="ElementShortName">clk_g</obj_property>
+         <obj_property name="ObjectShortName">clk_g</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/resetn" type="logic">
+         <obj_property name="ElementShortName">resetn</obj_property>
+         <obj_property name="ObjectShortName">resetn</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/rd_req" type="logic">
+         <obj_property name="ElementShortName">rd_req</obj_property>
+         <obj_property name="ObjectShortName">rd_req</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/rd_addr" type="array">
+         <obj_property name="ElementShortName">rd_addr[31:0]</obj_property>
+         <obj_property name="ObjectShortName">rd_addr[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/rd_rdy" type="logic">
+         <obj_property name="ElementShortName">rd_rdy</obj_property>
+         <obj_property name="ObjectShortName">rd_rdy</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/ret_valid" type="logic">
+         <obj_property name="ElementShortName">ret_valid</obj_property>
+         <obj_property name="ObjectShortName">ret_valid</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/ret_data" type="array">
+         <obj_property name="ElementShortName">ret_data[127:0]</obj_property>
+         <obj_property name="ObjectShortName">ret_data[127:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/wr_req" type="logic">
+         <obj_property name="ElementShortName">wr_req</obj_property>
+         <obj_property name="ObjectShortName">wr_req</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/wr_addr" type="array">
+         <obj_property name="ElementShortName">wr_addr[31:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_addr[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/wr_data" type="array">
+         <obj_property name="ElementShortName">wr_data[127:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_data[127:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/wr_rdy" type="logic">
+         <obj_property name="ElementShortName">wr_rdy</obj_property>
+         <obj_property name="ObjectShortName">wr_rdy</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/wr_bvalid" type="logic">
+         <obj_property name="ElementShortName">wr_bvalid</obj_property>
+         <obj_property name="ObjectShortName">wr_bvalid</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/urd_req" type="logic">
+         <obj_property name="ElementShortName">urd_req</obj_property>
+         <obj_property name="ObjectShortName">urd_req</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/urd_size" type="array">
+         <obj_property name="ElementShortName">urd_size[2:0]</obj_property>
+         <obj_property name="ObjectShortName">urd_size[2:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/urd_addr" type="array">
+         <obj_property name="ElementShortName">urd_addr[31:0]</obj_property>
+         <obj_property name="ObjectShortName">urd_addr[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/urd_rdy" type="logic">
+         <obj_property name="ElementShortName">urd_rdy</obj_property>
+         <obj_property name="ObjectShortName">urd_rdy</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/uret_valid" type="logic">
+         <obj_property name="ElementShortName">uret_valid</obj_property>
+         <obj_property name="ObjectShortName">uret_valid</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/uret_data" type="array">
+         <obj_property name="ElementShortName">uret_data[31:0]</obj_property>
+         <obj_property name="ObjectShortName">uret_data[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/uwr_req" type="logic">
+         <obj_property name="ElementShortName">uwr_req</obj_property>
+         <obj_property name="ObjectShortName">uwr_req</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/uwr_size" type="array">
+         <obj_property name="ElementShortName">uwr_size[2:0]</obj_property>
+         <obj_property name="ObjectShortName">uwr_size[2:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/uwr_wstrb" type="array">
+         <obj_property name="ElementShortName">uwr_wstrb[3:0]</obj_property>
+         <obj_property name="ObjectShortName">uwr_wstrb[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/uwr_addr" type="array">
+         <obj_property name="ElementShortName">uwr_addr[31:0]</obj_property>
+         <obj_property name="ObjectShortName">uwr_addr[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/uwr_data" type="array">
+         <obj_property name="ElementShortName">uwr_data[31:0]</obj_property>
+         <obj_property name="ObjectShortName">uwr_data[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/uwr_rdy" type="logic">
+         <obj_property name="ElementShortName">uwr_rdy</obj_property>
+         <obj_property name="ObjectShortName">uwr_rdy</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/uwr_bvalid" type="logic">
+         <obj_property name="ElementShortName">uwr_bvalid</obj_property>
+         <obj_property name="ObjectShortName">uwr_bvalid</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/uncache_state" type="array">
+         <obj_property name="ElementShortName">uncache_state[1:0]</obj_property>
+         <obj_property name="ObjectShortName">uncache_state[1:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/uncache_state_next" type="array">
+         <obj_property name="ElementShortName">uncache_state_next[1:0]</obj_property>
+         <obj_property name="ObjectShortName">uncache_state_next[1:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/store_buffer" type="array">
+         <obj_property name="ElementShortName">store_buffer</obj_property>
+         <obj_property name="ObjectShortName">store_buffer</obj_property>
+         <obj_property name="isExpanded"></obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/state" type="array">
+         <obj_property name="ElementShortName">state[3:0]</obj_property>
+         <obj_property name="ObjectShortName">state[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/state_next" type="array">
+         <obj_property name="ElementShortName">state_next[3:0]</obj_property>
+         <obj_property name="ObjectShortName">state_next[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/wb_state" type="array">
+         <obj_property name="ElementShortName">wb_state[2:0]</obj_property>
+         <obj_property name="ObjectShortName">wb_state[2:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/wb_state_next" type="array">
+         <obj_property name="ElementShortName">wb_state_next[2:0]</obj_property>
+         <obj_property name="ObjectShortName">wb_state_next[2:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/uncache_rdata" type="array">
+         <obj_property name="ElementShortName">uncache_rdata[31:0]</obj_property>
+         <obj_property name="ObjectShortName">uncache_rdata[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/read_addr" type="array">
+         <obj_property name="ElementShortName">read_addr[7:0]</obj_property>
+         <obj_property name="ObjectShortName">read_addr[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/write_addr" type="array">
+         <obj_property name="ElementShortName">write_addr[7:0]</obj_property>
+         <obj_property name="ObjectShortName">write_addr[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/tagv_addr" type="array">
+         <obj_property name="ElementShortName">tagv_addr[7:0]</obj_property>
+         <obj_property name="ObjectShortName">tagv_addr[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/tagv_rdata" type="array">
+         <obj_property name="ElementShortName">tagv_rdata[3:0]</obj_property>
+         <obj_property name="ObjectShortName">tagv_rdata[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/tagv_wdata" type="array">
+         <obj_property name="ElementShortName">tagv_wdata</obj_property>
+         <obj_property name="ObjectShortName">tagv_wdata</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/tagv_we" type="array">
+         <obj_property name="ElementShortName">tagv_we[3:0]</obj_property>
+         <obj_property name="ObjectShortName">tagv_we[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/dirty_addr" type="array">
+         <obj_property name="ElementShortName">dirty_addr[7:0]</obj_property>
+         <obj_property name="ObjectShortName">dirty_addr[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/dirty_rdata" type="array">
+         <obj_property name="ElementShortName">dirty_rdata[3:0]</obj_property>
+         <obj_property name="ObjectShortName">dirty_rdata[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/dirty_wdata" type="logic">
+         <obj_property name="ElementShortName">dirty_wdata</obj_property>
+         <obj_property name="ObjectShortName">dirty_wdata</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/dirty_we" type="array">
+         <obj_property name="ElementShortName">dirty_we[3:0]</obj_property>
+         <obj_property name="ObjectShortName">dirty_we[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/wb_we" type="array">
+         <obj_property name="ElementShortName">wb_we[3:0]</obj_property>
+         <obj_property name="ObjectShortName">wb_we[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/data_rdata" type="array">
+         <obj_property name="ElementShortName">data_rdata[3:0][3:0][31:0]</obj_property>
+         <obj_property name="ObjectShortName">data_rdata[3:0][3:0][31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/data_rdata_sel" type="array">
+         <obj_property name="ElementShortName">data_rdata_sel[3:0][31:0]</obj_property>
+         <obj_property name="ObjectShortName">data_rdata_sel[3:0][31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/data_rdata_final1" type="array">
+         <obj_property name="ElementShortName">data_rdata_final1[31:0]</obj_property>
+         <obj_property name="ObjectShortName">data_rdata_final1[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/data_rdata_final2" type="array">
+         <obj_property name="ElementShortName">data_rdata_final2[31:0]</obj_property>
+         <obj_property name="ObjectShortName">data_rdata_final2[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/data_wdata" type="array">
+         <obj_property name="ElementShortName">data_wdata[3:0][31:0]</obj_property>
+         <obj_property name="ObjectShortName">data_wdata[3:0][31:0]</obj_property>
+         <obj_property name="isExpanded"></obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/data_we" type="array">
+         <obj_property name="ElementShortName">data_we[3:0][3:0][3:0]</obj_property>
+         <obj_property name="ObjectShortName">data_we[3:0][3:0][3:0]</obj_property>
+         <obj_property name="isExpanded"></obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/data_read_en" type="logic">
+         <obj_property name="ElementShortName">data_read_en</obj_property>
+         <obj_property name="ObjectShortName">data_read_en</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_DCache/req" type="logic">
+         <obj_property name="ElementShortName">req</obj_property>
+         <obj_property name="ObjectShortName">req</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_DCache/iscache" type="logic">
+         <obj_property name="ElementShortName">iscache</obj_property>
+         <obj_property name="ObjectShortName">iscache</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_DCache/wr" type="logic">
+         <obj_property name="ElementShortName">wr</obj_property>
+         <obj_property name="ObjectShortName">wr</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_DCache/offset" type="array">
+         <obj_property name="ElementShortName">offset[3:0]</obj_property>
+         <obj_property name="ObjectShortName">offset[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_DCache/index" type="array">
+         <obj_property name="ElementShortName">index[7:0]</obj_property>
+         <obj_property name="ObjectShortName">index[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_DCache/tag" type="array">
+         <obj_property name="ElementShortName">tag[19:0]</obj_property>
+         <obj_property name="ObjectShortName">tag[19:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_DCache/wstrb" type="array">
+         <obj_property name="ElementShortName">wstrb[3:0]</obj_property>
+         <obj_property name="ObjectShortName">wstrb[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_DCache/size" type="array">
+         <obj_property name="ElementShortName">size[2:0]</obj_property>
+         <obj_property name="ObjectShortName">size[2:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_DCache/wdata" type="array">
+         <obj_property name="ElementShortName">wdata[31:0]</obj_property>
+         <obj_property name="ObjectShortName">wdata[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_DCache/rdata" type="array">
+         <obj_property name="ElementShortName">rdata[31:0]</obj_property>
+         <obj_property name="ObjectShortName">rdata[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_DCache/addr_ok" type="logic">
+         <obj_property name="ElementShortName">addr_ok</obj_property>
+         <obj_property name="ObjectShortName">addr_ok</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_DCache/data_ok" type="logic">
+         <obj_property name="ElementShortName">data_ok</obj_property>
+         <obj_property name="ObjectShortName">data_ok</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/req_buffer" type="array">
+         <obj_property name="ElementShortName">req_buffer</obj_property>
+         <obj_property name="ObjectShortName">req_buffer</obj_property>
+         <obj_property name="isExpanded"></obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/req_buffer_en" type="logic">
+         <obj_property name="ElementShortName">req_buffer_en</obj_property>
+         <obj_property name="ObjectShortName">req_buffer_en</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/lru" type="array">
+         <obj_property name="ElementShortName">lru[255:0][1:0]</obj_property>
+         <obj_property name="ObjectShortName">lru[255:0][1:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/hit" type="array">
+         <obj_property name="ElementShortName">hit[3:0]</obj_property>
+         <obj_property name="ObjectShortName">hit[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/cache_hit" type="logic">
+         <obj_property name="ElementShortName">cache_hit</obj_property>
+         <obj_property name="ObjectShortName">cache_hit</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/pipe_hit" type="array">
+         <obj_property name="ElementShortName">pipe_hit[3:0]</obj_property>
+         <obj_property name="ObjectShortName">pipe_hit[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/pipe_cache_hit" type="logic">
+         <obj_property name="ElementShortName">pipe_cache_hit</obj_property>
+         <obj_property name="ObjectShortName">pipe_cache_hit</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/pipe_tagv_rdata" type="array">
+         <obj_property name="ElementShortName">pipe_tagv_rdata[3:0]</obj_property>
+         <obj_property name="ObjectShortName">pipe_tagv_rdata[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/pipe_wr" type="logic">
+         <obj_property name="ElementShortName">pipe_wr</obj_property>
+         <obj_property name="ObjectShortName">pipe_wr</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/fifo_din" type="array">
+         <obj_property name="ElementShortName">fifo_din</obj_property>
+         <obj_property name="ObjectShortName">fifo_din</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/fifo_wr_en" type="logic">
+         <obj_property name="ElementShortName">fifo_wr_en</obj_property>
+         <obj_property name="ObjectShortName">fifo_wr_en</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/fifo_rd_en" type="logic">
+         <obj_property name="ElementShortName">fifo_rd_en</obj_property>
+         <obj_property name="ObjectShortName">fifo_rd_en</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/fifo_rd_rst_busy" type="logic">
+         <obj_property name="ElementShortName">fifo_rd_rst_busy</obj_property>
+         <obj_property name="ObjectShortName">fifo_rd_rst_busy</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/fifo_full" type="logic">
+         <obj_property name="ElementShortName">fifo_full</obj_property>
+         <obj_property name="ObjectShortName">fifo_full</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/fifo_empty" type="logic">
+         <obj_property name="ElementShortName">fifo_empty</obj_property>
+         <obj_property name="ObjectShortName">fifo_empty</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/fifo_dout" type="array">
+         <obj_property name="ElementShortName">fifo_dout</obj_property>
+         <obj_property name="ObjectShortName">fifo_dout</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/fifo_data_valid" type="logic">
+         <obj_property name="ElementShortName">fifo_data_valid</obj_property>
+         <obj_property name="ObjectShortName">fifo_data_valid</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/fifo_wr_ack" type="logic">
+         <obj_property name="ElementShortName">fifo_wr_ack</obj_property>
+         <obj_property name="ObjectShortName">fifo_wr_ack</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/fifo_wr_rst_busy" type="logic">
+         <obj_property name="ElementShortName">fifo_wr_rst_busy</obj_property>
+         <obj_property name="ObjectShortName">fifo_wr_rst_busy</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/rd_type" type="logic">
+         <obj_property name="ElementShortName">rd_type</obj_property>
+         <obj_property name="ObjectShortName">rd_type</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/wr_type" type="logic">
+         <obj_property name="ElementShortName">wr_type</obj_property>
+         <obj_property name="ObjectShortName">wr_type</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/wr_wstrb" type="logic">
+         <obj_property name="ElementShortName">wr_wstrb</obj_property>
+         <obj_property name="ObjectShortName">wr_wstrb</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/ststall" type="logic">
+         <obj_property name="ElementShortName">ststall</obj_property>
+         <obj_property name="ObjectShortName">ststall</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/STORE_BUFFER_SIZE" type="array">
+         <obj_property name="ElementShortName">STORE_BUFFER_SIZE[31:0]</obj_property>
+         <obj_property name="ObjectShortName">STORE_BUFFER_SIZE[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/DATA_WIDTH" type="array">
+         <obj_property name="ElementShortName">DATA_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">DATA_WIDTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/LINE_WORD_NUM" type="array">
+         <obj_property name="ElementShortName">LINE_WORD_NUM[31:0]</obj_property>
+         <obj_property name="ObjectShortName">LINE_WORD_NUM[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/ASSOC_NUM" type="array">
+         <obj_property name="ElementShortName">ASSOC_NUM[31:0]</obj_property>
+         <obj_property name="ObjectShortName">ASSOC_NUM[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/WAY_SIZE" type="array">
+         <obj_property name="ElementShortName">WAY_SIZE[31:0]</obj_property>
+         <obj_property name="ObjectShortName">WAY_SIZE[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/GROUP_NUM" type="array">
+         <obj_property name="ElementShortName">GROUP_NUM[31:0]</obj_property>
+         <obj_property name="ObjectShortName">GROUP_NUM[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/BYTES_PER_WORD" type="array">
+         <obj_property name="ElementShortName">BYTES_PER_WORD[31:0]</obj_property>
+         <obj_property name="ObjectShortName">BYTES_PER_WORD[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/INDEX_WIDTH" type="array">
+         <obj_property name="ElementShortName">INDEX_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">INDEX_WIDTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/OFFSET_WIDTH" type="array">
+         <obj_property name="ElementShortName">OFFSET_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">OFFSET_WIDTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/TAG_WIDTH" type="array">
          <obj_property name="ElementShortName">TAG_WIDTH[31:0]</obj_property>
          <obj_property name="ObjectShortName">TAG_WIDTH[31:0]</obj_property>
       </wvobject>
@@ -1655,267 +1957,289 @@
          <obj_property name="ElementShortName">reset</obj_property>
          <obj_property name="ObjectShortName">reset</obj_property>
       </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/icache_uncache" type="logic">
-         <obj_property name="ElementShortName">icache_uncache</obj_property>
-         <obj_property name="ObjectShortName">icache_uncache</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/icache_req" type="logic">
-         <obj_property name="ElementShortName">icache_req</obj_property>
-         <obj_property name="ObjectShortName">icache_req</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/icache_addr" type="array">
-         <obj_property name="ElementShortName">icache_addr[31:0]</obj_property>
-         <obj_property name="ObjectShortName">icache_addr[31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/icache_addr_ready" type="logic">
-         <obj_property name="ElementShortName">icache_addr_ready</obj_property>
-         <obj_property name="ObjectShortName">icache_addr_ready</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/icache_data_ready" type="logic">
-         <obj_property name="ElementShortName">icache_data_ready</obj_property>
-         <obj_property name="ObjectShortName">icache_data_ready</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/icache_rdata" type="array">
-         <obj_property name="ElementShortName">icache_rdata[127:0]</obj_property>
-         <obj_property name="ObjectShortName">icache_rdata[127:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/icache_state" type="array">
-         <obj_property name="ElementShortName">icache_state[1:0]</obj_property>
-         <obj_property name="ObjectShortName">icache_state[1:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/icache_target_size" type="array">
-         <obj_property name="ElementShortName">icache_target_size[3:0]</obj_property>
-         <obj_property name="ObjectShortName">icache_target_size[3:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/icache_index" type="array">
-         <obj_property name="ElementShortName">icache_index[3:0]</obj_property>
-         <obj_property name="ObjectShortName">icache_index[3:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/icache_data_buffer" type="array">
-         <obj_property name="ElementShortName">icache_data_buffer[127:0]</obj_property>
-         <obj_property name="ObjectShortName">icache_data_buffer[127:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/icache_axi" type="array">
-         <obj_property name="ElementShortName">icache_axi</obj_property>
-         <obj_property name="ObjectShortName">icache_axi</obj_property>
-         <obj_property name="isExpanded"></obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/data_req" type="logic">
-         <obj_property name="ElementShortName">data_req</obj_property>
-         <obj_property name="ObjectShortName">data_req</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/data_wr" type="logic">
-         <obj_property name="ElementShortName">data_wr</obj_property>
-         <obj_property name="ObjectShortName">data_wr</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/data_size" type="array">
-         <obj_property name="ElementShortName">data_size[1:0]</obj_property>
-         <obj_property name="ObjectShortName">data_size[1:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/data_wstrb" type="array">
-         <obj_property name="ElementShortName">data_wstrb[3:0]</obj_property>
-         <obj_property name="ObjectShortName">data_wstrb[3:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/data_addr" type="array">
-         <obj_property name="ElementShortName">data_addr[31:0]</obj_property>
-         <obj_property name="ObjectShortName">data_addr[31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/data_wdata" type="array">
-         <obj_property name="ElementShortName">data_wdata[31:0]</obj_property>
-         <obj_property name="ObjectShortName">data_wdata[31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/data_rdata" type="array">
-         <obj_property name="ElementShortName">data_rdata[31:0]</obj_property>
-         <obj_property name="ObjectShortName">data_rdata[31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/data_addr_ok" type="logic">
-         <obj_property name="ElementShortName">data_addr_ok</obj_property>
-         <obj_property name="ObjectShortName">data_addr_ok</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/data_data_ok" type="logic">
-         <obj_property name="ElementShortName">data_data_ok</obj_property>
-         <obj_property name="ObjectShortName">data_data_ok</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/dcache_state" type="array">
-         <obj_property name="ElementShortName">dcache_state[1:0]</obj_property>
-         <obj_property name="ObjectShortName">dcache_state[1:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/dcache_axi" type="array">
-         <obj_property name="ElementShortName">dcache_axi</obj_property>
-         <obj_property name="ObjectShortName">dcache_axi</obj_property>
-         <obj_property name="isExpanded"></obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/dcache_waddr_ready" type="logic">
-         <obj_property name="ElementShortName">dcache_waddr_ready</obj_property>
-         <obj_property name="ObjectShortName">dcache_waddr_ready</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/dcache_raddr_ready" type="logic">
-         <obj_property name="ElementShortName">dcache_raddr_ready</obj_property>
-         <obj_property name="ObjectShortName">dcache_raddr_ready</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/data_req_r" type="logic">
-         <obj_property name="ElementShortName">data_req_r</obj_property>
-         <obj_property name="ObjectShortName">data_req_r</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/data_wr_r" type="logic">
-         <obj_property name="ElementShortName">data_wr_r</obj_property>
-         <obj_property name="ObjectShortName">data_wr_r</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/data_size_r" type="array">
-         <obj_property name="ElementShortName">data_size_r[1:0]</obj_property>
-         <obj_property name="ObjectShortName">data_size_r[1:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/data_wstrb_r" type="array">
-         <obj_property name="ElementShortName">data_wstrb_r[3:0]</obj_property>
-         <obj_property name="ObjectShortName">data_wstrb_r[3:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/data_wdata_r" type="array">
-         <obj_property name="ElementShortName">data_wdata_r[31:0]</obj_property>
-         <obj_property name="ObjectShortName">data_wdata_r[31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/arid" type="array">
-         <obj_property name="ElementShortName">arid[3:0]</obj_property>
-         <obj_property name="ObjectShortName">arid[3:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/araddr" type="array">
-         <obj_property name="ElementShortName">araddr[31:0]</obj_property>
-         <obj_property name="ObjectShortName">araddr[31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/arlen" type="array">
-         <obj_property name="ElementShortName">arlen[7:0]</obj_property>
-         <obj_property name="ObjectShortName">arlen[7:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/arsize" type="array">
-         <obj_property name="ElementShortName">arsize[2:0]</obj_property>
-         <obj_property name="ObjectShortName">arsize[2:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/arburst" type="array">
-         <obj_property name="ElementShortName">arburst[1:0]</obj_property>
-         <obj_property name="ObjectShortName">arburst[1:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/arlock" type="array">
-         <obj_property name="ElementShortName">arlock[1:0]</obj_property>
-         <obj_property name="ObjectShortName">arlock[1:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/arcache" type="array">
-         <obj_property name="ElementShortName">arcache[3:0]</obj_property>
-         <obj_property name="ObjectShortName">arcache[3:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/arprot" type="array">
-         <obj_property name="ElementShortName">arprot[2:0]</obj_property>
-         <obj_property name="ObjectShortName">arprot[2:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/arvalid" type="logic">
-         <obj_property name="ElementShortName">arvalid</obj_property>
-         <obj_property name="ObjectShortName">arvalid</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/arready" type="logic">
-         <obj_property name="ElementShortName">arready</obj_property>
-         <obj_property name="ObjectShortName">arready</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/rid" type="array">
-         <obj_property name="ElementShortName">rid[3:0]</obj_property>
-         <obj_property name="ObjectShortName">rid[3:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/rdata" type="array">
-         <obj_property name="ElementShortName">rdata[31:0]</obj_property>
-         <obj_property name="ObjectShortName">rdata[31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/rresp" type="array">
-         <obj_property name="ElementShortName">rresp[1:0]</obj_property>
-         <obj_property name="ObjectShortName">rresp[1:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/rlast" type="logic">
-         <obj_property name="ElementShortName">rlast</obj_property>
-         <obj_property name="ObjectShortName">rlast</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/rvalid" type="logic">
-         <obj_property name="ElementShortName">rvalid</obj_property>
-         <obj_property name="ObjectShortName">rvalid</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/rready" type="logic">
-         <obj_property name="ElementShortName">rready</obj_property>
-         <obj_property name="ObjectShortName">rready</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/awid" type="array">
-         <obj_property name="ElementShortName">awid[3:0]</obj_property>
-         <obj_property name="ObjectShortName">awid[3:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/awaddr" type="array">
-         <obj_property name="ElementShortName">awaddr[31:0]</obj_property>
-         <obj_property name="ObjectShortName">awaddr[31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/awlen" type="array">
-         <obj_property name="ElementShortName">awlen[7:0]</obj_property>
-         <obj_property name="ObjectShortName">awlen[7:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/awsize" type="array">
-         <obj_property name="ElementShortName">awsize[2:0]</obj_property>
-         <obj_property name="ObjectShortName">awsize[2:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/awburst" type="array">
-         <obj_property name="ElementShortName">awburst[1:0]</obj_property>
-         <obj_property name="ObjectShortName">awburst[1:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/awlock" type="array">
-         <obj_property name="ElementShortName">awlock[1:0]</obj_property>
-         <obj_property name="ObjectShortName">awlock[1:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/awcache" type="array">
-         <obj_property name="ElementShortName">awcache[3:0]</obj_property>
-         <obj_property name="ObjectShortName">awcache[3:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/awprot" type="array">
-         <obj_property name="ElementShortName">awprot[2:0]</obj_property>
-         <obj_property name="ObjectShortName">awprot[2:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/awvalid" type="logic">
-         <obj_property name="ElementShortName">awvalid</obj_property>
-         <obj_property name="ObjectShortName">awvalid</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/awready" type="logic">
-         <obj_property name="ElementShortName">awready</obj_property>
-         <obj_property name="ObjectShortName">awready</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/wid" type="array">
-         <obj_property name="ElementShortName">wid[3:0]</obj_property>
-         <obj_property name="ObjectShortName">wid[3:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/wdata" type="array">
-         <obj_property name="ElementShortName">wdata[31:0]</obj_property>
-         <obj_property name="ObjectShortName">wdata[31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/wstrb" type="array">
-         <obj_property name="ElementShortName">wstrb[3:0]</obj_property>
-         <obj_property name="ObjectShortName">wstrb[3:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/wlast" type="logic">
-         <obj_property name="ElementShortName">wlast</obj_property>
-         <obj_property name="ObjectShortName">wlast</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/wvalid" type="logic">
-         <obj_property name="ElementShortName">wvalid</obj_property>
-         <obj_property name="ObjectShortName">wvalid</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/wready" type="logic">
-         <obj_property name="ElementShortName">wready</obj_property>
-         <obj_property name="ObjectShortName">wready</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/bid" type="array">
-         <obj_property name="ElementShortName">bid[3:0]</obj_property>
-         <obj_property name="ObjectShortName">bid[3:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/bresp" type="array">
-         <obj_property name="ElementShortName">bresp[1:0]</obj_property>
-         <obj_property name="ObjectShortName">bresp[1:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/bvalid" type="logic">
-         <obj_property name="ElementShortName">bvalid</obj_property>
-         <obj_property name="ObjectShortName">bvalid</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/bready" type="logic">
-         <obj_property name="ElementShortName">bready</obj_property>
-         <obj_property name="ObjectShortName">bready</obj_property>
+      <wvobject fp_name="group1651" type="group">
+         <obj_property name="label">ICache</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/icache_uncache" type="logic">
+            <obj_property name="ElementShortName">icache_uncache</obj_property>
+            <obj_property name="ObjectShortName">icache_uncache</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/icache_req" type="logic">
+            <obj_property name="ElementShortName">icache_req</obj_property>
+            <obj_property name="ObjectShortName">icache_req</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/icache_addr" type="array">
+            <obj_property name="ElementShortName">icache_addr[31:0]</obj_property>
+            <obj_property name="ObjectShortName">icache_addr[31:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/icache_addr_ready" type="logic">
+            <obj_property name="ElementShortName">icache_addr_ready</obj_property>
+            <obj_property name="ObjectShortName">icache_addr_ready</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/icache_data_ready" type="logic">
+            <obj_property name="ElementShortName">icache_data_ready</obj_property>
+            <obj_property name="ObjectShortName">icache_data_ready</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/icache_rdata" type="array">
+            <obj_property name="ElementShortName">icache_rdata[127:0]</obj_property>
+            <obj_property name="ObjectShortName">icache_rdata[127:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/icache_state" type="array">
+            <obj_property name="ElementShortName">icache_state[1:0]</obj_property>
+            <obj_property name="ObjectShortName">icache_state[1:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/icache_target_size" type="array">
+            <obj_property name="ElementShortName">icache_target_size[3:0]</obj_property>
+            <obj_property name="ObjectShortName">icache_target_size[3:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/icache_index" type="array">
+            <obj_property name="ElementShortName">icache_index[3:0]</obj_property>
+            <obj_property name="ObjectShortName">icache_index[3:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/icache_data_buffer" type="array">
+            <obj_property name="ElementShortName">icache_data_buffer[127:0]</obj_property>
+            <obj_property name="ObjectShortName">icache_data_buffer[127:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/icache_axi" type="array">
+            <obj_property name="ElementShortName">icache_axi</obj_property>
+            <obj_property name="ObjectShortName">icache_axi</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject fp_name="group1652" type="group">
+         <obj_property name="label">DCache</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/dcache_state" type="array">
+            <obj_property name="ElementShortName">dcache_state[2:0]</obj_property>
+            <obj_property name="ObjectShortName">dcache_state[2:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/dcache_target_size" type="array">
+            <obj_property name="ElementShortName">dcache_target_size[3:0]</obj_property>
+            <obj_property name="ObjectShortName">dcache_target_size[3:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/dcache_index" type="array">
+            <obj_property name="ElementShortName">dcache_index[3:0]</obj_property>
+            <obj_property name="ObjectShortName">dcache_index[3:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/dcache_data_buffer" type="array">
+            <obj_property name="ElementShortName">dcache_data_buffer[127:0]</obj_property>
+            <obj_property name="ObjectShortName">dcache_data_buffer[127:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/dcache_axi" type="array">
+            <obj_property name="ElementShortName">dcache_axi</obj_property>
+            <obj_property name="ObjectShortName">dcache_axi</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject fp_name="group1657" type="group">
+         <obj_property name="label">UnCache</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/uncache_axi" type="array">
+            <obj_property name="ElementShortName">uncache_axi</obj_property>
+            <obj_property name="ObjectShortName">uncache_axi</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/uncache_rd_state" type="array">
+            <obj_property name="ElementShortName">uncache_rd_state[1:0]</obj_property>
+            <obj_property name="ObjectShortName">uncache_rd_state[1:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/uncache_wr_state" type="array">
+            <obj_property name="ElementShortName">uncache_wr_state[1:0]</obj_property>
+            <obj_property name="ObjectShortName">uncache_wr_state[1:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/uncache_rd_size" type="array">
+            <obj_property name="ElementShortName">uncache_rd_size[2:0]</obj_property>
+            <obj_property name="ObjectShortName">uncache_rd_size[2:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/uncache_rd_addr" type="array">
+            <obj_property name="ElementShortName">uncache_rd_addr[31:0]</obj_property>
+            <obj_property name="ObjectShortName">uncache_rd_addr[31:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/uncache_rd_rdy" type="logic">
+            <obj_property name="ElementShortName">uncache_rd_rdy</obj_property>
+            <obj_property name="ObjectShortName">uncache_rd_rdy</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/uncache_ret_valid" type="logic">
+            <obj_property name="ElementShortName">uncache_ret_valid</obj_property>
+            <obj_property name="ObjectShortName">uncache_ret_valid</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/uncache_ret_data" type="array">
+            <obj_property name="ElementShortName">uncache_ret_data[31:0]</obj_property>
+            <obj_property name="ObjectShortName">uncache_ret_data[31:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/uncache_wr_req" type="logic">
+            <obj_property name="ElementShortName">uncache_wr_req</obj_property>
+            <obj_property name="ObjectShortName">uncache_wr_req</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/uncache_wr_size" type="array">
+            <obj_property name="ElementShortName">uncache_wr_size[2:0]</obj_property>
+            <obj_property name="ObjectShortName">uncache_wr_size[2:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/uncache_wr_wstrb" type="array">
+            <obj_property name="ElementShortName">uncache_wr_wstrb[3:0]</obj_property>
+            <obj_property name="ObjectShortName">uncache_wr_wstrb[3:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/uncache_wr_addr" type="array">
+            <obj_property name="ElementShortName">uncache_wr_addr[31:0]</obj_property>
+            <obj_property name="ObjectShortName">uncache_wr_addr[31:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/uncache_wr_data" type="array">
+            <obj_property name="ElementShortName">uncache_wr_data[31:0]</obj_property>
+            <obj_property name="ObjectShortName">uncache_wr_data[31:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/uncache_wr_rdy" type="logic">
+            <obj_property name="ElementShortName">uncache_wr_rdy</obj_property>
+            <obj_property name="ObjectShortName">uncache_wr_rdy</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/uncache_wr_bvalid" type="logic">
+            <obj_property name="ElementShortName">uncache_wr_bvalid</obj_property>
+            <obj_property name="ObjectShortName">uncache_wr_bvalid</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject fp_name="group1613" type="group">
+         <obj_property name="label">AXI_out</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/arid" type="array">
+            <obj_property name="ElementShortName">arid[3:0]</obj_property>
+            <obj_property name="ObjectShortName">arid[3:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/araddr" type="array">
+            <obj_property name="ElementShortName">araddr[31:0]</obj_property>
+            <obj_property name="ObjectShortName">araddr[31:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/arlen" type="array">
+            <obj_property name="ElementShortName">arlen[7:0]</obj_property>
+            <obj_property name="ObjectShortName">arlen[7:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/arsize" type="array">
+            <obj_property name="ElementShortName">arsize[2:0]</obj_property>
+            <obj_property name="ObjectShortName">arsize[2:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/arburst" type="array">
+            <obj_property name="ElementShortName">arburst[1:0]</obj_property>
+            <obj_property name="ObjectShortName">arburst[1:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/arlock" type="array">
+            <obj_property name="ElementShortName">arlock[1:0]</obj_property>
+            <obj_property name="ObjectShortName">arlock[1:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/arcache" type="array">
+            <obj_property name="ElementShortName">arcache[3:0]</obj_property>
+            <obj_property name="ObjectShortName">arcache[3:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/arprot" type="array">
+            <obj_property name="ElementShortName">arprot[2:0]</obj_property>
+            <obj_property name="ObjectShortName">arprot[2:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/arvalid" type="logic">
+            <obj_property name="ElementShortName">arvalid</obj_property>
+            <obj_property name="ObjectShortName">arvalid</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/arready" type="logic">
+            <obj_property name="ElementShortName">arready</obj_property>
+            <obj_property name="ObjectShortName">arready</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/rid" type="array">
+            <obj_property name="ElementShortName">rid[3:0]</obj_property>
+            <obj_property name="ObjectShortName">rid[3:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/rdata" type="array">
+            <obj_property name="ElementShortName">rdata[31:0]</obj_property>
+            <obj_property name="ObjectShortName">rdata[31:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/rresp" type="array">
+            <obj_property name="ElementShortName">rresp[1:0]</obj_property>
+            <obj_property name="ObjectShortName">rresp[1:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/rlast" type="logic">
+            <obj_property name="ElementShortName">rlast</obj_property>
+            <obj_property name="ObjectShortName">rlast</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/rvalid" type="logic">
+            <obj_property name="ElementShortName">rvalid</obj_property>
+            <obj_property name="ObjectShortName">rvalid</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/rready" type="logic">
+            <obj_property name="ElementShortName">rready</obj_property>
+            <obj_property name="ObjectShortName">rready</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/awid" type="array">
+            <obj_property name="ElementShortName">awid[3:0]</obj_property>
+            <obj_property name="ObjectShortName">awid[3:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/awaddr" type="array">
+            <obj_property name="ElementShortName">awaddr[31:0]</obj_property>
+            <obj_property name="ObjectShortName">awaddr[31:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/awlen" type="array">
+            <obj_property name="ElementShortName">awlen[7:0]</obj_property>
+            <obj_property name="ObjectShortName">awlen[7:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/awsize" type="array">
+            <obj_property name="ElementShortName">awsize[2:0]</obj_property>
+            <obj_property name="ObjectShortName">awsize[2:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/awburst" type="array">
+            <obj_property name="ElementShortName">awburst[1:0]</obj_property>
+            <obj_property name="ObjectShortName">awburst[1:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/awlock" type="array">
+            <obj_property name="ElementShortName">awlock[1:0]</obj_property>
+            <obj_property name="ObjectShortName">awlock[1:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/awcache" type="array">
+            <obj_property name="ElementShortName">awcache[3:0]</obj_property>
+            <obj_property name="ObjectShortName">awcache[3:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/awprot" type="array">
+            <obj_property name="ElementShortName">awprot[2:0]</obj_property>
+            <obj_property name="ObjectShortName">awprot[2:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/awvalid" type="logic">
+            <obj_property name="ElementShortName">awvalid</obj_property>
+            <obj_property name="ObjectShortName">awvalid</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/awready" type="logic">
+            <obj_property name="ElementShortName">awready</obj_property>
+            <obj_property name="ObjectShortName">awready</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/wid" type="array">
+            <obj_property name="ElementShortName">wid[3:0]</obj_property>
+            <obj_property name="ObjectShortName">wid[3:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/wdata" type="array">
+            <obj_property name="ElementShortName">wdata[31:0]</obj_property>
+            <obj_property name="ObjectShortName">wdata[31:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/wstrb" type="array">
+            <obj_property name="ElementShortName">wstrb[3:0]</obj_property>
+            <obj_property name="ObjectShortName">wstrb[3:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/wlast" type="logic">
+            <obj_property name="ElementShortName">wlast</obj_property>
+            <obj_property name="ObjectShortName">wlast</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/wvalid" type="logic">
+            <obj_property name="ElementShortName">wvalid</obj_property>
+            <obj_property name="ObjectShortName">wvalid</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/wready" type="logic">
+            <obj_property name="ElementShortName">wready</obj_property>
+            <obj_property name="ObjectShortName">wready</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/bid" type="array">
+            <obj_property name="ElementShortName">bid[3:0]</obj_property>
+            <obj_property name="ObjectShortName">bid[3:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/bresp" type="array">
+            <obj_property name="ElementShortName">bresp[1:0]</obj_property>
+            <obj_property name="ObjectShortName">bresp[1:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/bvalid" type="logic">
+            <obj_property name="ElementShortName">bvalid</obj_property>
+            <obj_property name="ObjectShortName">bvalid</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/bready" type="logic">
+            <obj_property name="ElementShortName">bready</obj_property>
+            <obj_property name="ObjectShortName">bready</obj_property>
+         </wvobject>
       </wvobject>
    </wvobject>
 </wave_config>

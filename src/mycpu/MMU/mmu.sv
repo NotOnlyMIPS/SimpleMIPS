@@ -60,7 +60,7 @@ begin: generate_mmu_enabled_code
     assign inst_result.virt_addr = inst_vaddr;
 
     assign data_mapped           = is_vaddr_mapped(data_vaddr);
-    assign data_result.uncached  = is_vaddr_uncached(data_vaddr);
+    assign data_result.uncached  = is_vaddr_uncached(data_vaddr) | (data_mapped && data_result.cache_flag == 3'd2);
     assign data_result.dirty     = (~data_mapped | data_tlb_result.dirty);
     assign data_result.miss      = (data_mapped & data_tlb_result.miss);
     assign data_result.illegal   = (is_user_mode & data_vaddr[31]);

@@ -389,8 +389,9 @@ interface C0_TLB_Interface();
 endinterface
 
 
-/* Interface Definition */
+/*--------------------------------------Interface Definition-----------------------------------------------*/
 
+// CP0
 interface WB_C0_Interface();
 	logic 		 we;
 	logic [ 7:0] addr;
@@ -413,7 +414,7 @@ interface WB_C0_Interface();
 
 endinterface
 
-/*  icache */
+// ICache
 interface CPU_ICache_Interface();
 	logic 	     req;
 	logic 		 addr_ok;
@@ -441,6 +442,52 @@ interface CPU_ICache_Interface();
 		output offset,
 		output index,
 		output tag,
+		input  addr_ok,
+		input  data_ok,
+		input  rdata
+	);
+endinterface
+
+// DCache
+interface CPU_DCache_Interface();
+	logic		 req;
+	logic 		 iscache;
+	logic	     wr;
+	logic [ 3:0] offset;
+	logic [ 7:0] index;
+	logic [19:0] tag;
+	logic [ 3:0] wstrb;
+	logic [ 2:0] size;
+	uint32_t	 wdata;
+	uint32_t	 rdata;
+	logic 		 addr_ok;
+	logic 		 data_ok;
+
+	modport	DCache(
+		input  req,
+		input  iscache,
+		input  wr,
+		input  offset,
+		input  index,
+		input  tag,
+		input  wstrb,
+		input  size,
+		input  wdata,
+		output addr_ok,
+		output data_ok,
+		output rdata
+	);
+
+	modport CPU(
+		output req,
+		output iscache,
+		output wr,
+		output offset,
+		output index,
+		output tag,
+		output wstrb,
+		output size,
+		output wdata,
 		input  addr_ok,
 		input  data_ok,
 		input  rdata

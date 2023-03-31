@@ -14,7 +14,7 @@ module wb_stage (
     // to c0
     output ws_to_c0_bus_t   ws_to_c0_bus,
     // WB_C0_Interface
-    WB_C0_Interface         wb_c0_bus,
+    WB_C0_Interface.WB      wb_c0_bus,
     // exception
     output pipeline_flush_t pipeline_flush,
     // tlb

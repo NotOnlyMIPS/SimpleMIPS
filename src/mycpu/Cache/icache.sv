@@ -22,7 +22,7 @@ module icache #(
     input  logic           clk_g,
     input  logic           resetn,
     // cpu_core
-    CPU_ICache_Interface   CPU_ICache_Bus,
+    CPU_ICache_Interface.ICache   IBus,
     // AXI4
     output logic           rd_uncache,
     output logic           rd_req,
@@ -116,11 +116,11 @@ logic                                                         pipe_wr;
 
 //cpu
 //地址握手信号
-assign CPU_ICache_Bus.addr_ok    = ( state_next == LOOKUP) && CPU_ICache_Bus.req;
+assign IBus.addr_ok    = ( state_next == LOOKUP) && IBus.req;
 //数据握手信号
-assign CPU_ICache_Bus.data_ok    = ((state == LOOKUP || state == REFILLDONE) && state_next == LOOKUP && req_buffer.valid);
+assign IBus.data_ok    = ((state == LOOKUP || state == REFILLDONE) && state_next == LOOKUP && req_buffer.valid);
 //返回给cpu的数据
-assign CPU_ICache_Bus.rdata      =  ( req_buffer.valid ) ? data_rdata_final2 : '0;
+assign IBus.rdata      =  ( req_buffer.valid ) ? data_rdata_final2 : '0;
 //axi
 //读请求
 assign rd_req     = (state == MISSCLEAN && req_buffer.isCache) ? 1'b1 : 1'b0;
@@ -132,13 +132,13 @@ assign rd_addr    = {req_buffer.tag,req_buffer.index, {OFFSET_WIDTH{1'b0}}};
 //判断是否命中
 assign cache_hit        = |hit;//ok
 //读ram地址
-assign read_addr        = req_buffer_en ? CPU_ICache_Bus.index : req_buffer.index;
+assign read_addr        = req_buffer_en ? IBus.index : req_buffer.index;
 assign tagv_addr        = req_buffer.index;
 
 //pipe写使能
 assign pipe_wr          = (state_next == MISSCLEAN); // ??????????????????
 //req_buffer写使能
-assign req_buffer_en    = (state_next == LOOKUP && CPU_ICache_Bus.req || CPU_ICache_Bus.data_ok);
+assign req_buffer_en    = (state_next == LOOKUP && IBus.req || IBus.data_ok);
 
 //将axi返回数据写入
 generate;//
@@ -278,12 +278,12 @@ always_ff @( posedge clk_g ) begin : req_buffer_block
     if( !resetn )begin
         req_buffer          <= '0;
     end else if(req_buffer_en) begin 
-        req_buffer.valid    <=  CPU_ICache_Bus.req;
+        req_buffer.valid    <=  IBus.req;
         // req_buffer.op       <=  op;
-        req_buffer.tag      <=  CPU_ICache_Bus.tag;
-        req_buffer.index    <=  CPU_ICache_Bus.index;
-        req_buffer.offset   <=  CPU_ICache_Bus.offset;
-        req_buffer.isCache  <=  CPU_ICache_Bus.iscache;
+        req_buffer.tag      <=  IBus.tag;
+        req_buffer.index    <=  IBus.index;
+        req_buffer.offset   <=  IBus.offset;
+        req_buffer.isCache  <=  IBus.iscache;
         // req_buffer.wstrb    <=  wstrb;
         // req_buffer.wdata    <=  wdata;
     end

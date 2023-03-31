@@ -97,11 +97,12 @@ module simple_port_ram #(
 	parameter int unsigned SIZE        = 1024, //指有多少块
 	parameter type dtype               = logic [DATA_WIDTH-1:0],
 	parameter int unsigned MEMORY_SIZE = $bits(dtype) * SIZE,
-	parameter int unsigned ADDR_WIDTH  = $clog2(SIZE)
+	parameter int unsigned ADDR_WIDTH  = $clog2(SIZE),
+   parameter int unsigned BYTE_PER_DATA = 1
 ) (
 	input  logic  clk,
 	input  logic  rst,
-	input  logic  wea,
+	input  logic [BYTE_PER_DATA - 1: 0]  wea,
 	input  logic  ena,
 	input  logic  enb,
 	input  logic  [$clog2(SIZE)-1:0] addra,
@@ -130,7 +131,7 @@ module simple_port_ram #(
       .ADDR_WIDTH_A(ADDR_WIDTH),               // DECIMAL
       .ADDR_WIDTH_B(ADDR_WIDTH),               // DECIMAL
       .AUTO_SLEEP_TIME(0),            // DECIMAL
-      .BYTE_WRITE_WIDTH_A($bits(dtype)),        // DECIMAL
+      .BYTE_WRITE_WIDTH_A(DATA_WIDTH/BYTE_PER_DATA),        // DECIMAL
       //.CASCADE_HEIGHT(0),             // DECIMAL
       .CLOCKING_MODE("common_clock"), // String
       .ECC_MODE("no_ecc"),            // String
