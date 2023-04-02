@@ -12,7 +12,7 @@
 //在原有cache上进行删除即可
 
 `include "cache.svh"
-`include "../cpu_defs.svh"
+`include "../cpu.svh"
 
 module icache #(
     parameter DATA_WIDTH    = 32,//字的大小

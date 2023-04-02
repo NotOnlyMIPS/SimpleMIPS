@@ -28,3 +28,6 @@ vivado*.str
 **/ip/xilinx/*/*
 **/ip/xilinx/*/*/
 !**/ip/xilinx/*/*.xci
+
+# keep test files
+!/test/official/*
