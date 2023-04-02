@@ -21,7 +21,7 @@ module pre_if_stage (
     input  pipeline_flush_t pipeline_flush,
     input  virt_t           c0_epc,
     // tlb/mmu
-    input  virt_t           tlb_pc,
+    input  virt_t           tlb_cache_pc,
     output virt_t           inst_vaddr,
     input  mmu_result_t     inst_result,
     input  exception_t      inst_tlb_ex,
@@ -80,8 +80,8 @@ always_ff @(posedge clk) begin
     else if(pipeline_flush.eret) begin
         pc <= c0_epc - 32'h4;
     end
-    else if(pipeline_flush.tlb_op) begin
-        pc <= tlb_pc + 32'h4;
+    else if(pipeline_flush.tlb_op || pipeline_flush.cache_op) begin
+        pc <= tlb_cache_pc + 32'h4;
     end
     else if (to_pfs_valid && fs_allowin && pfs_ready_go) begin
         pc <= next_pc;

@@ -71,41 +71,41 @@ regfile u_regfile (
 uint32_t rs_value, rt_value;
 
 register_forward u_register_forward(
-    .ds_valid   (ds_valid),
-    .inst_d     (inst_d),
-    // regfile
-    .rf_rdata1  (rf_rdata1),
-    .rf_rdata2  (rf_rdata2),
+    .ds_valid     (ds_valid),
+    .inst_d       (inst_d),
+    // regfile 
+    .rf_rdata1    (rf_rdata1),
+    .rf_rdata2    (rf_rdata2),
     // es forward
-    .es_mfc0    (es_forward_bus.op_mfc0),
-    .es_tlb     (es_forward_bus.op_tlb ),
-    .es_load    (es_forward_bus.op_load),
-    .es_dest    (es_forward_bus.dest   ),
-    .es_result  (es_forward_bus.result ),
+    .es_mfc0      (es_forward_bus.op_mfc0),
+    .es_tlb_cache (es_forward_bus.op_tlb_cache ),
+    .es_load      (es_forward_bus.op_load),
+    .es_dest      (es_forward_bus.dest   ),
+    .es_result    (es_forward_bus.result ),
     // pms forward
-    .pms_mfc0   (pms_forward_bus.op_mfc0),
-    .pms_tlb    (pms_forward_bus.op_tlb ),
-    .pms_load   (pms_forward_bus.op_load),
-    .pms_dest   (pms_forward_bus.dest   ),
-    .pms_result (pms_forward_bus.result ),
+    .pms_mfc0     (pms_forward_bus.op_mfc0),
+    .pms_tlb_cache(pms_forward_bus.op_tlb_cache ),
+    .pms_load     (pms_forward_bus.op_load),
+    .pms_dest     (pms_forward_bus.dest   ),
+    .pms_result   (pms_forward_bus.result ),
     // ms forward
-    .ms_mfc0    (ms_forward_bus.op_mfc0),
-    .ms_tlb     (ms_forward_bus.op_tlb ),
-    .ms_load    (ms_forward_bus.op_load),
-    .ms_rf_we   (ms_forward_bus.rf_we  ),
-    .ms_dest    (ms_forward_bus.dest   ),
-    .ms_result  (ms_forward_bus.result ),
-    // ws forward
-    .ws_mfc0    (ws_forward_bus.op_mfc0),
-    .ws_tlb     (ws_forward_bus.op_tlb ),
-    .ws_rf_we   (ws_forward_bus.rf_we  ),
-    .ws_dest    (ws_forward_bus.dest   ),
-    .ws_result  (ws_forward_bus.result ),
-    // result
-    .rs_value   (rs_value),
-    .rt_value   (rt_value),
-    // stall
-    .ds_stall   (ds_stall)
+    .ms_mfc0      (ms_forward_bus.op_mfc0),
+    .ms_tlb_cache (ms_forward_bus.op_tlb_cache ),
+    .ms_load      (ms_forward_bus.op_load),
+    .ms_rf_we     (ms_forward_bus.rf_we  ),
+    .ms_dest      (ms_forward_bus.dest   ),
+    .ms_result    (ms_forward_bus.result ),
+    // ws forward 
+    .ws_mfc0      (ws_forward_bus.op_mfc0),
+    .ws_tlb_cache (ws_forward_bus.op_tlb_cache ),
+    .ws_rf_we     (ws_forward_bus.rf_we  ),
+    .ws_dest      (ws_forward_bus.dest   ),
+    .ws_result    (ws_forward_bus.result ),
+    // result 
+    .rs_value     (rs_value),
+    .rt_value     (rt_value),
+    // stall  
+    .ds_stall     (ds_stall)
 );
 
 // ID stage
@@ -153,7 +153,7 @@ assign is_call   = inst_d.br_op[11] | inst_d.br_op[9];
 assign is_jump   = inst_d.br_op[8];
 assign br_bus_en = (|inst_d.br_op) & ds_ready_go & es_allowin & ds_valid;
 always_ff @(posedge clk) begin
-    if(reset || pipeline_flush.ex || pipeline_flush.eret || pipeline_flush.tlb_op || branch_resolved)
+    if(reset || pipeline_flush.ex || pipeline_flush.eret || pipeline_flush.tlb_op || pipeline_flush.cache_op || branch_resolved)
         br_bus_r_valid <= 1'b0;
     else if(br_bus_en) begin
         br_bus_r_valid <= 1'b1;
@@ -196,7 +196,8 @@ assign ds_to_es_bus = { ds_to_es_valid,
                         predict_target,
                         predict_entry,
                         exception,
-                        inst_d.tlb_op
+                        inst_d.tlb_op,
+                        inst_d.cache_op
                         };
 
 endmodule

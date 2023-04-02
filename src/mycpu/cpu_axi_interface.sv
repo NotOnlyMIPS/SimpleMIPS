@@ -212,6 +212,7 @@ always_ff @(posedge clk) begin
     end
     else if(dcache_state == D_WRITE && dcache_axi.wready) begin
         dcache_index       <= dcache_index + 4'd1;
+        dcache_data_buffer <= {32'd0, dcache_data_buffer[127:32]};
     end
 end
 
@@ -240,7 +241,7 @@ assign dcache_axi.awprot  = '0;
 assign dcache_axi.awvalid = dcache_state == D_WAIT && dcache_wr_req;
 // w
 assign dcache_axi.wid     = 4'b0001;
-assign dcache_axi.wdata   = dcache_data_buffer[dcache_index];
+assign dcache_axi.wdata   = dcache_data_buffer[31:0];
 assign dcache_axi.wstrb   = '1;
 assign dcache_axi.wlast   = dcache_index == dcache_target_size && dcache_state == D_WRITE;
 assign dcache_axi.wvalid  = dcache_state == D_WRITE;
@@ -258,6 +259,7 @@ typedef enum logic [1:0] {
 axi_t    uncache_axi;
 uncache_state_t  uncache_rd_state, uncache_wr_state;
 uint32_t uncache_wr_data_r;
+logic [3:0] uncache_wr_wstrb_r;
 
 assign uncache_rd_rdy    = uncache_rd_state == U_WAIT  && uncache_rd_req && uncache_axi.arready;
 assign uncache_ret_valid = uncache_rd_state == U_READ  && uncache_axi.rvalid;
@@ -278,8 +280,10 @@ always_ff @(posedge clk) begin
     else if(uncache_wr_state == U_WRITE && uncache_axi.wready)
         uncache_wr_state <= U_WRITE_DONE;
     
-    if(uncache_wr_rdy)
+    if(uncache_wr_rdy) begin
         uncache_wr_data_r <= uncache_wr_data;
+        uncache_wr_wstrb_r <= uncache_wr_wstrb;
+    end
 end
 
 // unCache AXI
@@ -308,7 +312,7 @@ assign uncache_axi.awvalid = uncache_wr_state == U_WAIT && uncache_wr_req;
 // w
 assign uncache_axi.wid     = 4'h2;
 assign uncache_axi.wdata   = uncache_wr_data_r;
-assign uncache_axi.wstrb   = uncache_wr_wstrb;
+assign uncache_axi.wstrb   = uncache_wr_wstrb_r;
 assign uncache_axi.wlast   = uncache_wr_state == U_WRITE;
 assign uncache_axi.wvalid  = uncache_wr_state == U_WRITE;
 // b

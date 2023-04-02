@@ -29,8 +29,8 @@ module pre_mem_stage(
 	output logic [ 3:0] data_offset,
 	output logic [ 7:0] data_index,
 	output logic [19:0] data_tag,
-    output logic [ 2:0]  data_size,
-    output logic [ 3:0]  data_wstrb,
+    output logic [ 2:0] data_size,
+    output logic [ 3:0] data_wstrb,
     output uint32_t     data_wdata,
     input  logic        data_addr_ok
 );
@@ -121,9 +121,10 @@ assign exception.badvaddr = es_to_pms_bus_r.exception.ex ? es_to_pms_bus_r.excep
 
 // forward bus
 assign op_tlb  = (es_to_pms_bus_r.tlb_op[0] | es_to_pms_bus_r.tlb_op[1] | es_to_pms_bus_r.tlb_op[2] ) & pms_valid; 
+assign op_cache = (es_to_pms_bus_r.cache_op != EMPTY) & pms_valid;
 assign pms_forward_bus = {op_mfc0,
                           es_to_pms_bus_r.res_from_mem & pms_valid,
-                          op_tlb,
+                          op_tlb | op_cache,
                           es_to_pms_bus_r.dest & {5{pms_valid}},
                           es_to_pms_bus_r.result
                         };
@@ -141,7 +142,9 @@ assign pms_to_ms_bus = {pms_to_ms_valid,
                         es_to_pms_bus_r.result,
                         es_to_pms_bus_r.pc,
                         exception,
-                        es_to_pms_bus_r.tlb_op
+                        data_result.phy_addr,
+                        es_to_pms_bus_r.tlb_op,
+                        es_to_pms_bus_r.cache_op
                         };
 
 endmodule

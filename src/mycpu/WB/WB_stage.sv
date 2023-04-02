@@ -1,4 +1,4 @@
-`include "..\cpu_defs.svh"
+`include "../cpu_defs.svh"
 
 module wb_stage (
     input  clk,
@@ -18,7 +18,7 @@ module wb_stage (
     // exception
     output pipeline_flush_t pipeline_flush,
     // tlb
-    output virt_t           tlb_pc,
+    output virt_t           tlb_cache_pc,
     // trace dubug interface
     output virt_t           debug_wb_pc,
     output logic [3:0]      debug_wb_rf_wen,
@@ -71,15 +71,19 @@ assign op_mfc0 = ms_to_ws_bus_r.c0_op[2] & ws_valid;
 assign op_tlb  = (ms_to_ws_bus_r.tlb_op[`TLBOP_TLBWI]| 
                   ms_to_ws_bus_r.tlb_op[`TLBOP_TLBP] |
                   ms_to_ws_bus_r.tlb_op[`TLBOP_TLBR] ) & ws_valid;
+assign op_cache = (ms_to_ws_bus_r.cache_op != EMPTY) & ws_valid;
 assign final_result = op_mfc0 ? wb_c0_bus.rdata : ms_to_ws_bus_r.result;
 assign ws_forward_bus = {op_mfc0,
-                         op_tlb,
+                         op_tlb | op_cache,
                          ms_to_ws_bus_r.rf_we,
                          ms_to_ws_bus_r.dest & {5{ws_valid}},
                          final_result
                          };
 
 // cp0 and exception
+assign ws_to_c0_bus.cache_vaddr = ms_to_ws_bus_r.result;
+assign ws_to_c0_bus.cache_paddr = ms_to_ws_bus_r.phy_addr;
+
 exception_control u_exception_control (
     .ws_valid   (ws_valid               ),
 
@@ -102,12 +106,15 @@ exception_control u_exception_control (
     .c0_pc          (ws_to_c0_bus.pc            )
 );
 
-assign tlb_pc = ms_to_ws_bus_r.pc;
+assign tlb_cache_pc = ms_to_ws_bus_r.pc;
 
 // tlb
 assign ws_to_c0_bus.tlb_op = ws_valid ? ms_to_ws_bus_r.tlb_op : 3'b0;
 
-assign pipeline_flush = {ex_en, eret_flush, op_tlb, ms_to_ws_bus_r.exception.tlb_refill};
+// cache
+assign ws_to_c0_bus.cache_op = ws_valid ? ms_to_ws_bus_r.cache_op: EMPTY;
+
+assign pipeline_flush = {ex_en, eret_flush, op_tlb, op_cache, ms_to_ws_bus_r.exception.tlb_refill};
 
 // trace debug interface
 assign debug_wb_pc       = ms_to_ws_bus_r.pc;

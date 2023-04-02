@@ -19,8 +19,16 @@ module reg_cp0 (
     input  tlb_entry_t  tlbrw_rdata,
     output uint32_t     tlbp_entry_hi,
     input  uint32_t     tlbp_index,
+    // Cache
+    output logic         cache_valid,
+    output logic [19:0]  cache_tag,
+    output logic         cache_dirty,
+    output CacheCodeType cache_op,
+    output logic [7:0]   cache_index,
     // epc
-    output virt_t epc
+    output virt_t epc,
+    // kseg0
+    output logic  kseg0_uncached
 );
 
 // from WB
@@ -28,11 +36,16 @@ logic       eret_flush;
 exception_t exception;
 virt_t      wb_pc;
 logic [2:0] tlb_op;
+virt_t		  cache_vaddr;
+phys_t	      cache_paddr;
 
 assign { eret_flush,
          exception,
          wb_pc,
-         tlb_op } = ws_to_c0_bus;
+         tlb_op,
+         cache_vaddr, 
+         cache_paddr, 
+         cache_op } = ws_to_c0_bus;
 
 // WB_C0_Interface
 logic        cp0_we   ;
@@ -236,7 +249,61 @@ always @(posedge clk) begin
         cp0_index <= {{(32-$clog2(`TLB_ENTRIES_NUM)){1'b0}},cp0_wdata[$clog2(`TLB_ENTRIES_NUM)-1:0]};
 end
 
+// Cache TagLo
+logic [31:0] cp0_tag_lo;
+always @(posedge clk) begin
+    if(reset)
+        cp0_tag_lo <= '0;
+    if(cp0_we && cp0_addr == `CR_TAGLO)
+        cp0_tag_lo <= cp0_wdata[31:10];
+end
+logic  tag_from_cp0;
+logic  cache_is_index;
+assign tag_from_cp0 = (cache_op == I_Index_Store_Tag || cache_op == D_Index_Store_Tag);
+assign cache_is_index = (cache_op == I_Index_Invalid || cache_op == I_Index_Store_Tag 
+                       ||cache_op == D_Index_Store_Tag || cache_op == D_Index_Writeback_Invalid);
+assign cache_valid = cp0_tag_lo[10];
+assign cache_dirty = cp0_tag_lo[11];
+assign cache_tag   = tag_from_cp0 ?  cp0_tag_lo[31:12] : cache_is_index ? ws_to_c0_bus.cache_vaddr[31:12] : ws_to_c0_bus.cache_paddr[31:12];
+assign cache_index = ws_to_c0_bus.cache_vaddr[11:4];
 
+// Configx
+logic [31:0] cp0_config0, cp0_config1;
+always @(posedge clk) begin
+    if(reset) begin
+        cp0_config0 <= {
+            1'b1,    // M
+            15'b0,   // 0
+            1'b0,    // BE
+            2'b0,    // AT
+            3'b0,    // AR
+            3'b1,    // MT
+            4'b0,    // 0
+            3'b011   // K0  
+        };
+        cp0_config1 <= {
+            1'b1,    // M
+            6'd15,   // MMUSize-1
+            3'd2,    // IS
+            3'd4,    // IL
+            3'd3,    // IA
+            3'd2,    // DS
+            3'd4,    // DL
+            3'd3,    // DA
+            1'd0,    // C2
+            1'd0,    // CMD
+            1'd0,    // PC
+            1'd0,    // WR
+            1'd0,    // CA
+            1'd0,    // EP
+            1'd0     // FP
+        };
+    end
+    if(cp0_we && cp0_addr == `CR_CONFIG0)
+        cp0_config0[2:0] <= cp0_wdata[2:0];
+end
+
+assign kseg0_uncached = (cp0_config0[2:0] != 3'd3);
 
 // WB_C0_Interface
 assign c0_wb_bus.rdata = ({32{cp0_addr==`CR_BADVADDR}} & cp0_badvaddr   )
@@ -248,7 +315,10 @@ assign c0_wb_bus.rdata = ({32{cp0_addr==`CR_BADVADDR}} & cp0_badvaddr   )
                        | ({32{cp0_addr==`CR_INDEX   }} & cp0_index      )
                        | ({32{cp0_addr==`CR_ENTRYHI }} & cp0_entry_hi   )
                        | ({32{cp0_addr==`CR_ENTRYLO0}} & cp0_entry_lo0  )
-                       | ({32{cp0_addr==`CR_ENTRYLO1}} & cp0_entry_lo1  );
+                       | ({32{cp0_addr==`CR_ENTRYLO1}} & cp0_entry_lo1  )
+                       | ({32{cp0_addr==`CR_TAGLO   }} & cp0_tag_lo     )
+                       | ({32{cp0_addr==`CR_CONFIG0 }} & cp0_config0    )
+                       | ({32{cp0_addr==`CR_CONFIG1 }} & cp0_config1    );
 
 assign {c0_hw, c0_sw} = {8{~cp0_status.exl}} & {8{cp0_status.ie}} & cp0_cause.ip & cp0_status.im;
 

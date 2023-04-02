@@ -46,7 +46,8 @@ assign fs_to_ds_valid = fs_valid && fs_ready_go && !pfs_fs_lock && !bpu_flush;
 assign branch_delay_slot = pfs_to_fs_bus.br_op;
 
 always_ff @( posedge clk ) begin
-    if (reset || pipeline_flush.ex || pipeline_flush.eret || pipeline_flush.tlb_op || (bpu_flush && !branch_delay_slot)) begin
+    if (reset || pipeline_flush.ex || pipeline_flush.eret ||
+                 pipeline_flush.tlb_op || pipeline_flush.cache_op || (bpu_flush && !branch_delay_slot)) begin
         fs_valid <= 1'b0;
     end
     else if (fs_allowin && !pfs_fs_lock) begin
@@ -56,7 +57,8 @@ always_ff @( posedge clk ) begin
     if(pfs_to_fs_bus.valid && fs_allowin && !pfs_fs_lock)
         pfs_to_fs_bus_r <= pfs_to_fs_bus;
     
-    if(reset || pipeline_flush.ex || pipeline_flush.eret || pipeline_flush.tlb_op || (bpu_flush && !branch_delay_slot))
+    if(reset || pipeline_flush.ex || pipeline_flush.eret || 
+                pipeline_flush.tlb_op || pipeline_flush.cache_op || (bpu_flush && !branch_delay_slot))
         fs_inst_valid <= 1'b0;
     else if(icache_data_ok && (!ds_allowin || pfs_fs_lock)) begin
         fs_inst_valid <= 1'b1;

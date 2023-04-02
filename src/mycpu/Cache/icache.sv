@@ -9,12 +9,13 @@
 //Icache直接复用原本的cache逻辑
 //并且由于icache不具有写操作
 //在原有cache上进行删除即可
+`include "Cache_define.svh"
 `include "../cpu_defs.svh"
 
 module icache #(
     parameter DATA_WIDTH    = 32,//字的大小
     parameter LINE_WORD_NUM = 4,//cache数据块大小
-    parameter ASSOC_NUM     = 4,//组相联路数
+    parameter ASSOC_NUM     = 2,//组相联路数
     parameter WAY_SIZE      = 4*1024*8,//每一路的大小4KB
     parameter GROUP_NUM     = WAY_SIZE/(LINE_WORD_NUM*DATA_WIDTH)//一共多少组 
 
@@ -50,23 +51,23 @@ typedef logic [ASSOC_NUM-1:0]                     gpwe_t;
 typedef logic [DATA_WIDTH-1:0]                    data_t;
 
 //这个需要配置当4路时用这个函数
-function logic[1:0] clog2(
-    input logic [ASSOC_NUM-1:0] hit
-);
-    return{
-        (hit[3] == 1'b1) ? 2'b11 : 
-        (hit[2] == 1'b1) ? 2'b10 : 
-        (hit[1] == 1'b1) ? 2'b01 : 2'b00
-    };
-endfunction
-//2路时用这个函数
-// function logic clog2(
+// function logic[1:0] clog2(
 //     input logic [ASSOC_NUM-1:0] hit
 // );
 //     return{
-//         hit[1] ? 1'b1 : 1'b0;
+//         (hit[3] == 1'b1) ? 2'b11 : 
+//         (hit[2] == 1'b1) ? 2'b10 : 
+//         (hit[1] == 1'b1) ? 2'b01 : 2'b00
 //     };
 // endfunction
+//2路时用这个函数
+function logic clog2(
+    input logic [ASSOC_NUM-1:0] hit
+);
+    return{
+        hit[1] ? 1'b1 : 1'b0
+    };
+endfunction
 
 typedef enum logic [3:0] { 
         LOOKUP,
@@ -81,8 +82,8 @@ typedef struct packed {
     index_t           index;
     offset_t          offset;
     logic             isCache;//判断时cache还是uncache
+    CacheType         cacheType;
 } request_t;
-
 
 state_t  state,state_next;
 
@@ -123,17 +124,17 @@ assign IBus.data_ok    = ((state == LOOKUP || state == REFILLDONE) && state_next
 assign IBus.rdata      =  ( req_buffer.valid ) ? data_rdata_final2 : '0;
 //axi
 //读请求
-assign rd_req     = (state == MISSCLEAN && req_buffer.isCache) ? 1'b1 : 1'b0;
+assign rd_req     = state == MISSCLEAN ? 1'b1 : 1'b0;
 //读uncache
-assign rd_uncache = (state == MISSCLEAN && req_buffer.isCache == 1'b0) ? 1'b1 : 1'b0;
+assign rd_uncache = (req_buffer.isCache == 1'b0) ? 1'b1 : 1'b0;
 //读地址
-assign rd_addr    = {req_buffer.tag,req_buffer.index, {OFFSET_WIDTH{1'b0}}};
+assign rd_addr    = {req_buffer.tag,req_buffer.index, req_buffer.isCache ? {OFFSET_WIDTH{1'b0}} : req_buffer.offset};
 
 //判断是否命中
 assign cache_hit        = |hit;//ok
 //读ram地址
 assign read_addr        = req_buffer_en ? IBus.index : req_buffer.index;
-assign tagv_addr        = req_buffer.index;
+assign tagv_addr        = IBus.cachetype.isIcache ? IBus.cache_index : req_buffer.index ;
 
 //pipe写使能
 assign pipe_wr          = (state_next == MISSCLEAN); // ??????????????????
@@ -148,7 +149,21 @@ generate;//
 endgenerate
 
 //只有重填时tag有值
-assign tagv_wdata       = (state == REFILL) ? {1'b1, req_buffer.tag} : '0;
+// assign tagv_wdata       = (state == REFILL) ? {1'b1, req_buffer.tag} : '0;
+always_comb begin : tagv_wdata_blockName
+    if(IBus.cachetype.isIcache)begin
+        case (IBus.cachetype.cacheCode)
+            I_Index_Store_Tag:begin
+                tagv_wdata = {IBus.cache_valid, IBus.cache_tag};
+            end
+            default : begin
+                tagv_wdata = {1'b0,req_buffer.tag};
+            end
+        endcase
+    end else begin
+        tagv_wdata = (state == REFILL) ? {1'b1,req_buffer.tag} : '0;
+    end
+end
 
 //generate
 generate;
@@ -216,9 +231,9 @@ generate;
 endgenerate
 
 always_comb begin : data_rdata_final2__blockname 
-    if(req_buffer.valid && req_buffer.isCache == 1'b0 && state_next == LOOKUP)
+    if(req_buffer.valid && !req_buffer.isCache && state_next == LOOKUP)
         data_rdata_final2 = uncache_rdata;
-    else if(req_buffer.valid && req_buffer.isCache == 1'b1) begin
+    else if(req_buffer.valid && req_buffer.isCache) begin
         data_rdata_final2 = data_rdata_sel[clog2(hit)];
     end 
     else begin
@@ -227,8 +242,41 @@ always_comb begin : data_rdata_final2__blockname
 end
 
 //tag的写使能
+// always_comb begin : tagv_we_blockName
+//     if (state == REFILL && ret_valid) begin
+//         tagv_we = '0;
+//         tagv_we[lru[req_buffer.index]] =1'b1;
+//     end else begin
+//         tagv_we = '0;
+//     end
+// end
 always_comb begin : tagv_we_blockName
-    if (state == REFILL && ret_valid) begin
+    if(IBus.cachetype.isIcache)begin
+        case (IBus.cachetype.cacheCode)
+            I_Index_Invalid, I_Index_Store_Tag:begin
+                tagv_we = (IBus.cache_tag[0]) ? 2'b10 : 2'b01;
+            end
+            I_Hit_Invalid:begin
+                tagv_we = (cache_hit) ? ( (hit[0]) ? 2'b01:2'b10 )  : '0;
+            end
+            default: begin
+                tagv_we = '0;
+            end
+        endcase
+        // case (IBus.cacheType.cacheCode)
+        //     I_Index_Invalid,I_Index_Store_Tag:begin
+        //         tagv_we =   (IBus.cache_tag[1:0] == 2'b00) ? 4'b0001 :
+        //                     (IBus.cache_tag[1:0] == 2'b01) ? 4'b0010 :
+        //                     (IBus.cache_tag[1:0] == 2'b10) ? 4'b0100 : 4'b1000;
+        //     end
+        //     I_Hit_Invalid:begin
+        //         tagv_we = (cache_hit) ? hit : '0;
+        //     end
+        //     default: begin
+        //         tagv_we = '0;
+        //     end
+        // endcase
+    end else if (state == REFILL && ret_valid && req_buffer.isCache) begin
         tagv_we = '0;
         tagv_we[lru[req_buffer.index]] =1'b1;
     end else begin
@@ -238,7 +286,7 @@ end
 
 //data的写使能
 always_comb begin : data_we_blockName
-    if (state == REFILL && ret_valid) begin
+    if (state == REFILL && ret_valid && req_buffer.isCache) begin
         data_we = '0;
         data_we[lru[req_buffer.index]] ='1;
     end else begin
@@ -279,13 +327,11 @@ always_ff @( posedge clk_g ) begin : req_buffer_block
         req_buffer          <= '0;
     end else if(req_buffer_en) begin 
         req_buffer.valid    <=  IBus.req;
-        // req_buffer.op       <=  op;
         req_buffer.tag      <=  IBus.tag;
         req_buffer.index    <=  IBus.index;
         req_buffer.offset   <=  IBus.offset;
         req_buffer.isCache  <=  IBus.iscache;
-        // req_buffer.wstrb    <=  wstrb;
-        // req_buffer.wdata    <=  wdata;
+        req_buffer.cacheType<=  IBus.cachetype; 
     end
 end
 
@@ -318,7 +364,7 @@ always_comb begin : state_next_blockName
             end
         end
         MISSCLEAN:begin
-            if ( rd_rdy || rd_uncache ) begin
+            if ( rd_rdy ) begin
                 state_next = REFILL;
             end else begin
                 state_next = MISSCLEAN;

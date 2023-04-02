@@ -12,18 +12,18 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="6067234965fs"></ZoomStartTime>
-      <ZoomEndTime time="6067559007fs"></ZoomEndTime>
-      <Cursor1Time time="6067505000fs"></Cursor1Time>
+      <ZoomStartTime time="21340583fs"></ZoomStartTime>
+      <ZoomEndTime time="21513884fs"></ZoomEndTime>
+      <Cursor1Time time="21485000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="162"></NameColumnWidth>
-      <ValueColumnWidth column_width="60"></ValueColumnWidth>
+      <NameColumnWidth column_width="220"></NameColumnWidth>
+      <ValueColumnWidth column_width="148"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="14" />
    <wave_markers>
       <marker time="72293502638" label="" />
-      <marker time="14269500" label="" />
+      <marker time="5139817" label="" />
    </wave_markers>
    <wvobject fp_name="group34" type="group">
       <obj_property name="label">Top</obj_property>
@@ -283,10 +283,6 @@
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_core/u_pre_if_stage/c0_epc" type="array">
          <obj_property name="ElementShortName">c0_epc[31:0]</obj_property>
          <obj_property name="ObjectShortName">c0_epc[31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_core/u_pre_if_stage/tlb_pc" type="array">
-         <obj_property name="ElementShortName">tlb_pc[31:0]</obj_property>
-         <obj_property name="ObjectShortName">tlb_pc[31:0]</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_core/u_pre_if_stage/inst_vaddr" type="array">
          <obj_property name="ElementShortName">inst_vaddr[31:0]</obj_property>
@@ -1023,10 +1019,6 @@
          <obj_property name="ElementShortName">pipeline_flush</obj_property>
          <obj_property name="ObjectShortName">pipeline_flush</obj_property>
       </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_core/wb_stage/tlb_pc" type="array">
-         <obj_property name="ElementShortName">tlb_pc[31:0]</obj_property>
-         <obj_property name="ObjectShortName">tlb_pc[31:0]</obj_property>
-      </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_core/wb_stage/debug_wb_pc" type="array">
          <obj_property name="ElementShortName">debug_wb_pc[31:0]</obj_property>
          <obj_property name="ObjectShortName">debug_wb_pc[31:0]</obj_property>
@@ -1452,24 +1444,27 @@
          <obj_property name="ObjectShortName">tagv_addr[7:0]</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/tagv_rdata" type="array">
-         <obj_property name="ElementShortName">tagv_rdata[3:0]</obj_property>
-         <obj_property name="ObjectShortName">tagv_rdata[3:0]</obj_property>
+         <obj_property name="ElementShortName">tagv_rdata[1:0]</obj_property>
+         <obj_property name="ObjectShortName">tagv_rdata[1:0]</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/tagv_wdata" type="array">
          <obj_property name="ElementShortName">tagv_wdata</obj_property>
          <obj_property name="ObjectShortName">tagv_wdata</obj_property>
+         <obj_property name="isExpanded"></obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/tagv_we" type="array">
-         <obj_property name="ElementShortName">tagv_we[3:0]</obj_property>
-         <obj_property name="ObjectShortName">tagv_we[3:0]</obj_property>
+         <obj_property name="ElementShortName">tagv_we[1:0]</obj_property>
+         <obj_property name="ObjectShortName">tagv_we[1:0]</obj_property>
+         <obj_property name="isExpanded"></obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/data_rdata" type="array">
-         <obj_property name="ElementShortName">data_rdata[3:0][3:0][31:0]</obj_property>
-         <obj_property name="ObjectShortName">data_rdata[3:0][3:0][31:0]</obj_property>
+         <obj_property name="ElementShortName">data_rdata[1:0][3:0][31:0]</obj_property>
+         <obj_property name="ObjectShortName">data_rdata[1:0][3:0][31:0]</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/data_rdata_sel" type="array">
-         <obj_property name="ElementShortName">data_rdata_sel[3:0][31:0]</obj_property>
-         <obj_property name="ObjectShortName">data_rdata_sel[3:0][31:0]</obj_property>
+         <obj_property name="ElementShortName">data_rdata_sel[1:0][31:0]</obj_property>
+         <obj_property name="ObjectShortName">data_rdata_sel[1:0][31:0]</obj_property>
+         <obj_property name="isExpanded"></obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/data_rdata_final2" type="array">
          <obj_property name="ElementShortName">data_rdata_final2[31:0]</obj_property>
@@ -1478,27 +1473,53 @@
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/data_wdata" type="array">
          <obj_property name="ElementShortName">data_wdata[3:0][31:0]</obj_property>
          <obj_property name="ObjectShortName">data_wdata[3:0][31:0]</obj_property>
+         <obj_property name="isExpanded"></obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/data_we" type="array">
-         <obj_property name="ElementShortName">data_we[3:0][3:0]</obj_property>
-         <obj_property name="ObjectShortName">data_we[3:0][3:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/req_buffer" type="array">
-         <obj_property name="ElementShortName">req_buffer</obj_property>
-         <obj_property name="ObjectShortName">req_buffer</obj_property>
-         <obj_property name="isExpanded"></obj_property>
+         <obj_property name="ElementShortName">data_we[1:0][3:0]</obj_property>
+         <obj_property name="ObjectShortName">data_we[1:0][3:0]</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/req_buffer_en" type="logic">
          <obj_property name="ElementShortName">req_buffer_en</obj_property>
          <obj_property name="ObjectShortName">req_buffer_en</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/lru" type="array">
-         <obj_property name="ElementShortName">lru[255:0][1:0]</obj_property>
-         <obj_property name="ObjectShortName">lru[255:0][1:0]</obj_property>
+         <obj_property name="ElementShortName">lru[255:0][0:0]</obj_property>
+         <obj_property name="ObjectShortName">lru[255:0][0:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/req_buffer" type="array">
+         <obj_property name="ElementShortName">req_buffer</obj_property>
+         <obj_property name="ObjectShortName">req_buffer</obj_property>
+         <obj_property name="isExpanded"></obj_property>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/req_buffer.valid" type="logic">
+            <obj_property name="ElementShortName">.valid</obj_property>
+            <obj_property name="ObjectShortName">.valid</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/req_buffer.tag" type="array">
+            <obj_property name="ElementShortName">.tag[19:0]</obj_property>
+            <obj_property name="ObjectShortName">.tag[19:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/req_buffer.index" type="array">
+            <obj_property name="ElementShortName">.index[7:0]</obj_property>
+            <obj_property name="ObjectShortName">.index[7:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/req_buffer.offset" type="array">
+            <obj_property name="ElementShortName">.offset[3:0]</obj_property>
+            <obj_property name="ObjectShortName">.offset[3:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/req_buffer.isCache" type="logic">
+            <obj_property name="ElementShortName">.isCache</obj_property>
+            <obj_property name="ObjectShortName">.isCache</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/req_buffer.cacheType" type="array">
+            <obj_property name="ElementShortName">.cacheType</obj_property>
+            <obj_property name="ObjectShortName">.cacheType</obj_property>
+            <obj_property name="isExpanded"></obj_property>
+         </wvobject>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/hit" type="array">
-         <obj_property name="ElementShortName">hit[3:0]</obj_property>
-         <obj_property name="ObjectShortName">hit[3:0]</obj_property>
+         <obj_property name="ElementShortName">hit[1:0]</obj_property>
+         <obj_property name="ObjectShortName">hit[1:0]</obj_property>
          <obj_property name="isExpanded"></obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/cache_hit" type="logic">
@@ -1506,16 +1527,16 @@
          <obj_property name="ObjectShortName">cache_hit</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/pipe_hit" type="array">
-         <obj_property name="ElementShortName">pipe_hit[3:0]</obj_property>
-         <obj_property name="ObjectShortName">pipe_hit[3:0]</obj_property>
+         <obj_property name="ElementShortName">pipe_hit[1:0]</obj_property>
+         <obj_property name="ObjectShortName">pipe_hit[1:0]</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/pipe_cache_hit" type="logic">
          <obj_property name="ElementShortName">pipe_cache_hit</obj_property>
          <obj_property name="ObjectShortName">pipe_cache_hit</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/pipe_tagv_rdata" type="array">
-         <obj_property name="ElementShortName">pipe_tagv_rdata[3:0]</obj_property>
-         <obj_property name="ObjectShortName">pipe_tagv_rdata[3:0]</obj_property>
+         <obj_property name="ElementShortName">pipe_tagv_rdata[1:0]</obj_property>
+         <obj_property name="ObjectShortName">pipe_tagv_rdata[1:0]</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/pipe_wr" type="logic">
          <obj_property name="ElementShortName">pipe_wr</obj_property>
@@ -1552,6 +1573,54 @@
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_icache/TAG_WIDTH" type="array">
          <obj_property name="ElementShortName">TAG_WIDTH[31:0]</obj_property>
          <obj_property name="ObjectShortName">TAG_WIDTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_ICache/ICache/req" type="logic">
+         <obj_property name="ElementShortName">req</obj_property>
+         <obj_property name="ObjectShortName">req</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_ICache/ICache/iscache" type="logic">
+         <obj_property name="ElementShortName">iscache</obj_property>
+         <obj_property name="ObjectShortName">iscache</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_ICache/ICache/offset" type="array">
+         <obj_property name="ElementShortName">offset[3:0]</obj_property>
+         <obj_property name="ObjectShortName">offset[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_ICache/ICache/index" type="array">
+         <obj_property name="ElementShortName">index[7:0]</obj_property>
+         <obj_property name="ObjectShortName">index[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_ICache/ICache/tag" type="array">
+         <obj_property name="ElementShortName">tag[19:0]</obj_property>
+         <obj_property name="ObjectShortName">tag[19:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_ICache/ICache/cachetype" type="array">
+         <obj_property name="ElementShortName">cachetype</obj_property>
+         <obj_property name="ObjectShortName">cachetype</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_ICache/ICache/cache_valid" type="logic">
+         <obj_property name="ElementShortName">cache_valid</obj_property>
+         <obj_property name="ObjectShortName">cache_valid</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_ICache/ICache/cache_tag" type="array">
+         <obj_property name="ElementShortName">cache_tag[19:0]</obj_property>
+         <obj_property name="ObjectShortName">cache_tag[19:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_ICache/ICache/cache_index" type="array">
+         <obj_property name="ElementShortName">cache_index[7:0]</obj_property>
+         <obj_property name="ObjectShortName">cache_index[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_ICache/ICache/addr_ok" type="logic">
+         <obj_property name="ElementShortName">addr_ok</obj_property>
+         <obj_property name="ObjectShortName">addr_ok</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_ICache/ICache/data_ok" type="logic">
+         <obj_property name="ElementShortName">data_ok</obj_property>
+         <obj_property name="ObjectShortName">data_ok</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_ICache/ICache/rdata" type="array">
+         <obj_property name="ElementShortName">rdata[31:0]</obj_property>
+         <obj_property name="ObjectShortName">rdata[31:0]</obj_property>
       </wvobject>
    </wvobject>
    <wvobject fp_name="group1431" type="group">
@@ -1668,7 +1737,6 @@
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/store_buffer" type="array">
          <obj_property name="ElementShortName">store_buffer</obj_property>
          <obj_property name="ObjectShortName">store_buffer</obj_property>
-         <obj_property name="isExpanded"></obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/state" type="array">
          <obj_property name="ElementShortName">state[3:0]</obj_property>
@@ -1703,44 +1771,44 @@
          <obj_property name="ObjectShortName">tagv_addr[7:0]</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/tagv_rdata" type="array">
-         <obj_property name="ElementShortName">tagv_rdata[3:0]</obj_property>
-         <obj_property name="ObjectShortName">tagv_rdata[3:0]</obj_property>
+         <obj_property name="ElementShortName">tagv_rdata[1:0]</obj_property>
+         <obj_property name="ObjectShortName">tagv_rdata[1:0]</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/tagv_wdata" type="array">
          <obj_property name="ElementShortName">tagv_wdata</obj_property>
          <obj_property name="ObjectShortName">tagv_wdata</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/tagv_we" type="array">
-         <obj_property name="ElementShortName">tagv_we[3:0]</obj_property>
-         <obj_property name="ObjectShortName">tagv_we[3:0]</obj_property>
+         <obj_property name="ElementShortName">tagv_we[1:0]</obj_property>
+         <obj_property name="ObjectShortName">tagv_we[1:0]</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/dirty_addr" type="array">
          <obj_property name="ElementShortName">dirty_addr[7:0]</obj_property>
          <obj_property name="ObjectShortName">dirty_addr[7:0]</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/dirty_rdata" type="array">
-         <obj_property name="ElementShortName">dirty_rdata[3:0]</obj_property>
-         <obj_property name="ObjectShortName">dirty_rdata[3:0]</obj_property>
+         <obj_property name="ElementShortName">dirty_rdata[1:0]</obj_property>
+         <obj_property name="ObjectShortName">dirty_rdata[1:0]</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/dirty_wdata" type="logic">
          <obj_property name="ElementShortName">dirty_wdata</obj_property>
          <obj_property name="ObjectShortName">dirty_wdata</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/dirty_we" type="array">
-         <obj_property name="ElementShortName">dirty_we[3:0]</obj_property>
-         <obj_property name="ObjectShortName">dirty_we[3:0]</obj_property>
+         <obj_property name="ElementShortName">dirty_we[1:0]</obj_property>
+         <obj_property name="ObjectShortName">dirty_we[1:0]</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/wb_we" type="array">
-         <obj_property name="ElementShortName">wb_we[3:0]</obj_property>
-         <obj_property name="ObjectShortName">wb_we[3:0]</obj_property>
+         <obj_property name="ElementShortName">wb_we[1:0]</obj_property>
+         <obj_property name="ObjectShortName">wb_we[1:0]</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/data_rdata" type="array">
-         <obj_property name="ElementShortName">data_rdata[3:0][3:0][31:0]</obj_property>
-         <obj_property name="ObjectShortName">data_rdata[3:0][3:0][31:0]</obj_property>
+         <obj_property name="ElementShortName">data_rdata[1:0][3:0][31:0]</obj_property>
+         <obj_property name="ObjectShortName">data_rdata[1:0][3:0][31:0]</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/data_rdata_sel" type="array">
-         <obj_property name="ElementShortName">data_rdata_sel[3:0][31:0]</obj_property>
-         <obj_property name="ObjectShortName">data_rdata_sel[3:0][31:0]</obj_property>
+         <obj_property name="ElementShortName">data_rdata_sel[1:0][31:0]</obj_property>
+         <obj_property name="ObjectShortName">data_rdata_sel[1:0][31:0]</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/data_rdata_final1" type="array">
          <obj_property name="ElementShortName">data_rdata_final1[31:0]</obj_property>
@@ -1753,12 +1821,10 @@
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/data_wdata" type="array">
          <obj_property name="ElementShortName">data_wdata[3:0][31:0]</obj_property>
          <obj_property name="ObjectShortName">data_wdata[3:0][31:0]</obj_property>
-         <obj_property name="isExpanded"></obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/data_we" type="array">
-         <obj_property name="ElementShortName">data_we[3:0][3:0][3:0]</obj_property>
-         <obj_property name="ObjectShortName">data_we[3:0][3:0][3:0]</obj_property>
-         <obj_property name="isExpanded"></obj_property>
+         <obj_property name="ElementShortName">data_we[1:0][3:0][3:0]</obj_property>
+         <obj_property name="ObjectShortName">data_we[1:0][3:0][3:0]</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/data_read_en" type="logic">
          <obj_property name="ElementShortName">data_read_en</obj_property>
@@ -1816,34 +1882,83 @@
          <obj_property name="ElementShortName">req_buffer</obj_property>
          <obj_property name="ObjectShortName">req_buffer</obj_property>
          <obj_property name="isExpanded"></obj_property>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/req_buffer.valid" type="logic">
+            <obj_property name="ElementShortName">.valid</obj_property>
+            <obj_property name="ObjectShortName">.valid</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/req_buffer.wr" type="logic">
+            <obj_property name="ElementShortName">.wr</obj_property>
+            <obj_property name="ObjectShortName">.wr</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/req_buffer.tag" type="array">
+            <obj_property name="ElementShortName">.tag[19:0]</obj_property>
+            <obj_property name="ObjectShortName">.tag[19:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/req_buffer.index" type="array">
+            <obj_property name="ElementShortName">.index[7:0]</obj_property>
+            <obj_property name="ObjectShortName">.index[7:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/req_buffer.offset" type="array">
+            <obj_property name="ElementShortName">.offset[3:0]</obj_property>
+            <obj_property name="ObjectShortName">.offset[3:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/req_buffer.wstrb" type="array">
+            <obj_property name="ElementShortName">.wstrb[3:0]</obj_property>
+            <obj_property name="ObjectShortName">.wstrb[3:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/req_buffer.wdata" type="array">
+            <obj_property name="ElementShortName">.wdata[31:0]</obj_property>
+            <obj_property name="ObjectShortName">.wdata[31:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/req_buffer.size" type="array">
+            <obj_property name="ElementShortName">.size[2:0]</obj_property>
+            <obj_property name="ObjectShortName">.size[2:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/req_buffer.isCache" type="logic">
+            <obj_property name="ElementShortName">.isCache</obj_property>
+            <obj_property name="ObjectShortName">.isCache</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/req_buffer.cacheType" type="array">
+            <obj_property name="ElementShortName">.cacheType</obj_property>
+            <obj_property name="ObjectShortName">.cacheType</obj_property>
+            <obj_property name="isExpanded"></obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/req_buffer.cache_dirty" type="logic">
+            <obj_property name="ElementShortName">.cache_dirty</obj_property>
+            <obj_property name="ObjectShortName">.cache_dirty</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/req_buffer.cache_valid" type="logic">
+            <obj_property name="ElementShortName">.cache_valid</obj_property>
+            <obj_property name="ObjectShortName">.cache_valid</obj_property>
+         </wvobject>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/req_buffer_en" type="logic">
          <obj_property name="ElementShortName">req_buffer_en</obj_property>
          <obj_property name="ObjectShortName">req_buffer_en</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/lru" type="array">
-         <obj_property name="ElementShortName">lru[255:0][1:0]</obj_property>
-         <obj_property name="ObjectShortName">lru[255:0][1:0]</obj_property>
+         <obj_property name="ElementShortName">lru[255:0][0:0]</obj_property>
+         <obj_property name="ObjectShortName">lru[255:0][0:0]</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/hit" type="array">
-         <obj_property name="ElementShortName">hit[3:0]</obj_property>
-         <obj_property name="ObjectShortName">hit[3:0]</obj_property>
+         <obj_property name="ElementShortName">hit[1:0]</obj_property>
+         <obj_property name="ObjectShortName">hit[1:0]</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/cache_hit" type="logic">
          <obj_property name="ElementShortName">cache_hit</obj_property>
          <obj_property name="ObjectShortName">cache_hit</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/pipe_hit" type="array">
-         <obj_property name="ElementShortName">pipe_hit[3:0]</obj_property>
-         <obj_property name="ObjectShortName">pipe_hit[3:0]</obj_property>
+         <obj_property name="ElementShortName">pipe_hit[1:0]</obj_property>
+         <obj_property name="ObjectShortName">pipe_hit[1:0]</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/pipe_cache_hit" type="logic">
          <obj_property name="ElementShortName">pipe_cache_hit</obj_property>
          <obj_property name="ObjectShortName">pipe_cache_hit</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/pipe_tagv_rdata" type="array">
-         <obj_property name="ElementShortName">pipe_tagv_rdata[3:0]</obj_property>
-         <obj_property name="ObjectShortName">pipe_tagv_rdata[3:0]</obj_property>
+         <obj_property name="ElementShortName">pipe_tagv_rdata[1:0]</obj_property>
+         <obj_property name="ObjectShortName">pipe_tagv_rdata[1:0]</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_dcache/pipe_wr" type="logic">
          <obj_property name="ElementShortName">pipe_wr</obj_property>
@@ -1945,6 +2060,74 @@
          <obj_property name="ElementShortName">TAG_WIDTH[31:0]</obj_property>
          <obj_property name="ObjectShortName">TAG_WIDTH[31:0]</obj_property>
       </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_DCache/DCache/req" type="logic">
+         <obj_property name="ElementShortName">req</obj_property>
+         <obj_property name="ObjectShortName">req</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_DCache/DCache/iscache" type="logic">
+         <obj_property name="ElementShortName">iscache</obj_property>
+         <obj_property name="ObjectShortName">iscache</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_DCache/DCache/wr" type="logic">
+         <obj_property name="ElementShortName">wr</obj_property>
+         <obj_property name="ObjectShortName">wr</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_DCache/DCache/offset" type="array">
+         <obj_property name="ElementShortName">offset[3:0]</obj_property>
+         <obj_property name="ObjectShortName">offset[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_DCache/DCache/index" type="array">
+         <obj_property name="ElementShortName">index[7:0]</obj_property>
+         <obj_property name="ObjectShortName">index[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_DCache/DCache/tag" type="array">
+         <obj_property name="ElementShortName">tag[19:0]</obj_property>
+         <obj_property name="ObjectShortName">tag[19:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_DCache/DCache/wstrb" type="array">
+         <obj_property name="ElementShortName">wstrb[3:0]</obj_property>
+         <obj_property name="ObjectShortName">wstrb[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_DCache/DCache/size" type="array">
+         <obj_property name="ElementShortName">size[2:0]</obj_property>
+         <obj_property name="ObjectShortName">size[2:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_DCache/DCache/wdata" type="array">
+         <obj_property name="ElementShortName">wdata[31:0]</obj_property>
+         <obj_property name="ObjectShortName">wdata[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_DCache/DCache/cachetype" type="array">
+         <obj_property name="ElementShortName">cachetype</obj_property>
+         <obj_property name="ObjectShortName">cachetype</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_DCache/DCache/cache_valid" type="logic">
+         <obj_property name="ElementShortName">cache_valid</obj_property>
+         <obj_property name="ObjectShortName">cache_valid</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_DCache/DCache/cache_tag" type="array">
+         <obj_property name="ElementShortName">cache_tag[19:0]</obj_property>
+         <obj_property name="ObjectShortName">cache_tag[19:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_DCache/DCache/cache_dirty" type="logic">
+         <obj_property name="ElementShortName">cache_dirty</obj_property>
+         <obj_property name="ObjectShortName">cache_dirty</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_DCache/DCache/cache_index" type="array">
+         <obj_property name="ElementShortName">cache_index[7:0]</obj_property>
+         <obj_property name="ObjectShortName">cache_index[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_DCache/DCache/addr_ok" type="logic">
+         <obj_property name="ElementShortName">addr_ok</obj_property>
+         <obj_property name="ObjectShortName">addr_ok</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_DCache/DCache/data_ok" type="logic">
+         <obj_property name="ElementShortName">data_ok</obj_property>
+         <obj_property name="ObjectShortName">data_ok</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/CPU_DCache/DCache/rdata" type="array">
+         <obj_property name="ElementShortName">rdata[31:0]</obj_property>
+         <obj_property name="ObjectShortName">rdata[31:0]</obj_property>
+      </wvobject>
    </wvobject>
    <wvobject fp_name="group476" type="group">
       <obj_property name="label">AXI</obj_property>
@@ -2003,11 +2186,13 @@
          <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/icache_axi" type="array">
             <obj_property name="ElementShortName">icache_axi</obj_property>
             <obj_property name="ObjectShortName">icache_axi</obj_property>
+            <obj_property name="isExpanded"></obj_property>
          </wvobject>
       </wvobject>
       <wvobject fp_name="group1652" type="group">
          <obj_property name="label">DCache</obj_property>
          <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="isExpanded"></obj_property>
          <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/dcache_state" type="array">
             <obj_property name="ElementShortName">dcache_state[2:0]</obj_property>
             <obj_property name="ObjectShortName">dcache_state[2:0]</obj_property>
@@ -2027,14 +2212,17 @@
          <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/dcache_axi" type="array">
             <obj_property name="ElementShortName">dcache_axi</obj_property>
             <obj_property name="ObjectShortName">dcache_axi</obj_property>
+            <obj_property name="isExpanded"></obj_property>
          </wvobject>
       </wvobject>
       <wvobject fp_name="group1657" type="group">
          <obj_property name="label">UnCache</obj_property>
          <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="isExpanded"></obj_property>
          <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/uncache_axi" type="array">
             <obj_property name="ElementShortName">uncache_axi</obj_property>
             <obj_property name="ObjectShortName">uncache_axi</obj_property>
+            <obj_property name="isExpanded"></obj_property>
          </wvobject>
          <wvobject fp_name="/tb_top/soc_lite/u_Simple_MIPS/u_cpu_axi_interface/uncache_rd_state" type="array">
             <obj_property name="ElementShortName">uncache_rd_state[1:0]</obj_property>

@@ -38,7 +38,7 @@ endfunction
 function logic is_vaddr_uncached(
 	input virt_t vaddr
 ); 
-	return vaddr[31:29] == 3'b101 || kseg0_uncached && vaddr[31:29] == 3'b100;
+	return vaddr[31:29] == 3'b101 || (kseg0_uncached && vaddr[31:29] == 3'b100);
 endfunction
 
 generate if(`CPU_MMU_ENABLED)

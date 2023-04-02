@@ -1,10 +1,32 @@
 `ifndef CPU_DEFS_SVH
 `define CPU_DEFS_SVH
-`include "..\common_defs.svh"
+`include "../common_defs.svh"
 
 /*
 cpu_defs:定义在cpu核中使用的常量和数据结构
 */
+
+//Cache
+typedef enum logic [2:0] {
+	EMPTY,
+
+	I_Index_Invalid,
+	I_Index_Store_Tag,
+	I_Hit_Invalid,
+
+	D_Index_Writeback_Invalid,
+	D_Index_Store_Tag,
+	D_Hit_Invalid,
+	D_Hit_Writeback_Invalid
+} CacheCodeType;
+
+
+typedef struct packed {
+	CacheCodeType       	cacheCode;
+	logic 					isIcache;
+	logic 					isDcache;	
+} CacheType;
+
 //BPU
 `define B_IS_J		3'h1
 `define B_IS_CALL   3'h2
@@ -20,7 +42,7 @@ cpu_defs:定义在cpu核中使用的常量和数据结构
 `define T       2'b11  //taken
 
 //MMU
-`define CPU_MMU_ENABLED 0
+`define CPU_MMU_ENABLED 1
 
 // TLB 
 `define TLB_ENTRIES_NUM 16
@@ -41,6 +63,9 @@ cpu_defs:定义在cpu核中使用的常量和数据结构
 `define CR_STATUS   12
 `define CR_CAUSE    13
 `define CR_EPC      14
+`define CR_CONFIG0  16
+`define CR_CONFIG1  48
+`define CR_TAGLO    28
 
 // cause register exc_code field
 `define EXCCODE_INT   5'h00  // interrupt
@@ -74,6 +99,7 @@ typedef struct packed {
 	logic ex;
 	logic eret;
 	logic tlb_op;
+	logic cache_op;
 	logic tlb_refill;
 } pipeline_flush_t;
 
@@ -170,6 +196,8 @@ typedef struct packed {
 
 	logic  		 op_syscall;
 	logic 		 op_break;
+
+	CacheCodeType cache_op;
 } decoded_inst_t;
 
 typedef struct packed {
@@ -207,6 +235,8 @@ typedef struct packed {
 	exception_t  exception;
 	// tlb
 	logic   [2:0]tlb_op;
+	// cache
+	CacheCodeType cache_op;
 } ds_to_es_bus_t;
 
 
@@ -214,7 +244,7 @@ typedef struct packed {
 typedef struct packed {
 	logic 		op_mfc0;
 	logic 		op_load;
-	logic       op_tlb;
+	logic       op_tlb_cache;
 	reg_addr_t 	dest;
 	uint32_t 	result;
 } es_forward_bus_t;
@@ -238,13 +268,15 @@ typedef struct packed {
 	exception_t  exception;
 	// tlb
 	logic   [2:0]tlb_op;
+	// cache
+	CacheCodeType cache_op;
 } es_to_pms_bus_t;
 
 // pre_MEM stage
 typedef struct packed {
 	logic 		op_mfc0;
 	logic 		op_load;
-	logic       op_tlb;
+	logic       op_tlb_cache;
 	reg_addr_t 	dest;
 	uint32_t 	result;
 } pms_forward_bus_t;
@@ -266,14 +298,17 @@ typedef struct packed {
     // ex
 	exception_t  exception;
 	// tlb
-	logic   [2:0]tlb_op;
+	phys_t	     phy_addr;
+	logic  [2:0] tlb_op;
+	// cache
+	CacheCodeType cache_op;
 } pms_to_ms_bus_t;
 
 // MEM stage
 typedef struct packed {
 	logic 		 op_mfc0;
 	logic 		 op_load;
-	logic        op_tlb;
+	logic        op_tlb_cache;
 	logic [ 3:0] rf_we;
 	reg_addr_t 	 dest;
 	uint32_t 	 result;
@@ -292,13 +327,16 @@ typedef struct packed {
     // ex
 	exception_t  exception;
 	// tlb
+	phys_t	     phy_addr;
 	logic   [2:0]tlb_op;
+	// cache
+	CacheCodeType cache_op;
 } ms_to_ws_bus_t;
 
 // WB stage
 typedef struct packed {
 	logic 		 op_mfc0;
-	logic        op_tlb;
+	logic        op_tlb_cache;
 	logic [ 3:0] rf_we;
 	reg_addr_t 	 dest;
 	uint32_t 	 result;
@@ -317,6 +355,10 @@ typedef struct packed {
 	virt_t 		 pc;
 	// TLB
 	logic  [2:0] tlb_op;
+	// Cache
+	virt_t		 cache_vaddr;
+	phys_t	     cache_paddr;
+	CacheCodeType cache_op;
 } ws_to_c0_bus_t;
 
 // CP0
@@ -357,6 +399,7 @@ typedef struct packed {
 	phys_t phy_addr;
 	virt_t virt_addr;
 	logic  uncached;
+	logic[2:0] cache_flag;
 	logic  invalid, miss, dirty, illegal;
 } mmu_result_t;
 interface C0_TLB_Interface();
@@ -424,6 +467,11 @@ interface CPU_ICache_Interface();
 	logic [19:0] tag;
 	logic 		 data_ok;
 	uint32_t	 rdata;
+	// Cache Instruction
+	CacheType    cachetype;
+	logic        cache_valid;
+	logic [19:0] cache_tag;
+	logic [ 7:0] cache_index;
 
 	modport	ICache(
 		input  req,
@@ -431,6 +479,10 @@ interface CPU_ICache_Interface();
 		input  offset,
 		input  index,
 		input  tag,
+		input  cachetype,
+		input  cache_valid,
+		input  cache_tag,
+		input  cache_index,
 		output addr_ok,
 		output data_ok,
 		output rdata
@@ -442,6 +494,10 @@ interface CPU_ICache_Interface();
 		output offset,
 		output index,
 		output tag,
+		output cachetype,
+		output cache_valid,
+		output cache_tag,
+		output cache_index,
 		input  addr_ok,
 		input  data_ok,
 		input  rdata
@@ -462,6 +518,12 @@ interface CPU_DCache_Interface();
 	uint32_t	 rdata;
 	logic 		 addr_ok;
 	logic 		 data_ok;
+	// Cache Instruction
+	CacheType    cachetype;
+	logic        cache_valid;
+	logic [19:0] cache_tag;
+	logic        cache_dirty;
+	logic [ 7:0] cache_index;
 
 	modport	DCache(
 		input  req,
@@ -473,6 +535,11 @@ interface CPU_DCache_Interface();
 		input  wstrb,
 		input  size,
 		input  wdata,
+		input  cachetype,
+		input  cache_valid,
+		input  cache_tag,
+		input  cache_dirty,
+		input  cache_index,
 		output addr_ok,
 		output data_ok,
 		output rdata
@@ -488,6 +555,11 @@ interface CPU_DCache_Interface();
 		output wstrb,
 		output size,
 		output wdata,
+		output cachetype,
+		output cache_valid,
+		output cache_tag,
+		output cache_dirty,
+		output cache_index,
 		input  addr_ok,
 		input  data_ok,
 		input  rdata

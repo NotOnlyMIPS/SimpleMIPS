@@ -135,9 +135,10 @@ assign es_to_bpu_bus.pc = ds_to_es_bus_r.pc;
 // forward
 assign op_mfc0 = ds_to_es_bus_r.c0_op[2] & es_valid;
 assign op_tlb  = (ds_to_es_bus_r.tlb_op[0] | ds_to_es_bus_r.tlb_op[1] | ds_to_es_bus_r.tlb_op[2]) & es_valid;
+assign op_cache = (ds_to_es_bus_r.cache_op != EMPTY) & es_valid;
 assign es_forward_bus = { op_mfc0,
                           ds_to_es_bus_r.res_from_mem & es_valid,
-                          op_tlb,
+                          op_tlb | op_cache,
                           ds_to_es_bus_r.dest & {5{es_valid}},
                           final_result
                           };
@@ -171,7 +172,8 @@ assign es_to_pms_bus  = { es_to_pms_valid,
                           final_result,
                           ds_to_es_bus_r.pc,
                           exception,
-                          ds_to_es_bus_r.tlb_op
+                          ds_to_es_bus_r.tlb_op,
+                          ds_to_es_bus_r.cache_op
                           };
 
 endmodule

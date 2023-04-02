@@ -66,7 +66,7 @@ logic            load_op;
 logic            store_op;
 exception_t      inst_tlb_ex;
 exception_t      data_tlb_ex;
-virt_t           tlb_pc;
+virt_t           tlb_cache_pc;
 tlb_index_t      tlbrw_index;
 logic            tlbrw_we;
 tlb_entry_t      tlbrw_wdata;
@@ -74,6 +74,24 @@ tlb_entry_t      tlbrw_rdata;
 uint32_t         tlbp_entry_hi;
 uint32_t         tlbp_index;
 logic[7:0]       tlb_asid;
+// cache
+logic         cache_valid;
+logic [19:0]  cache_tag;
+logic [ 7:0]  cache_index;
+logic         cache_dirty;
+CacheCodeType cache_op;
+logic         kseg0_uncached;
+
+assign IBus.cachetype = {cache_op, cache_op != EMPTY, 1'b0};
+assign IBus.cache_valid = cache_valid;
+assign IBus.cache_tag   = cache_tag;
+assign IBus.cache_index = cache_index;
+
+assign DBus.cachetype = {cache_op, 1'b0, cache_op != EMPTY};
+assign DBus.cache_valid = cache_valid;
+assign DBus.cache_tag   = cache_tag;
+assign DBus.cache_dirty = cache_dirty;
+assign DBus.cache_index = cache_index;
 
 // BPU
 BPU u_BPU (
@@ -112,7 +130,7 @@ pre_if_stage u_pre_if_stage (
     .pipeline_flush (pipeline_flush ),
     .c0_epc         (c0_epc         ),
     // tlb/mmu
-    .tlb_pc         (tlb_pc         ),
+    .tlb_cache_pc   (tlb_cache_pc   ),
     .inst_vaddr     (inst_vaddr     ),
     .inst_result    (inst_result    ),
     .inst_tlb_ex    (inst_tlb_ex    ),
@@ -278,7 +296,7 @@ wb_stage wb_stage(
     // exception
     .pipeline_flush (pipeline_flush ),
     // tlb
-    .tlb_pc         (tlb_pc         ),
+    .tlb_cache_pc   (tlb_cache_pc         ),
     //trace debug interface
     .debug_wb_pc      (debug_wb_pc      ),
     .debug_wb_rf_wen  (debug_wb_rf_wen  ),
@@ -306,8 +324,15 @@ reg_cp0 u_reg_cp0(
     .tlbrw_rdata    (tlbrw_rdata    ),
     .tlbp_entry_hi  (tlbp_entry_hi  ),
     .tlbp_index     (tlbp_index     ),
+    // Cache
+    .cache_valid,
+    .cache_tag,
+    .cache_dirty,
+    .cache_op,
+    .cache_index,
     // EPC
-    .epc            (c0_epc         )
+    .epc            (c0_epc         ),
+    .kseg0_uncached
 );
 
 // MMU
@@ -315,7 +340,7 @@ mmu u_mmu (
     .clk            (clk            ),
     .reset          (reset          ),
     .asid           (tlb_asid       ),
-    .kseg0_uncached (1'b0           ),
+    .kseg0_uncached ,
     .is_user_mode   (1'b1           ),
     .inst_vaddr     (inst_vaddr     ),
     .data_vaddr     (data_vaddr     ),
