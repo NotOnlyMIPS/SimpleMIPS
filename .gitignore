@@ -30,4 +30,4 @@ vivado*.str
 !**/ip/xilinx/*/*.xci
 
 # keep test files
-!/test/official/*
+!/test/official/**
