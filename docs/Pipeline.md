@@ -235,7 +235,7 @@ wire op_sra;   //> 算术右移
 wire op_lui;   //> 立即数置于高半部分
 ```
 
-### reg_hi_lo
+### hilo_reg
 
 乘除运算指令和 HI/LO 寄存器交互
 

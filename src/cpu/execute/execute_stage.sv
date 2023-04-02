@@ -1,0 +1,179 @@
+`include "../cpu.svh"
+
+module execute_stage (
+    input clk,
+    input reset,
+    // pipeline control
+    input  pms_allowin,
+    output es_allowin,
+    // from ID
+    input   ds_to_es_bus_t   ds_to_es_bus,
+    // to BPU
+    output  verify_result_t  es_to_bpu_bus,
+    //to MEM
+    output  es_to_pms_bus_t  es_to_pms_bus,
+    // forward bus
+    output  es_forward_bus_t es_forward_bus,
+    // cp0 and exception
+    input  pms_wr_disable,
+    input  wr_disable,
+    input pipeline_flush_t pipeline_flush
+);
+
+// EXE
+logic es_valid;
+logic es_ready_go;
+logic es_to_pms_valid;
+
+// from ID
+ds_to_es_bus_t ds_to_es_bus_r;
+
+// alu
+uint32_t alu_result;
+logic    alu_ex;
+
+// hi_lo reg
+logic    hi_lo_ready;
+uint32_t hi_lo_result;
+
+// forward
+logic op_mfc0;
+logic op_tlb;
+
+// cp0 and exception
+exception_t exception;
+
+// to MEM
+logic    op_mtc0;
+logic    res_from_hi_lo;
+logic    res_from_alu;
+uint32_t final_result;
+
+// EXE stage
+assign es_ready_go    = es_valid && (res_from_hi_lo && hi_lo_ready || !res_from_hi_lo);
+assign es_allowin     = !es_valid || es_ready_go && pms_allowin;
+assign es_to_pms_valid =  es_valid && es_ready_go;
+always_ff @(posedge clk) begin
+    if (reset) begin
+        es_valid <= 1'b0;
+    end
+    else if(pipeline_flush.eret | pipeline_flush.ex) begin
+        es_valid <= 1'b0;
+    end
+    else if (es_allowin) begin
+        es_valid <= ds_to_es_bus.valid;
+    end
+
+    if (ds_to_es_bus.valid && es_allowin) begin
+        ds_to_es_bus_r <= ds_to_es_bus;
+    end
+end
+
+// alu
+alu u_alu (
+    .alu_op         (ds_to_es_bus_r.alu_op      ),
+
+    .src1_is_sa     (ds_to_es_bus_r.src1_is_sa  ),
+    .src1_is_pc     (ds_to_es_bus_r.src1_is_pc  ),
+    .src2_is_simm   (ds_to_es_bus_r.src2_is_simm),
+    .src2_is_zimm   (ds_to_es_bus_r.src2_is_zimm),
+    .src2_is_8      (ds_to_es_bus_r.src2_is_8   ),
+    .rs_value       (ds_to_es_bus_r.rs_value    ),
+    .rt_value       (ds_to_es_bus_r.rt_value    ),
+    .pc             (ds_to_es_bus_r.pc          ),
+    .imm            (ds_to_es_bus_r.imm         ),
+
+    .alu_result     (alu_result                 ),
+
+    .alu_ov         (ds_to_es_bus_r.alu_ov      ),
+    .alu_ex         (alu_ex                     )
+);
+
+// hi_lo
+reg_hilo u_reg_hilo(
+    .clk    (clk  ),
+    .reset  (reset),
+
+    .hi_lo_op    (ds_to_es_bus_r.hi_lo_op),
+    .src1        (ds_to_es_bus_r.rs_value),
+    .src2        (ds_to_es_bus_r.rt_value),
+
+    .hi_lo_ready (hi_lo_ready            ),
+    .hi_lo_result(hi_lo_result           ),
+
+    .wr_disable (wr_disable | pms_wr_disable | ~es_valid | exception.ex)
+);
+
+// branch_control
+virt_t delay_slot_pc;
+assign delay_slot_pc = ds_to_es_bus_r.pc+3'd4;
+
+branch_control u_branch_control (
+    .es_valid       (es_valid     ),
+
+    .br_op          (ds_to_es_bus_r.br_op ),
+
+    .rs_value       (ds_to_es_bus_r.rs_value),
+    .rt_value       (ds_to_es_bus_r.rt_value),
+
+    .delay_slot_pc  (delay_slot_pc),
+    .imm            (ds_to_es_bus_r.imm ),
+    .jidx           (ds_to_es_bus_r.jidx),
+
+    .predict_is_taken(ds_to_es_bus_r.predict_is_taken),
+    .predict_target  (ds_to_es_bus_r.predict_target  ),
+    .predict_sucess  (es_to_bpu_bus.predict_sucess),
+    .br_taken        (es_to_bpu_bus.is_taken      ),
+    .br_target       (es_to_bpu_bus.correct_target)
+);
+
+assign es_to_bpu_bus.br_type = ds_to_es_bus_r.br_type & {3{es_valid}};
+assign es_to_bpu_bus.ready = es_ready_go;
+assign es_to_bpu_bus.predict_entry = ds_to_es_bus_r.predict_entry;
+assign es_to_bpu_bus.pc = ds_to_es_bus_r.pc;
+
+// forward
+assign op_mfc0 = ds_to_es_bus_r.c0_op[2] & es_valid;
+assign op_tlb  = (ds_to_es_bus_r.tlb_op[0] | ds_to_es_bus_r.tlb_op[1] | ds_to_es_bus_r.tlb_op[2]) & es_valid;
+assign op_cache = (ds_to_es_bus_r.cache_op != EMPTY) & es_valid;
+assign es_forward_bus = { op_mfc0,
+                          ds_to_es_bus_r.res_from_mem & es_valid,
+                          op_tlb | op_cache,
+                          ds_to_es_bus_r.dest & {5{es_valid}},
+                          final_result
+                          };
+
+// exception
+assign exception.bd = ds_to_es_bus_r.exception.bd;
+assign {exception.ex, exception.exccode} = ds_to_es_bus_r.exception.ex ? {ds_to_es_bus_r.exception.ex, ds_to_es_bus_r.exception.exccode} :
+                                           alu_ex & es_valid           ? {1'b1, `EXCCODE_OV}                                             :
+                                                                         6'h0;
+assign exception.badvaddr = ds_to_es_bus_r.exception.badvaddr;
+assign exception.tlb_refill =  exception.exccode == `EXCCODE_TLBL ?
+                               ds_to_es_bus_r.exception.tlb_refill : 1'b0;
+
+// to MEM
+assign op_mtc0        = ds_to_es_bus_r.c0_op[1];
+assign res_from_alu   = (|ds_to_es_bus_r.alu_op) & ~ds_to_es_bus_r.res_to_mem;
+assign res_from_hi_lo = |ds_to_es_bus_r.hi_lo_op;
+assign final_result   = {32{res_from_alu  }} & alu_result
+                      | {32{res_from_hi_lo}} & hi_lo_result
+                      | {32{op_mtc0 | ds_to_es_bus_r.res_to_mem}} & ds_to_es_bus_r.rt_value;
+assign es_to_pms_bus  = { es_to_pms_valid,
+                          ds_to_es_bus_r.load_op,
+                          ds_to_es_bus_r.store_op,
+                          ds_to_es_bus_r.c0_op,
+                          ds_to_es_bus_r.c0_addr,
+                          ds_to_es_bus_r.res_from_mem,
+                          ds_to_es_bus_r.res_to_mem,
+                          ds_to_es_bus_r.rf_we,
+                          alu_result,
+                          ds_to_es_bus_r.dest,
+                          final_result,
+                          ds_to_es_bus_r.pc,
+                          exception,
+                          ds_to_es_bus_r.tlb_op,
+                          ds_to_es_bus_r.cache_op
+                          };
+
+endmodule

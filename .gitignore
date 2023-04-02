@@ -6,6 +6,12 @@
 *.o
 *.obj
 *.exe
+*.a
+*.dll
+*.so
+
+# backup directories
+*.bak/
 
 # Vivado output
 *.jou
@@ -17,3 +23,8 @@
 *.runs/
 *.ip_user_files/
 vivado*.str
+
+# Xilinx IP generated files
+**/ip/xilinx/*/*
+**/ip/xilinx/*/*/
+!**/ip/xilinx/*/*.xci
