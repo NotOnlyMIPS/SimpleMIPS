@@ -257,7 +257,7 @@ pre_mem_stage u_pre_mem_stage (
 );
 
 // MEM stage
-mem_stage mem_stage(
+mem_stage u_mem_stage(
     .clk            (clk            ),
     .reset          (reset          ),
     // pipeline control
@@ -278,7 +278,7 @@ mem_stage mem_stage(
 );
 
 // WB stage
-writeback_stage wb_stage(
+writeback_stage u_wb_stage(
     .clk            (clk            ),
     .reset          (reset          ),
     // allowin

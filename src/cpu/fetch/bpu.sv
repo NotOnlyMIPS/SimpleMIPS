@@ -31,7 +31,7 @@ assign w_entry.target  = es_to_bpu_bus.predict_entry.target;
 assign w_entry.br_type = es_to_bpu_bus.predict_entry.br_type;
 
 
-simple_port_ram_without_bypass #(
+simple_port_ram_without_bypass_customized #(
     .LATENCY(0),
     .dtype(BHT_entry_t)
 )mem_data(

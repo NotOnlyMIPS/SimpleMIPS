@@ -196,9 +196,7 @@ module simple_port_ram #(
 
 endmodule
 
-
-
-module simple_port_ram_without_bypass #(
+module simple_port_ram_without_bypass_customized #(
 	// default data width if the fifo is of type logic
 	parameter int unsigned DATA_WIDTH = 32,
 	parameter int unsigned LATENCY    = 1,

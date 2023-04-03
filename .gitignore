@@ -16,12 +16,13 @@
 # Vivado output
 *.jou
 *.log
-*.sim/
-*.hw/
 *.cache/
-.Xil/
-*.runs/
+*.gen/
+*.hw/
 *.ip_user_files/
+*.runs/
+*.sim/
+.Xil/
 vivado*.str
 
 # Xilinx IP generated files
