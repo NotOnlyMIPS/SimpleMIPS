@@ -6,14 +6,29 @@
 *.o
 *.obj
 *.exe
+*.a
+*.dll
+*.so
+
+# backup directories
+*.bak/
 
 # Vivado output
 *.jou
 *.log
-*.sim/
-*.hw/
 *.cache/
-.Xil/
-*.runs/
+*.gen/
+*.hw/
 *.ip_user_files/
+*.runs/
+*.sim/
+.Xil/
 vivado*.str
+
+# Xilinx IP generated files
+**/ip/xilinx/*/*
+**/ip/xilinx/*/*/
+!**/ip/xilinx/*/*.xci
+
+# keep test files
+!/test/official/**
