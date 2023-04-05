@@ -9,8 +9,9 @@ module BPU (
     input   reset,
     input   pipeline_flush_t    pipeline_flush,
     input   logic               correct_finish,
-    input   ds_to_bpu_bus_t     ds_to_bpu_bus,
     input   verify_result_t     es_to_bpu_bus,
+    input   logic               if_valid,
+    input   virt_t              if_pc,
     output  BHT_entry_t         predict_entry,
     output  predict_result_t    bpu_predict_bus,
     output  logic               flush,
@@ -18,6 +19,8 @@ module BPU (
     output  virt_t              correct_target
 );
 
+predict_result_t    predict_result_r;
+BHT_entry_t         predict_entry_r;
 BHT_entry_t         w_entry;
 BHT_entry_t         r_entry;
 
@@ -46,7 +49,7 @@ simple_port_ram_without_bypass_customized #(
     //read port
     .enb(1'b1),
     // .addrb(Index),
-    .addrb(ds_to_bpu_bus.pc[11:2]),
+    .addrb(if_pc[11:2]),
     .doutb(r_entry)
 );
 
@@ -100,9 +103,9 @@ always_ff @(posedge clk) begin
     end
 end
 
-assign pc_add8 = ds_to_bpu_bus.pc + 32'h8;
-assign bht_hit = (ds_to_bpu_bus.pc[31:11] == r_entry.tag);
-assign valid   = (state == `IDLE) && (ds_to_bpu_bus.br_type != 3'b0);
+assign pc_add8 = if_pc + 32'h8;
+assign bht_hit = (if_pc[31:11] == r_entry.tag);
+assign valid   = (state == `IDLE) && (r_entry.br_type != 3'b0) && if_valid;
 
 always_comb begin
     if(~bht_hit) begin
@@ -110,7 +113,7 @@ always_comb begin
         is_taken = 1'b0;
     end
     else begin
-        unique case(ds_to_bpu_bus.br_type)
+        unique case(r_entry.br_type)
         `B_IS_CALL: begin
             target = r_entry.target;
             is_taken = 1'b1;
@@ -141,21 +144,47 @@ always_comb begin
     end
 end
 
-assign bpu_predict_bus.valid         = valid;
-assign bpu_predict_bus.br_op         = (ds_to_bpu_bus.br_type != 3'b0);
-assign bpu_predict_bus.br_taken      = is_taken;
-assign bpu_predict_bus.target        = target;
-assign predict_entry = r_entry;
+always_ff @ (posedge clk) begin
+    if(reset) begin
+        predict_result_r <= '0;
+        predict_entry_r  <= '0;
+    end else if(if_valid) begin
+        predict_result_r.br_op    <= (r_entry.br_type != 3'b0);
+        predict_result_r.br_taken <= is_taken;
+        predict_result_r.target   <= target;
+        predict_entry_r           <= r_entry;
+    end
+    
+    predict_result_r.valid  <= valid;
+end
 
-assign flush                         = es_verify_valid && ~es_to_bpu_bus.predict_sucess;
+assign bpu_predict_bus  = predict_result_r;
+assign predict_entry    = predict_entry_r;
+
+// assign bpu_predict_bus.valid         = valid;
+// assign bpu_predict_bus.br_op         = (r_entry.br_type != 3'b0);
+// assign bpu_predict_bus.br_taken      = is_taken;
+// assign bpu_predict_bus.target        = target;
+// assign predict_entry = r_entry;
+
+logic flush_r;
+
+always_ff @ (posedge clk) begin
+    if(reset)
+        flush_r <= 1'b0;
+    else 
+        flush_r <= es_verify_valid && ~es_to_bpu_bus.predict_sucess;
+end
+
+assign flush                         = flush_r;
 assign is_correction                 = (state == `CORRECTION);
 assign correct_target                = correction_target;
 
 ras ras_instance(
     .clk,
     .reset,
-    .push_req  (ds_to_bpu_bus.br_type == `B_IS_CALL),
-    .pop_req   (ds_to_bpu_bus.br_type == `B_IS_RET ),
+    .push_req  (r_entry.br_type == `B_IS_CALL),
+    .pop_req   (r_entry.br_type == `B_IS_RET ),
     .push_data ({1'b1, es_to_bpu_bus.pc + 8}),
     .ras_top   (ras_data)
 );

@@ -5,7 +5,7 @@ module dcache #(
     parameter STORE_BUFFER_SIZE = 32,
     parameter DATA_WIDTH    = 32,
     parameter LINE_WORD_NUM = 4,
-    parameter ASSOC_NUM     = 2,
+    parameter ASSOC_NUM     = 4,
     parameter WAY_SIZE      = 4*1024*8,
     parameter GROUP_NUM     = WAY_SIZE/(LINE_WORD_NUM*DATA_WIDTH)
 
@@ -47,7 +47,6 @@ localparam int unsigned TAG_WIDTH      = 32-INDEX_WIDTH-OFFSET_WIDTH ;
 
 typedef struct packed {
     logic valid;
-    //logic dirty;
     logic [TAG_WIDTH-1:0] tag;
 } tagv_t;
 
@@ -91,27 +90,27 @@ function logic  [31:0] mux_byteenable(
     };
 endfunction
 
-// function logic[1:0] clog2(
-//     input logic [ASSOC_NUM-1:0] hit
-// );
-//     return{
-//         (hit[3] == 1'b1) ? 2'b11 :
-//         (hit[2] == 1'b1) ? 2'b10 :
-//         (hit[1] == 1'b1) ? 2'b01 : 2'b00
-//     };
-// endfunction
-
-function logic clog2(
+function logic[1:0] clog2(
     input logic [ASSOC_NUM-1:0] hit
 );
     return{
-        hit[1] ? 1'b1 : 1'b0
-        //! FIXME: code below is from commit ee8672edca2f88cb36ad81ecf25e2ac6c091c32b
-        //(hit[3] == 1'b1) ? 2'b11 :
-        //(hit[2] == 1'b1) ? 2'b10 :
-        //(hit[1] == 1'b1) ? 2'b01 : 2'b00
+        (hit[3] == 1'b1) ? 2'b11 :
+        (hit[2] == 1'b1) ? 2'b10 :
+        (hit[1] == 1'b1) ? 2'b01 : 2'b00
     };
 endfunction
+
+// function logic clog2(
+//     input logic [ASSOC_NUM-1:0] hit
+// );
+//     return{
+//         hit[1] ? 1'b1 : 1'b0
+//         //! FIXME: code below is from commit ee8672edca2f88cb36ad81ecf25e2ac6c091c32b
+//         //(hit[3] == 1'b1) ? 2'b11 :
+//         //(hit[2] == 1'b1) ? 2'b10 :
+//         //(hit[1] == 1'b1) ? 2'b01 : 2'b00
+//     };
+// endfunction
 
 typedef enum logic [3:0] {
         MISSDIRTY,
@@ -137,8 +136,8 @@ typedef struct packed {
     logic[3:0]        wstrb;
     logic[31:0]       wdata;
     logic[ 2:0]       size;
-    logic             isCache;
-    CacheType         cacheType;
+    logic             is_cache;
+    CacheType         cache_type;
     logic             cache_dirty;
     logic             cache_valid;
 } request_t;
@@ -161,14 +160,6 @@ typedef enum logic [1:0]{
     UNCACHE_READ_DONE
 } uncache_state_t;
 
-// typedef enum logic [1:0] {
-//     CACHE_IDLE,
-//     CACHE_LOOKUP,
-//     CACHE_WAIT_WRITE,
-//     CACHE_WRITEBACK
-// } cache_state_t;
-
-// cache_state_t cache_state,cache_state_next;
 uncache_state_t uncache_state,uncache_state_next;
 store_t  store_buffer;
 state_t  state,state_next;
@@ -226,32 +217,26 @@ logic fifo_wr_rst_busy;
 
 
 assign fifo_din   = {req_buffer.tag,req_buffer.index,req_buffer.offset,req_buffer.wdata,req_buffer.wstrb};
-assign fifo_wr_en = (fifo_wr_rst_busy || fifo_full || (~(req_buffer.valid & req_buffer.wr & (~req_buffer.isCache))) ) ?  1'b0 : 1'b1;
+assign fifo_wr_en = (fifo_wr_rst_busy || fifo_full || (~(req_buffer.valid & req_buffer.wr & (~req_buffer.is_cache))) ) ?  1'b0 : 1'b1;
 assign fifo_rd_en = (uwr_rdy && (!fifo_empty) && (!fifo_rd_rst_busy)) ? 1'b1 :1'b0;
 //cpu
 
 assign DBus.addr_ok   = ( state_next == LOOKUP) && DBus.req;
 
-assign DBus.data_ok   = req_buffer.isCache ? ((state == LOOKUP || state == REFILLDONE) && state_next == LOOKUP && req_buffer.valid)
+assign DBus.data_ok   = req_buffer.is_cache ? ((state == LOOKUP || state == REFILLDONE) && state_next == LOOKUP && req_buffer.valid)
                                            : (req_buffer.wr ? req_buffer.valid : (uncache_state == UNCACHE_READ_DONE  && req_buffer.valid));
 
 assign DBus.rdata     =  ( req_buffer.valid ) ? data_rdata_final1 : '0;
 //axi
 assign rd_req = (state == MISSCLEAN) ? 1'b1 : 1'b0;
-assign rd_type = '0;
 assign rd_addr = {req_buffer.tag,req_buffer.index, {OFFSET_WIDTH{1'b0}}};
 assign wr_req = (state == MISSDIRTY) ? 1'b1 : 1'b0;
-assign wr_type = '0;
-assign wr_wstrb = '0;
 // assign wr_addr = {pipe_tagv_rdata[lru[req_buffer.index]].tag, req_buffer.index, {OFFSET_WIDTH{1'b0}}};
 always_comb begin : axi_bus_wraddr_blockName
-    if (req_buffer.cacheType.isDcache) begin
-        case (req_buffer.cacheType.cacheCode)
+    if (req_buffer.cache_type.isDcache) begin
+        case (req_buffer.cache_type.cacheCode)
             D_Index_Writeback_Invalid:begin
-                //2闁荤姳璀﹂崹顖涚箾閸ヮ剚鍋ㄩ柨鐕傛嫹
                 wr_addr = {pipe_tagv_rdata[req_buffer.tag[0]].tag,req_buffer.index,{OFFSET_WIDTH{1'b0}}};
-                //4闁荤姳璀﹂崹顖涚箾閸ヮ剚鍋ㄩ柨鐕傛嫹
-                // wr_addr = {pipe_tagv_rdata[req_buffer.tag[1:0]].tag,req_buffer.index,{OFFSET_WIDTH{1'b0}}};
             end
             D_Hit_Writeback_Invalid:begin
                 wr_addr = {req_buffer.tag,req_buffer.index,{OFFSET_WIDTH{1'b0}}};
@@ -264,12 +249,6 @@ always_comb begin : axi_bus_wraddr_blockName
         wr_addr = {pipe_tagv_rdata[lru[req_buffer.index]].tag,req_buffer.index,{OFFSET_WIDTH{1'b0}}};
     end
 end
-
-// generate;
-//     for (genvar  i=0; i<LINE_WORD_NUM; ++i) begin
-//         assign wr_data[32*(i+1)-1:32*(i)] = data_rdata[lru[req_buffer.index]][i];
-//     end
-// endgenerate
 
 logic[127:0] wr_data1,wr_data2,wr_data3;
 
@@ -292,8 +271,8 @@ generate;
 endgenerate
 
 always_comb begin : axi_bus_wr_data_blockName
-    if (req_buffer.cacheType.isDcache) begin
-        case (req_buffer.cacheType.cacheCode)
+    if (req_buffer.cache_type.isDcache) begin
+        case (req_buffer.cache_type.cacheCode)
             D_Index_Writeback_Invalid:begin
                 wr_data = wr_data1;
             end
@@ -321,7 +300,6 @@ assign uwr_addr  = {fifo_dout.address}; //
 assign uwr_data  = {fifo_dout.data};
 assign uwr_wstrb = fifo_dout.wstrb;
 
-assign ststall = 0;
 assign cache_hit        = |hit;//ok
 
 assign read_addr        = req_buffer_en ? DBus.index : req_buffer.index;
@@ -342,8 +320,8 @@ generate;//
 endgenerate
 
 always_comb begin : tagv_wdata_blockName
-    if(req_buffer.cacheType.isDcache)begin
-        case (req_buffer.cacheType.cacheCode)
+    if(req_buffer.cache_type.isDcache)begin
+        case (req_buffer.cache_type.cacheCode)
             D_Index_Store_Tag:begin
                 tagv_wdata = {req_buffer.cache_valid, req_buffer.tag};
             end
@@ -359,8 +337,8 @@ end
 assign data_read_en     = 1'b1;
 
 always_comb begin : dirty_wdata_blockName
-    if(req_buffer.cacheType.isDcache)begin
-        case (req_buffer.cacheType.cacheCode)
+    if(req_buffer.cache_type.isDcache)begin
+        case (req_buffer.cache_type.cacheCode)
             D_Index_Store_Tag:begin
                 dirty_wdata = req_buffer.cache_dirty;
             end
@@ -454,47 +432,66 @@ generate;
 endgenerate
 
 always_comb begin : dirty_we_block
-    if(req_buffer.cacheType.isDcache)begin
-        case (req_buffer.cacheType.cacheCode)
-            D_Index_Writeback_Invalid:begin
-                if (state == REFILL && ret_valid)
+    if(req_buffer.cache_type.isDcache)begin
+        if(ASSOC_NUM == 2) begin
+            case (req_buffer.cache_type.cacheCode)
+                D_Index_Writeback_Invalid:begin
+                    if (state == REFILL && ret_valid)
+                        dirty_we = (req_buffer.tag[0]) ? 2'b10 : 2'b01;
+                    else
+                        dirty_we = '0;
+                end
+                D_Index_Store_Tag:begin
                     dirty_we = (req_buffer.tag[0]) ? 2'b10 : 2'b01;
-                else
+                end
+                D_Hit_Invalid:begin
+                    //( (hit[0]) ? 2'b01:2'b10 )
+                    dirty_we = (cache_hit) ? hit : '0;
+                end
+                D_Hit_Writeback_Invalid: begin
+                    if (state == REFILL && ret_valid)
+                        dirty_we = (cache_hit) ? hit : '0;
+                    else
+                        dirty_we = '0;
+                end
+                default: begin
                     dirty_we = '0;
-            end
-            D_Index_Store_Tag:begin
-                dirty_we = (req_buffer.tag[0]) ? 2'b10 : 2'b01;
-            end
-            D_Hit_Invalid:begin
-                dirty_we = (cache_hit) ? ( (hit[0]) ? 2'b01:2'b10 )  : '0;
-            end
-            D_Hit_Writeback_Invalid: begin
-                if (state == REFILL && ret_valid)
-                    dirty_we = (cache_hit) ? ( (hit[0]) ? 2'b01:2'b10 )  : '0;
-                else
+                end
+            endcase
+        end else if(ASSOC_NUM == 4)begin
+            case (req_buffer.cache_type.cacheCode)
+                D_Index_Writeback_Invalid:begin
+                    if (state == REFILL && ret_valid)
+                        dirty_we =  (req_buffer.tag[1:0] == 2'b00) ? 4'b0001 :
+                                    (req_buffer.tag[1:0] == 2'b01) ? 4'b0010 :
+                                    (req_buffer.tag[1:0] == 2'b10) ? 4'b0100 : 4'b1000;
+                    else
+                        dirty_we = '0;
+                end
+                D_Index_Store_Tag:begin
+                    dirty_we =  (req_buffer.tag[1:0] == 2'b00) ? 4'b0001 :
+                                (req_buffer.tag[1:0] == 2'b01) ? 4'b0010 :
+                                (req_buffer.tag[1:0] == 2'b10) ? 4'b0100 : 4'b1000;
+                end
+                D_Hit_Invalid:begin
+                    //( (hit[0]) ? 2'b01:2'b10 )
+                    dirty_we = (cache_hit) ? hit : '0;
+                end
+                D_Hit_Writeback_Invalid: begin
+                    if (state == REFILL && ret_valid)
+                        dirty_we = (cache_hit) ? hit : '0;
+                    else
+                        dirty_we = '0;
+                end
+                default: begin
                     dirty_we = '0;
-            end
-            default: begin
-                dirty_we = '0;
-            end
-        endcase
-        // case (DBus.cacheType.cacheCode)
-        //     D_Index_Writeback_Invalid,D_Index_Store_Tag:begin
-        //         dirty_we =  (DBus.cache_tag[1:0] == 2'b00) ? 4'b0001 :
-        //                     (DBus.cache_tag[1:0] == 2'b01) ? 4'b0010 :
-        //                     (DBus.cache_tag[1:0] == 2'b10) ? 4'b0100 : 4'b1000;
-        //     end
-        //     D_Hit_Invalid,D_Hit_Writeback_Invalid:begin
-        //         dirty_we = (cache_hit) ? hit : '0;
-        //     end
-        //     default: begin
-        //         dirty_we = '0;
-        //     end
-        // endcase
+                end
+            endcase
+        end
     end else if (state == REFILL && ret_valid) begin
         dirty_we = '0;
         dirty_we[lru[req_buffer.index]] =1'b1;
-    end else if(req_buffer.valid && req_buffer.wr && req_buffer.isCache)begin
+    end else if(req_buffer.valid && req_buffer.wr && req_buffer.is_cache)begin
         dirty_we = hit;
     end else begin
         dirty_we = '0;
@@ -508,43 +505,60 @@ always_comb begin : data_rdata_final2__blockname
 end
 
 always_comb begin : tagv_we_blockName
-    if(req_buffer.cacheType.isDcache)begin
-        case (req_buffer.cacheType.cacheCode)
-            D_Index_Writeback_Invalid:begin
-                if (state == REFILL && ret_valid)
+    if(req_buffer.cache_type.isDcache)begin
+        if(ASSOC_NUM == 2) begin
+            case (req_buffer.cache_type.cacheCode)
+                D_Index_Writeback_Invalid:begin
+                    if (state == REFILL && ret_valid)
+                        tagv_we = (req_buffer.tag[0]) ? 2'b10 : 2'b01;
+                    else
+                        tagv_we = '0;
+                end
+                D_Index_Store_Tag:begin
                     tagv_we = (req_buffer.tag[0]) ? 2'b10 : 2'b01;
-                else
+                end
+                D_Hit_Invalid:begin
+                    tagv_we = (cache_hit) ?hit  : '0;
+                end
+                D_Hit_Writeback_Invalid:begin
+                    if (state == REFILL && ret_valid)
+                        tagv_we = (cache_hit) ? hit  : '0;
+                    else
+                        tagv_we = '0;
+                end
+                default: begin
                     tagv_we = '0;
-            end
-            D_Index_Store_Tag:begin
-                tagv_we = (req_buffer.tag[0]) ? 2'b10 : 2'b01;
-            end
-            D_Hit_Invalid:begin
-                tagv_we = (cache_hit) ? ( (hit[0]) ? 2'b01:2'b10 )  : '0;
-            end
-            D_Hit_Writeback_Invalid:begin
-                if (state == REFILL && ret_valid)
-                    tagv_we = (cache_hit) ? ( (hit[0]) ? 2'b01:2'b10 )  : '0;
-                else
+                end
+            endcase
+        end else if(ASSOC_NUM == 4) begin
+            case (req_buffer.cache_type.cacheCode)
+                D_Index_Writeback_Invalid:begin
+                    if (state == REFILL && ret_valid)
+                        tagv_we =   (req_buffer.tag[1:0] == 2'b00) ? 4'b0001 :
+                                    (req_buffer.tag[1:0] == 2'b01) ? 4'b0010 :
+                                    (req_buffer.tag[1:0] == 2'b10) ? 4'b0100 : 4'b1000;
+                    else
+                        tagv_we = '0;
+                end
+                D_Index_Store_Tag:begin
+                    tagv_we =   (req_buffer.tag[1:0] == 2'b00) ? 4'b0001 :
+                                (req_buffer.tag[1:0] == 2'b01) ? 4'b0010 :
+                                (req_buffer.tag[1:0] == 2'b10) ? 4'b0100 : 4'b1000;
+                end
+                D_Hit_Invalid:begin
+                    tagv_we = (cache_hit) ?hit  : '0;
+                end
+                D_Hit_Writeback_Invalid:begin
+                    if (state == REFILL && ret_valid)
+                        tagv_we = (cache_hit) ? hit  : '0;
+                    else
+                        tagv_we = '0;
+                end
+                default: begin
                     tagv_we = '0;
-            end
-            default: begin
-                tagv_we = '0;
-            end
-        endcase
-        // case (DBus.cachetype.cacheCode)
-        //     D_Index_Writeback_Invalid,D_Index_Store_Tag:begin
-        //         tagv_we =   (DBus.cache_tag[1:0] == 2'b00) ? 4'b0001 :
-        //                     (DBus.cache_tag[1:0] == 2'b01) ? 4'b0010 :
-        //                     (DBus.cache_tag[1:0] == 2'b10) ? 4'b0100 : 4'b1000;
-        //     end
-        //     D_Hit_Invalid,D_Hit_Writeback_Invalid:begin
-        //         tagv_we = (cache_hit) ? hit : '0;
-        //     end
-        //     default: begin
-        //         tagv_we = '0;
-        //     end
-        // endcase
+                end
+            endcase
+        end
     end else if (state == REFILL && ret_valid) begin
         tagv_we = '0;
         tagv_we[lru[req_buffer.index]] =1'b1;
@@ -567,7 +581,7 @@ end
 always_ff @( posedge clk_g ) begin : store_buffer_blockName
     if ( !resetn ) begin
         store_buffer <= '0;
-    end else if( req_buffer.valid && ~ststall) begin
+    end else if( req_buffer.valid) begin
         store_buffer.hit   <= hit;
         store_buffer.valid <= (req_buffer.valid & req_buffer.wr);
         store_buffer.tag   <= req_buffer.tag;
@@ -612,8 +626,8 @@ always_ff @( posedge clk_g ) begin : req_buffer_block
         req_buffer.wstrb    <=  DBus.wstrb    ;
         req_buffer.wdata    <=  DBus.wdata    ;
         req_buffer.size     <=  DBus.size     ;
-        req_buffer.isCache  <=  DBus.iscache  ;
-        req_buffer.cacheType<=  DBus.cachetype;
+        req_buffer.is_cache  <=  DBus.iscache  ;
+        req_buffer.cache_type<=  DBus.cachetype;
         req_buffer.cache_dirty <= DBus.cache_dirty;
         req_buffer.cache_valid <= DBus.cache_valid;
     end
@@ -639,12 +653,12 @@ always_comb begin : state_next_blockName
 
     unique case (state)
         LOOKUP:begin
-            if ( req_buffer.cacheType.isDcache &&
-                 ((req_buffer.cacheType.cacheCode == D_Index_Writeback_Invalid && dirty_rdata[req_buffer.tag[0]])||
-                 (req_buffer.cacheType.cacheCode == D_Hit_Writeback_Invalid && cache_hit && dirty_rdata[clog2(hit)]) ))
+            if ( req_buffer.cache_type.isDcache &&
+                 ((req_buffer.cache_type.cacheCode == D_Index_Writeback_Invalid && dirty_rdata[req_buffer.tag[0]])||
+                 (req_buffer.cache_type.cacheCode == D_Hit_Writeback_Invalid && cache_hit && dirty_rdata[clog2(hit)]) ))
                 state_next = MISSDIRTY;
             else if ( req_buffer.valid ) begin
-                if ( req_buffer.isCache == 1'b0 ) begin
+                if ( req_buffer.is_cache == 1'b0 ) begin
                     state_next = LOOKUP;
                 end else begin
                     if ( cache_hit ) begin
@@ -774,159 +788,6 @@ always_comb begin : uncache_state_next_blockName
         end
     endcase
 end
-
-// always_ff @( posedge clk_g ) begin : cache_state_blockName
-//     if ( !resetn ) begin
-//         cache_state <= CACHE_IDLE;
-//     end else begin
-//         cache_state <= cache_state_next;
-//     end
-// end
-
-// always_comb begin : cache_state_next_blockName
-//     case (cache_state)
-//         CACHE_IDLE:begin
-//             if (req_buffer.cacheType.isDcache) begin
-//                 cache_state_next = CACHE_LOOKUP;
-//             end else begin
-//                 cache_state_next = CACHE_IDLE;
-//             end
-//         end
-//         CACHE_LOOKUP:begin
-//             case (req_buffer.cacheType.cacheCode)
-//                 D_Index_Store_Tag:begin
-//                     cache_state_next = CACHE_IDLE;
-//                 end
-//                 D_Index_Writeback_Invalid:begin
-// //2
-//                 if (req_buffer.tag[0]) begin
-//                     if (pipe_tagv_rdata[1].valid & dirty_rdata[1]) begin
-//                         cache_state_next = CACHE_WAIT_WRITE;
-//                     end else begin
-//                         cache_state_next = CACHE_IDLE;
-//                     end
-//                 end else begin
-//                     if (pipe_tagv_rdata[0].valid & dirty_rdata[0]) begin
-//                         cache_state_next = CACHE_WAIT_WRITE;
-//                     end else begin
-//                         cache_state_next = CACHE_IDLE;
-//                     end
-//                 end
-// //4闁荤姳璀﹂崹顖涚箾閸ヮ剚鍋ㄩ柨鐕傛嫹
-//                 // case (req_buffer.tag[1:0])
-//                 //     2'b00 : begin
-//                 //         if(pipe_tagv_rdata[0].valid && dirty_rdata[0]) begin
-//                 //             cache_state_next = CACHE_WAIT_WRITE ;
-//                 //         end else begin
-//                 //             cache_state_next = CACHE_IDLE ;
-//                 //         end
-//                 //     end
-//                 //     2'b01 : begin
-//                 //         if(pipe_tagv_rdata[1].valid && dirty_rdata[1]) begin
-//                 //             cache_state_next = CACHE_WAIT_WRITE ;
-//                 //         end else begin
-//                 //             cache_state_next = CACHE_IDLE ;
-//                 //         end
-//                 //     end
-//                 //     2'b10 : begin
-//                 //         if(pipe_tagv_rdata[2].valid && dirty_rdata[2]) begin
-//                 //             cache_state_next = CACHE_WAIT_WRITE ;
-//                 //         end else begin
-//                 //             cache_state_next = CACHE_IDLE ;
-//                 //         end
-//                 //     end
-//                 //     2'b11 : begin
-//                 //         if(pipe_tagv_rdata[3].valid && dirty_rdata[3]) begin
-//                 //             cache_state_next = CACHE_WAIT_WRITE ;
-//                 //         end else begin
-//                 //             cache_state_next = CACHE_IDLE ;
-//                 //         end
-//                 //     end
-//                 // endcase
-//             end
-//             D_Hit_Invalid:begin
-//                 cache_state_next = CACHE_IDLE;
-//             end
-//             D_Hit_Writeback_Invalid:begin
-// //2
-//                 case (hit)
-//                     2'b01:begin
-//                         if (dirty_rdata[0]) begin
-//                             cache_state_next = CACHE_WAIT_WRITE;
-//                         end else begin
-//                             cache_state_next = CACHE_IDLE;
-//                         end
-//                     end
-//                     2'b10:begin
-//                         if (dirty_rdata[1]) begin
-//                             cache_state_next = CACHE_WAIT_WRITE;
-//                         end else begin
-//                             cache_state_next = CACHE_IDLE;
-//                         end
-//                     end
-//                     default: begin
-//                         cache_state_next = CACHE_IDLE;
-//                     end
-//                 endcase
-// //4
-//                 // case (hit)
-//                 //     4'b0001:begin
-//                 //         if (dirty_rdata[0]) begin
-//                 //             cache_state_next = CACHE_WAIT_WRITE;
-//                 //         end else begin
-//                 //             cache_state_next = CACHE_IDLE;
-//                 //         end
-//                 //     end
-//                 //     4'b0010:begin
-//                 //         if (dirty_rdata[1]) begin
-//                 //             cache_state_next = CACHE_WAIT_WRITE;
-//                 //         end else begin
-//                 //             cache_state_next = CACHE_IDLE;
-//                 //         end
-//                 //     end
-//                 //     4'b0100:begin
-//                 //         if (dirty_rdata[2]) begin
-//                 //             cache_state_next = CACHE_WAIT_WRITE;
-//                 //         end else begin
-//                 //             cache_state_next = CACHE_IDLE;
-//                 //         end
-//                 //     end
-//                 //     4'b1000:begin
-//                 //         if (dirty_rdata[3]) begin
-//                 //             cache_state_next = CACHE_WAIT_WRITE;
-//                 //         end else begin
-//                 //             cache_state_next = CACHE_IDLE;
-//                 //         end
-//                 //     end
-//                 //     default: begin
-//                 //         cache_state_next = CACHE_IDLE;
-//                 //     end
-//                 // endcase
-//             end
-//             default: begin
-//                 cache_state_next = CACHE_IDLE;
-//             end
-//             endcase
-//         end
-//         CACHE_WAIT_WRITE:begin
-//             if (wr_rdy) begin
-//                 cache_state_next = CACHE_WRITEBACK;
-//             end else begin
-//                 cache_state_next = CACHE_WAIT_WRITE;
-//             end
-//         end
-//         CACHE_WRITEBACK:begin
-//             if (wr_bvalid) begin
-//                 cache_state_next = CACHE_IDLE;
-//             end else begin
-//                 cache_state_next = CACHE_WRITEBACK;
-//             end
-//         end
-//         default: begin
-//                 cache_state_next = CACHE_IDLE;
-//         end
-//     endcase
-// end
 
 
 FIFO #(

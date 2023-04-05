@@ -63,13 +63,13 @@ assign req = pms_valid && ms_allowin && !wr_disable && !exception.ex
 
 // pre_MEM stage
 assign req_ok           = req && data_addr_ok;
-assign pms_ready_go     = req_ok || !(res_from_mem || res_to_mem) || exception.ex;
+assign pms_ready_go     = req_ok || !(res_from_mem || res_to_mem);
 assign pms_allowin      = !pms_valid || pms_ready_go && ms_allowin ;
-assign pms_to_ms_valid  = pms_valid && pms_ready_go;
+assign pms_to_ms_valid  = pms_valid && pms_ready_go || ms_allowin && exception.ex;
 always_ff @(posedge clk) begin
     if(reset)
         pms_valid <= 1'b0;
-    else if(pipeline_flush.eret | pipeline_flush.ex)
+    else if(pipeline_flush.flush || exception.ex && ms_allowin)
         pms_valid <= 1'b0;
     else if(pms_allowin)
         pms_valid <= es_to_pms_bus.valid;

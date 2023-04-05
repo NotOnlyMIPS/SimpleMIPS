@@ -95,6 +95,7 @@ typedef struct packed {
 } exception_t;
 
 typedef struct packed {
+	logic flush;
 	logic ex;
 	logic eret;
 	logic tlb_op;
@@ -145,7 +146,10 @@ typedef struct packed {
 	// pipeline
 	logic 	 	valid;
 	// pre_IF to IF
-	logic   	req;
+	logic   	inst_valid;
+	uint32_t	inst;
+	logic 		data_cancel;
+	logic 		addr_ok;
 	logic 	 	br_op;
 	virt_t	 	pc;
 	// exception

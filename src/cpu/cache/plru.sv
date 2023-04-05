@@ -8,10 +8,10 @@ module PLRU #(
     input clk,
     input resetn,
 
-    input [ASSOC_NUM-1:0] access,//鐙儹鐮侊紝鍝竴浣嶄负1灏辫〃鏄庡摢涓?璺懡涓?
-    input update, //琛ㄧず鍛戒腑 鍚﹀垯娌℃硶琛ㄧず娌℃湁璁垮瓨涓嶉渶瑕佹洿鏂發ru鐨勬儏鍐?
+    input [ASSOC_NUM-1:0] access,//命中路数
+    input update, //更新信号
 
-    output [$clog2(ASSOC_NUM)-1:0] lru //琛ㄧず濡傛灉鏇挎崲锛屾浛鎹㈢殑鏄摢涓?璺?
+    output [$clog2(ASSOC_NUM)-1:0] lru //lru结果
 );
 
     logic [ASSOC_NUM-2:0] state,state_d;
@@ -33,7 +33,7 @@ if(ASSOC_NUM == 2) begin
 
         if(update && |access) begin
             if(access[0]) begin
-                state_d[0] = 1;//濡傛灉杩欐鍛戒腑鐨勬槸绗?0璺? 閭ｄ箞涓嬫涓嶅懡涓殑鏃跺?欐浛鎹㈢殑灏辨槸1璺?
+                state_d[0] = 1;
             end else begin
                 state_d[0] = 0;
             end
@@ -41,7 +41,7 @@ if(ASSOC_NUM == 2) begin
     end
 end else  begin
     always_comb begin
-        state_d = state;    //濂戒範鎯晩
+        state_d = state;    
 
         casez(access)
             4'b1???: begin

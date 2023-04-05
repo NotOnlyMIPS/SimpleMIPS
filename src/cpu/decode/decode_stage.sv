@@ -16,13 +16,11 @@ module decode_stage (
     input ms_forward_bus_t  ms_forward_bus,
     input ws_forward_bus_t  ws_forward_bus,
     // branch prediction
+    input  logic            bpu_flush,
     input  logic            branch_resolved,
     input  logic            predict_is_taken,
     input  virt_t           predict_target,
     input  BHT_entry_t      predict_entry,
-    output ds_to_bpu_bus_t  ds_to_bpu_bus,
-    // branch bus
-    output logic br_op,
     // to EXE
     output ds_to_es_bus_t   ds_to_es_bus,
     // cp0 and exception
@@ -113,10 +111,10 @@ assign ds_ready_go  = ds_valid && !ds_stall;
 assign ds_allowin   = !ds_valid || ds_ready_go && es_allowin;
 assign ds_to_es_valid = ds_valid && ds_ready_go;
 always @(posedge clk) begin
-    if(reset) begin
+    if(reset || bpu_flush && !exception.bd) begin
         ds_valid <= 1'b0;
     end
-    else if(pipeline_flush.eret | pipeline_flush.ex) begin
+    else if(pipeline_flush.flush) begin
         ds_valid <= 1'b0;
     end
     else if(ds_allowin) begin
@@ -144,28 +142,22 @@ assign exception.tlb_refill =  exception.exccode == `EXCCODE_TLBL ?
 logic       is_branch, is_call, is_ret, is_jump;
 logic       br_bus_en;
 logic       br_bus_r_valid;
-logic [2:0] br_op_r;
+logic [2:0] br_type_r;
 logic [2:0] br_type;
-assign br_op     = (br_type != 3'd0 );
 assign is_branch = |inst_d.br_op[7:0];
 assign is_ret    = inst_d.br_op[10];
 assign is_call   = inst_d.br_op[11] | inst_d.br_op[9];
 assign is_jump   = inst_d.br_op[8];
 assign br_bus_en = (|inst_d.br_op) & ds_ready_go & es_allowin & ds_valid;
 always_ff @(posedge clk) begin
-    if(reset || pipeline_flush.ex || pipeline_flush.eret || pipeline_flush.tlb_op || pipeline_flush.cache_op || branch_resolved)
+    if(reset || pipeline_flush.flush || branch_resolved || bpu_flush && !exception.bd)
         br_bus_r_valid <= 1'b0;
     else if(br_bus_en) begin
         br_bus_r_valid <= 1'b1;
-        br_op_r        <= {3{is_jump}} & 3'h1 | {3{is_call}} & 3'h2 | {3{is_ret}} & 3'h3 |{3{is_branch}} & 3'h4;
+        br_type_r        <= {3{is_jump}} & 3'h1 | {3{is_call}} & 3'h2 | {3{is_ret}} & 3'h3 |{3{is_branch}} & 3'h4;
     end
 end
-assign br_type = br_bus_r_valid ? br_op_r : {3{ds_valid}} & ({3{is_jump}} & 3'h1 | {3{is_call}} & 3'h2 | {3{is_ret}} & 3'h3 |{3{is_branch}} & 3'h4);
-
-// to BPU
-assign ds_to_bpu_bus = { br_type,
-                         br_bus_en,
-                         fs_to_ds_bus_r.pc};
+assign br_type = br_bus_r_valid ? br_type_r : {3{ds_valid}} & ({3{is_jump}} & 3'h1 | {3{is_call}} & 3'h2 | {3{is_ret}} & 3'h3 |{3{is_branch}} & 3'h4);
 
 // to EXE
 assign ds_to_es_bus = { ds_to_es_valid,

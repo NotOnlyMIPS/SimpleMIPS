@@ -25,9 +25,9 @@ logic   bpu_flush;
 logic   is_correction;
 logic   branch_resolved;
 virt_t  correct_target;
+virt_t  if_pc;
 BHT_entry_t      predict_entry;
 predict_result_t predict_result;
-ds_to_bpu_bus_t  ds_to_bpu_bus;
 verify_result_t  es_to_bpu_bus;
 // pipeline bus
 pfs_to_fs_bus_t pfs_to_fs_bus;
@@ -99,8 +99,9 @@ BPU u_BPU (
     .reset          (reset          ),
     .pipeline_flush (pipeline_flush ),
     .correct_finish (branch_resolved),
-    .ds_to_bpu_bus  (ds_to_bpu_bus  ),
     .es_to_bpu_bus  (es_to_bpu_bus  ),
+    .if_valid       (fs_valid       ),
+    .if_pc          (if_pc          ),
     .predict_entry  (predict_entry  ),
     .bpu_predict_bus(predict_result ),
     .flush          (bpu_flush      ),
@@ -140,8 +141,9 @@ pre_fetch_stage u_pre_if_stage (
     .icache_offset  (IBus.offset    ),
     .icache_index   (IBus.index     ),
     .icache_tag     (IBus.tag       ),
-    .icache_addr_ok (IBus.addr_ok   )
-
+    .icache_addr_ok (IBus.addr_ok   ),
+    .icache_data_ok (IBus.data_ok   ),
+    .icache_rdata   (IBus.rdata     )
 );
 
 // IF stage
@@ -159,6 +161,11 @@ fetch_stage u_if_stage (
     .fs_to_pfs_valid(fs_valid       ),
     // to ID
     .fs_to_ds_bus   (fs_to_ds_bus   ),
+    // to BPU
+    .if_to_bpu_valid(fs_valid       ),
+    .if_pc          (if_pc          ),
+    // branch bus
+    .br_op          (br_op          ),
     // cp0 and exception
     .pipeline_flush (pipeline_flush ),
     .c0_epc         (c0_epc         ),
@@ -188,9 +195,6 @@ decode_stage u_idstage (
     .predict_is_taken   (predict_result.br_taken),
     .predict_target     (predict_result.target  ),
     .predict_entry      (predict_entry          ),
-    .ds_to_bpu_bus      (ds_to_bpu_bus          ),
-    // branch bus
-    .br_op          (br_op          ),
     // to EXE
     .ds_to_es_bus   (ds_to_es_bus   ),
     // cp0 and exception

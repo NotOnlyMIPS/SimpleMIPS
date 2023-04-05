@@ -59,7 +59,7 @@ always @(posedge clk) begin
     if (reset) begin
         ms_valid <= 1'b0;
     end
-    else if(pipeline_flush.eret | pipeline_flush.ex)
+    else if(pipeline_flush.flush)
         ms_valid <= 1'b0;
     else if (ms_allowin) begin
         ms_valid <= pms_to_ms_bus.valid;
@@ -69,7 +69,7 @@ always @(posedge clk) begin
         pms_to_ms_bus_r  <= pms_to_ms_bus;
     end
 
-    if(reset || pipeline_flush.ex || pipeline_flush.eret)
+    if(reset || pipeline_flush.flush)
         ms_data_valid <= 1'b0;
     else if(data_data_ok && !ws_allowin) begin
         ms_data_valid <= 1'b1;
@@ -109,7 +109,7 @@ assign ms_wr_disable = (op_eret | exception.ex) & ms_valid;
 always_ff @(posedge clk) begin
     if(reset)
         data_cancel <= 1'b0;
-    else if((pipeline_flush.eret || pipeline_flush.ex) && (pms_to_ms_bus.req_ok || !ms_ready_go && (res_from_mem || res_to_mem)))
+    else if((pipeline_flush.flush) && (pms_to_ms_bus.req_ok || !ms_ready_go && (res_from_mem || res_to_mem)))
         data_cancel <= 1'b1;
     else if(data_data_ok)
         data_cancel <= 1'b0;

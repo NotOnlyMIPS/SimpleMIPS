@@ -57,7 +57,7 @@ always_ff @(posedge clk) begin
     if (reset) begin
         es_valid <= 1'b0;
     end
-    else if(pipeline_flush.eret | pipeline_flush.ex) begin
+    else if(pipeline_flush.flush) begin
         es_valid <= 1'b0;
     end
     else if (es_allowin) begin

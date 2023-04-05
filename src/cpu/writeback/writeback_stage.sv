@@ -114,7 +114,8 @@ assign ws_to_c0_bus.tlb_op = ws_valid ? ms_to_ws_bus_r.tlb_op : 3'b0;
 // cache
 assign ws_to_c0_bus.cache_op = ws_valid ? ms_to_ws_bus_r.cache_op: EMPTY;
 
-assign pipeline_flush = {ex_en, eret_flush, op_tlb, op_cache, ms_to_ws_bus_r.exception.tlb_refill};
+assign pipeline_flush = {ex_en | eret_flush | op_tlb | op_cache ,
+                        ex_en, eret_flush, op_tlb, op_cache, ms_to_ws_bus_r.exception.tlb_refill};
 
 // trace debug interface
 assign debug_wb_pc       = ms_to_ws_bus_r.pc;
