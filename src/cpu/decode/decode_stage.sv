@@ -107,7 +107,7 @@ register_forward u_register_forward(
 );
 
 // ID stage
-assign ds_ready_go  = ds_valid && !ds_stall;
+assign ds_ready_go  = ds_valid && !ds_stall && !bpu_flush;
 assign ds_allowin   = !ds_valid || ds_ready_go && es_allowin;
 assign ds_to_es_valid = ds_valid && ds_ready_go;
 always @(posedge clk) begin

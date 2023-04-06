@@ -50,9 +50,9 @@ logic data_cancel;
 
 // IF stage
 assign pfs_fs_lock = pfs_to_fs_bus.br_op && !pfs_to_fs_bus.valid && fs_valid;
-assign fs_ready_go = (icache_data_ok || fs_inst_valid || pfs_inst_valid) && !data_cancel || pfs_to_fs_bus_r.exception.ex;
-assign fs_allowin = !fs_valid || fs_ready_go && ds_allowin;
-assign fs_to_ds_valid = fs_valid && fs_ready_go && !pfs_fs_lock && !bpu_flush;
+assign fs_ready_go = (icache_data_ok || fs_inst_valid || pfs_inst_valid) && !data_cancel  || pfs_to_fs_bus_r.exception.ex;
+assign fs_allowin = !fs_valid || fs_ready_go && ds_allowin && !bpu_flush;
+assign fs_to_ds_valid = fs_valid && fs_ready_go && !bpu_flush && !pfs_fs_lock ;
 assign branch_delay_slot = pfs_to_fs_bus.br_op;
 
 always_ff @( posedge clk ) begin
@@ -72,7 +72,7 @@ always_ff @( posedge clk ) begin
         fs_inst_valid <= 1'b1;
         fs_inst       <= icache_rdata;
     end
-    else if(ds_allowin && fs_ready_go && !pfs_fs_lock)
+    else if(ds_allowin && fs_ready_go && !bpu_flush && !pfs_fs_lock)
         fs_inst_valid <= 1'b0;
 end
 

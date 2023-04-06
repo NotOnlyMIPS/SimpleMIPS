@@ -191,6 +191,7 @@ decode_stage u_idstage (
     .ms_forward_bus (ms_forward_bus ),
     .ws_forward_bus (ws_forward_bus ),
     // branch prediction
+    .bpu_flush      (bpu_flush      ),
     .branch_resolved    (branch_resolved        ),
     .predict_is_taken   (predict_result.br_taken),
     .predict_target     (predict_result.target  ),
