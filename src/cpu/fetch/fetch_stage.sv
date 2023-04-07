@@ -87,6 +87,7 @@ assign if_pc           = pfs_to_fs_bus_r.pc;
 uint32_t fs_to_ds_inst;
 uint32_t rt_d;
 uint64_t op_d, func_d;
+logic        br_op_r;
 logic [ 5:0] op;
 logic [ 4:0] rt;
 logic [ 5:0] func;

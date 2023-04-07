@@ -16,7 +16,6 @@ module decode_stage (
     input ms_forward_bus_t  ms_forward_bus,
     input ws_forward_bus_t  ws_forward_bus,
     // branch prediction
-    input  logic            bpu_flush,
     input  logic            branch_resolved,
     input  logic            predict_is_taken,
     input  virt_t           predict_target,
@@ -107,11 +106,11 @@ register_forward u_register_forward(
 );
 
 // ID stage
-assign ds_ready_go  = ds_valid && !ds_stall && !bpu_flush;
+assign ds_ready_go  = ds_valid && !ds_stall;
 assign ds_allowin   = !ds_valid || ds_ready_go && es_allowin;
 assign ds_to_es_valid = ds_valid && ds_ready_go;
 always @(posedge clk) begin
-    if(reset || bpu_flush && !exception.bd) begin
+    if(reset) begin
         ds_valid <= 1'b0;
     end
     else if(pipeline_flush.flush) begin
@@ -150,7 +149,7 @@ assign is_call   = inst_d.br_op[11] | inst_d.br_op[9];
 assign is_jump   = inst_d.br_op[8];
 assign br_bus_en = (|inst_d.br_op) & ds_ready_go & es_allowin & ds_valid;
 always_ff @(posedge clk) begin
-    if(reset || pipeline_flush.flush || branch_resolved || bpu_flush && !exception.bd)
+    if(reset || pipeline_flush.flush || branch_resolved)
         br_bus_r_valid <= 1'b0;
     else if(br_bus_en) begin
         br_bus_r_valid <= 1'b1;

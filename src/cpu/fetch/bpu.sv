@@ -176,7 +176,7 @@ always_ff @ (posedge clk) begin
         flush_r <= es_verify_valid && ~es_to_bpu_bus.predict_sucess;
 end
 
-assign flush                         = flush_r;
+assign flush                         = es_verify_valid && ~es_to_bpu_bus.predict_sucess;
 assign is_correction                 = (state == `CORRECTION);
 assign correct_target                = correction_target;
 
