@@ -2,11 +2,11 @@
 
 module SimpleMIPS(
     input logic clk,
-    input logic resetn,
-    // ex
+    input logic rstn,
+    //! exception
     input logic [5:0] ext_int,
-    // axi
-    //ar
+    //! AXI
+    //! AXI/AR read address
     output [3 :0]   arid   ,
     output virt_t   araddr ,
     output [7 :0]   arlen  ,
@@ -17,14 +17,14 @@ module SimpleMIPS(
     output [2 :0]   arprot ,
     output          arvalid,
     input           arready,
-    //r
+    //! AXI/R read data
     input  [3 :0]   rid    ,
     input  uint32_t rdata  ,
     input  [1 :0]   rresp  ,
     input           rlast  ,
     input           rvalid ,
     output          rready ,
-    //aw
+    //! AXI/AW write address
     output [3 :0]   awid   ,
     output virt_t   awaddr ,
     output [7 :0]   awlen  ,
@@ -35,26 +35,27 @@ module SimpleMIPS(
     output [2 :0]   awprot ,
     output          awvalid,
     input           awready,
-    //w
+    //! AXI/W write data
     output [3 :0]   wid    ,
     output uint32_t wdata  ,
     output [3 :0]   wstrb  ,
     output          wlast  ,
     output          wvalid ,
     input           wready ,
-    //b
+    //! AXI/B write response
     input  [3 :0]   bid    ,
     input  [1 :0]   bresp  ,
     input           bvalid ,
     output          bready ,
-    // trace debug interface
+    //! debug interface for trace
     output [31:0] debug_wb_pc,
     output [ 3:0] debug_wb_rf_wen,
     output [ 4:0] debug_wb_rf_wnum,
     output [31:0] debug_wb_rf_wdata
 );
+
 reg reset;
-always @(posedge clk) reset <= ~resetn;
+always @(posedge clk) reset <= ~rstn;
 
 // CPU_ICache
 CPU_ICache_Interface CPU_ICache();
