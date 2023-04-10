@@ -46,7 +46,7 @@ typedef struct packed {
 	//! AXI/W
 	logic        wready;
 	//! AXI/B
-	logic [1 :0] bresp;
+	logic [1:0]  bresp;
 	logic        bvalid;
 } axi_resp_t;
 

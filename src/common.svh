@@ -18,4 +18,12 @@ typedef uint32_t      phys_t;
 
 `include "axi.svh"
 
+//! debug info of writeback stage
+typedef struct packed {
+    uint32_t pc;        //!< PC
+    uint32_t data;      //!< data writing to regfiles
+    logic [3:0] en;     //!< enable signals writing to regfiles
+    logic [4:0] num;    //!< number writing to regfiles
+} wb_debug_t;
+
 `endif

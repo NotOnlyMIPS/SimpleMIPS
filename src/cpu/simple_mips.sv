@@ -1,6 +1,7 @@
+`include "../common.svh"
 `include "cpu.svh"
 
-module SimpleMIPS(
+module SimpleMIPS (
     input logic clk,
     input logic rstn,
     //! exception
@@ -94,17 +95,57 @@ logic [ 31:0]   uncache_wr_data;
 logic           uncache_wr_rdy;
 logic           uncache_wr_bvalid;
 
-cpu_core u_cpu_core(
+//! AXI
+axi_t axi;
+
+assign axi.arid         = arid;
+assign axi.req.araddr   = araddr;
+assign axi.req.arlen    = arlen;
+assign axi.req.arsize   = arsize;
+assign axi.req.arburst  = arburst;
+assign axi.req.arlock   = arlock;
+assign axi.req.arcache  = arcache;
+assign axi.req.arprot   = arprot;
+assign axi.req.arvalid  = arvalid;
+assign axi.resp.arready = arready;
+assign axi.rid          = rid;
+assign axi.req.rready   = rready;
+assign axi.resp.rdata   = rdata;
+assign axi.resp.rresp   = rresp;
+assign axi.resp.rlast   = rlast;
+assign axi.resp.rvalid  = rvalid;
+assign axi.awid         = awid;
+assign axi.req.awaddr   = awaddr;
+assign axi.req.awlen    = awlen;
+assign axi.req.awsize   = awsize;
+assign axi.req.awburst  = awburst;
+assign axi.req.awlock   = awlock;
+assign axi.req.awcache  = awcache;
+assign axi.req.awprot   = awprot;
+assign axi.req.awvalid  = awvalid;
+assign axi.resp.awready = awready;
+assign axi.wid          = wid;
+assign axi.req.wdata    = wdata;
+assign axi.req.wstrb    = wstrb;
+assign axi.req.wlast    = wlast;
+assign axi.req.wvalid   = wvalid;
+assign axi.resp.wready  = wready;
+assign axi.bid          = bid;
+assign axi.req.bready   = bready;
+assign axi.resp.bresp   = bresp;
+assign axi.resp.bvalid  = bvalid;
+
+cpu_core u_cpu_core (
+    //! common
     .clk,
     .reset,
-
+    //! exception
     .ext_int,
-
-    // ICache
+    //! ICache
     .IBus             (CPU_ICache.CPU   ),
-    // data_sram
+    //! data_sram
     .DBus             (CPU_DCache.CPU   ),
-    //debug interface
+    //! debug interface
     .debug_wb_pc      (debug_wb_pc      ),
     .debug_wb_rf_wen  (debug_wb_rf_wen  ),
     .debug_wb_rf_wnum (debug_wb_rf_wnum ),
@@ -157,83 +198,8 @@ dcache u_dcache(
     .uwr_bvalid    (uncache_wr_bvalid)
 );
 
-cpu_axi_interface u_cpu_axi_interface(
-    .clk,
-    .reset,
-    // ICache
-    .icache_uncache    ,
-    .icache_req        ,
-    .icache_addr       ,
-    .icache_addr_ready ,
-    .icache_data_ready ,
-    .icache_rdata      ,
-    // DCache
-    .dcache_rd_req,
-    .dcache_rd_addr,
-    .dcache_rd_rdy,
-    .dcache_ret_valid,
-    .dcache_ret_data,
-    .dcache_wr_req,
-    .dcache_wr_addr,
-    .dcache_wr_data,
-    .dcache_wr_rdy,
-    .dcache_wr_bvalid,
-    // UnCache
-    .uncache_rd_req,
-    .uncache_rd_size,//
-    .uncache_rd_addr,
-    .uncache_rd_rdy,
-    .uncache_ret_valid,
-    .uncache_ret_data,
-    .uncache_wr_req,
-    .uncache_wr_size,//
-    .uncache_wr_addr,
-    .uncache_wr_wstrb,//
-    .uncache_wr_data,
-    .uncache_wr_rdy,
-    .uncache_wr_bvalid,
-    // axi
-    // ar
-    .arid   ,
-    .araddr ,
-    .arlen  ,
-    .arsize ,
-    .arburst,
-    .arlock ,
-    .arcache,
-    .arprot ,
-    .arvalid,
-    .arready,
-    // r
-    .rid   ,
-    .rdata ,
-    .rresp ,
-    .rlast ,
-    .rvalid,
-    .rready,
-    // aw
-    .awid   ,
-    .awaddr ,
-    .awlen  ,
-    .awsize ,
-    .awburst,
-    .awlock ,
-    .awcache,
-    .awprot ,
-    .awvalid,
-    .awready,
-    // w
-    .wid   ,
-    .wdata ,
-    .wstrb ,
-    .wlast ,
-    .wvalid,
-    .wready,
-    // b
-    .bid   ,
-    .bresp ,
-    .bvalid,
-    .bready
+cpu_axi_interface u_cpu_axi_interface (
+    .*
 );
 
 endmodule
