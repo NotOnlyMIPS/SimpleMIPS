@@ -23,14 +23,11 @@ module pre_fetch_stage (
     // tlb/mmu
     input  virt_t           tlb_cache_pc,
     output virt_t           inst_vaddr,
-    input  mmu_result_t     inst_result,
     input  exception_t      inst_tlb_ex,
     // icache
     output logic            icache_req,
-    output logic            icache_iscache,
     output logic [ 3:0]     icache_offset,
     output logic [ 7:0]     icache_index,
-    output logic [19:0]     icache_tag,
     input  logic            icache_addr_ok,
     input  logic            icache_data_ok,
     input  uint32_t         icache_rdata
@@ -155,16 +152,14 @@ assign inst_vaddr = next_pc;
 // exception
 assign exception.bd = 1'b0;
 assign {exception.ex, exception.exccode} = {6{pfs_valid}} & (next_pc[1:0] != 2'b0 ? {1'b1, `EXCCODE_ADEL} :
-                                                             {inst_tlb_ex.ex, inst_tlb_ex.exccode});
+                                                             6'b0);
 assign exception.badvaddr = next_pc;
-assign exception.tlb_refill =  exception.exccode == `EXCCODE_TLBL ?
-                               inst_tlb_ex.tlb_refill : 1'b0;
+// assign exception.tlb_refill =  exception.exccode == `EXCCODE_TLBL ?
+//                                inst_tlb_ex.tlb_refill : 1'b0;
 
 // inst_sram interface
 assign icache_req     = req_valid && !exception.ex && pfs_valid && !bpu_flush;
-assign icache_iscache = ~inst_result.uncached;
 assign icache_offset  = inst_vaddr[ 3:0];
 assign icache_index   = inst_vaddr[11:4];
-assign icache_tag     = inst_result.phy_addr[31:12];
 
 endmodule

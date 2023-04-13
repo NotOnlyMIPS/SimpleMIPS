@@ -86,12 +86,16 @@ assign IBus.cachetype = {cache_op, cache_op != EMPTY, 1'b0};
 assign IBus.cache_valid = cache_valid;
 assign IBus.cache_tag   = cache_tag;
 assign IBus.cache_index = cache_index;
+assign IBus.tag         = inst_result.phy_addr[31:12];
+assign IBus.iscache     = ~inst_result.uncached;
 
 assign DBus.cachetype = {cache_op, 1'b0, cache_op != EMPTY};
 assign DBus.cache_valid = cache_valid;
 assign DBus.cache_tag   = cache_tag;
 assign DBus.cache_dirty = cache_dirty;
 assign DBus.cache_index = cache_index;
+assign DBus.tag         = data_result.phy_addr[31:12];
+assign DBus.iscache     = ~data_result.uncached;
 
 // BPU
 BPU u_BPU (
@@ -133,14 +137,11 @@ pre_fetch_stage u_pre_if_stage (
     // tlb/mmu
     .tlb_cache_pc   (tlb_cache_pc   ),
     .inst_vaddr     (inst_vaddr     ),
-    .inst_result    (inst_result    ),
     .inst_tlb_ex    (inst_tlb_ex    ),
     // ICache
     .icache_req     (IBus.req       ),
-    .icache_iscache (IBus.iscache   ),
     .icache_offset  (IBus.offset    ),
     .icache_index   (IBus.index     ),
-    .icache_tag     (IBus.tag       ),
     .icache_addr_ok (IBus.addr_ok   ),
     .icache_data_ok (IBus.data_ok   ),
     .icache_rdata   (IBus.rdata     )
@@ -249,11 +250,9 @@ pre_mem_stage u_pre_mem_stage (
     .data_tlb_ex    (data_tlb_ex    ),
     // data_sram interface
     .data_req       (DBus.req       ),
-    .data_iscache   (DBus.iscache   ),
     .data_wr        (DBus.wr        ),
     .data_offset    (DBus.offset    ),
     .data_index     (DBus.index     ),
-    .data_tag       (DBus.tag       ),
     .data_wstrb     (DBus.wstrb     ),
     .data_size      (DBus.size      ),
     .data_wdata     (DBus.wdata     ),

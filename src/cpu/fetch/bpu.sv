@@ -27,7 +27,7 @@ BHT_entry_t         r_entry;
 ras_t               ras_data;
 
 logic  es_verify_valid;
-assign es_verify_valid = (es_to_bpu_bus.br_type != 3'b0 && es_to_bpu_bus.ready);
+assign es_verify_valid = es_to_bpu_bus.br_type != 3'b0;
 
 assign w_entry.tag     = es_to_bpu_bus.predict_entry.tag;
 assign w_entry.target  = es_to_bpu_bus.predict_entry.target;

@@ -196,7 +196,8 @@ assign tlbp_entry_hi = cp0_entry_hi;
 
 
 always @(posedge clk) begin
-    if(exception.ex && (exception.exccode == `EXCCODE_TLBL
+    if(reset) cp0_entry_hi <= '0;
+    else if(exception.ex && (exception.exccode == `EXCCODE_TLBL
                     || exception.exccode == `EXCCODE_TLBS
                     || exception.exccode == `EXCCODE_MOD))
         cp0_entry_hi[31:13] <= exception.badvaddr[31:13];

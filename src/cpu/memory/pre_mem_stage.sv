@@ -24,11 +24,9 @@ module pre_mem_stage(
     input  exception_t  data_tlb_ex,
     // data sram interface
     output logic        data_req,
-    output logic        data_iscache,
     output logic        data_wr,
 	output logic [ 3:0] data_offset,
 	output logic [ 7:0] data_index,
-	output logic [19:0] data_tag,
     output logic [ 2:0] data_size,
     output logic [ 3:0] data_wstrb,
     output uint32_t     data_wdata,
@@ -80,8 +78,6 @@ end
 
 // mem_req
 assign data_req     = req;
-assign data_iscache = ~data_result.uncached;
-assign data_tag     = data_result.phy_addr[31:12];
 mem_req u_mem_req (
     .pms_valid      (pms_valid),
 
@@ -114,10 +110,10 @@ assign {exception.ex,
         exception.exccode,
         exception.tlb_refill} = {7{pms_valid}} & (
                                                 es_to_pms_bus_r.exception.ex ? {es_to_pms_bus_r.exception.ex, es_to_pms_bus_r.exception.exccode, es_to_pms_bus_r.exception.tlb_refill} :
-                                                mem_ex ? {1'b1, mem_exccode, 1'b0} :
-                                                {data_tlb_ex.ex, data_tlb_ex.exccode, data_tlb_ex.tlb_refill});
+                                                mem_ex ? {1'b1, mem_exccode, 1'b0} : '0);
+                                                // {data_tlb_ex.ex, data_tlb_ex.exccode, data_tlb_ex.tlb_refill});
 assign exception.badvaddr = es_to_pms_bus_r.exception.ex ? es_to_pms_bus_r.exception.badvaddr :
-                            (mem_ex | data_tlb_ex.ex) & pms_valid ? es_to_pms_bus_r.mem_addr  : 32'h0;
+                            mem_ex & pms_valid ? es_to_pms_bus_r.mem_addr  : 32'h0;
 
 // forward bus
 assign op_tlb  = (es_to_pms_bus_r.tlb_op[0] | es_to_pms_bus_r.tlb_op[1] | es_to_pms_bus_r.tlb_op[2] ) & pms_valid;
