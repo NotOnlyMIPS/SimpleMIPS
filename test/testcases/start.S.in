@@ -1,0 +1,195 @@
+/*!
+ * \brief source template for generation of start.S
+ *
+ * \note preprocess works will be done before all the things,
+ * so any comments included in the file are written in c-style.
+ */
+
+#include <asm.h>
+#include <regdef.h>
+#include <cpu_cde.h>
+
+.set	noreorder
+.globl	_start
+.globl	start
+.globl	__main
+
+/*!
+ * s0: number of testcases
+ * s1: number address (defined in SoC CONFREG) [questionable]
+ * s2: for exception use [questionable]
+ * s3: score of the test [questionable]
+ * s4: exception PC [questionable]
+ *
+ * \note reg-aliases above are defined in regdef.h
+ */
+
+_start:
+start:
+    li t0, 0xffffffff
+    li t0, 0xffffffff
+    addiu t0, zero, 0xffff
+	b locate
+	nop
+
+    //! avoid `b locate` not taken [questionable]
+    lui   t0, 0x8000
+    addiu t1, t1, 1
+    or    t2, t0, zero
+    addu  t3, t5, t6
+    lw    t4, 0(t0)
+    nop
+
+//! NOTE: why here requires 0xbfc000ec?
+.org 0x0ec
+cpu_error_handler:
+    lui   t0, 0x8000
+    addiu t1, t1, 1
+    or    t2, t0, zero
+    addu  t3, t5, t6
+    lw    t4, 0(t0)
+
+//! NOTE: why here requires 0xbfc00100?
+.org 0x100
+test_finish:
+    addiu t0, t0, 1
+    li t1, 0xff
+    LI (t2, UART_ADDR)
+    sw t1, 0x0(t2)
+    b test_finish
+    nop
+
+    //! NOTE: and why here repeat the cpu_error_handler again???
+    lui   t0, 0x8000
+    addiu t1, t1, 1
+    or    t2, t0, zero
+    addu  t3, t5, t6
+    lw    t4, 0(t0)
+
+//! include exception handler
+#define START_USE_EXCEPTION
+#include "exception.S"
+
+/*!
+ * test entry
+ */
+locate:
+    LI(a0, LED_RG1_ADDR)
+    LI(a1, LED_RG0_ADDR)
+    LI(a2, LED_ADDR)
+    LI(s1, NUM_ADDR)
+
+    LI(t1, 0x0002)
+    LI(t2, 0x0001)
+    LI(t3, 0x0000ffff)
+    lui s3, 0
+    NOP4
+
+    sw t1, 0(a0)
+    sw t2, 0(a1)
+    sw t3, 0(a2)
+    sw s3, 0(s1)
+    lui s0, 0
+    NOP4
+
+    //! switch to KSEG0 from KSEG1
+    la t9, kseg1_to_kseg0
+    jr t9
+    nop
+kseg1_to_kseg0:
+
+/*!
+ * notation below will be replaced with code lablelled `inst_test`
+ * during the start.S generation
+ */
+#define START_INST_TEST_PLACEHOLDER
+
+    //! switch to KSEG1 from KSEG0
+    la   t1, kseg0_to_kseg1
+    li   t2, 0x20000000
+    addu t9, t1, t2
+    jr   t9
+    nop
+kseg0_to_kseg1:
+
+/*!
+ * instead of mannual specification, TEST_NUM is auto-evaluated
+ * and defined by the build script
+ */
+#ifndef TEST_NUM
+#error missing number of testcases
+#endif
+
+test_end:
+    LI(s0, TEST_NUM)
+    NOP4
+    beq s0, s3, 1f
+    nop
+
+    LI(a0, LED_ADDR)
+    LI(a1, LED_ADDR)
+    LI(a2, LED_ADDR)
+
+    LI(t1, 0x0002)
+    NOP4
+
+    sw zero, 0(a0)
+    sw t1, 0(a1)
+    sw t1, 0(a2)
+    b  2f
+    nop
+1:
+    LI(t1, 0x0001)
+    LI(a0, LED_RG1_ADDR)
+    LI(a1, LED_RG0_ADDR)
+    NOP4
+    sw t1, 0(a0)
+    sw t1, 0(a1)
+2:
+    // LI(t1, 0xff)
+    // LI(t0, UARD_ADDR)
+    // sw t1, 0(t0)
+
+    jal test_finish
+    nop
+
+/*!
+ * useful functions begin
+ *
+ * \note these functions will be used in the generated `inst_test`
+ */
+wait_1s:
+    LI(t0, SW_INTER_ADDR)
+    LI(t1, 0xaaaa)
+
+    //! initialize t3
+    lw    t2, 0x0(t0)   //!< switch_interleave: {switch[7],1'b0, switch[6],1'b0...switch[0],1'b0}
+    NOP4
+    xor   t2, t2, t1
+    NOP4
+    sll   t3, t2, 9     //!< t3 = switch interleave << 9
+    NOP4
+    addiu t3, t3, 1
+    NOP4
+
+sub1:
+    addiu t3, t3, -1
+
+    //! select min{t3, switch_interleave}
+    lw    t2, 0x0(t0)   //!< switch_interleave: {switch[7],1'b0, switch[6],1'b0...switch[0],1'b0}
+    NOP4
+    xor   t2, t2, t1
+    NOP4
+    sll   t2, t2, 9     //!< switch interleave << 9
+    NOP4
+    sltu  t4, t3, t2
+    NOP4
+    bnez  t4, 1f
+    nop
+    addu  t3, t2, 0
+    NOP4
+1:
+    bne   t3,zero, sub1
+    nop
+    jr ra
+    nop
