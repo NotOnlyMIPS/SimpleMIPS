@@ -1,13 +1,16 @@
+#!/usr/bin/nu
+
 use mips-testlib.nu *
 
 def generate-start [
     srcDir: string = '.'
     buildDir: string = 'build'
+    --exclude (-e): list = []
 ] {
     let placeholder = '#define START_INST_TEST_PLACEHOLDER'
     let srcIn = (open $'($srcDir)/start.S.in' | split row $placeholder)
 
-    let inst_test = (get-all-testcases $srcDir | generate-inst-asm)
+    let inst_test = (get-all-testcases $srcDir | filter {|e| not ($e.target in $exclude)} | generate-inst-asm)
 
     [$srcIn.0, $inst_test, $srcIn.1] | str join | save -f $'($buildDir)/start.S'
 }
@@ -15,6 +18,7 @@ def generate-start [
 def install-source [
     srcDir: string = '.'
     buildDir: string = 'build'
+    --exclude (-e): list = []
 ] {
     let buildSrcDir = $'($buildDir)/.src'
     if not ($buildSrcDir | path exists) {
@@ -25,7 +29,7 @@ def install-source [
     cp $'($srcDir)/*.S' $buildSrcDir
 
     # install target inst
-    let testcases = (get-all-testcases $srcDir)
+    let testcases = (get-all-testcases $srcDir | filter {|e| not ($e.target in $exclude)})
     for target in ($testcases.target | uniq) {
         let dir = $'($buildSrcDir)/($target)'
         if not ($dir | path exists) {
@@ -35,7 +39,7 @@ def install-source [
     }
 
     # generate start.S
-    generate-start $srcDir $buildSrcDir
+    generate-start $srcDir $buildSrcDir --exclude $exclude
 }
 
 def compile [
@@ -47,58 +51,90 @@ def compile [
         mkdir $objDir
     }
 
-    # = CFLAGS
-    # == general
-    #
-    #   -fno-builtin
-    #   -fno-pic
-    #   -fverbose-asm
-    #   -nostdinc
-    #   -nostdlib
-    #   -mips1
-    #   -mno-abicalls
-    #   -g
-    #   -O2
-    #
-    # == asm.h
-    #
-    #   -D_KERNEL
-    #
-    # == bin.lds.S
-    #
-    #   -DMEMSTART=0x80000000
-    #   -DMEMSIZE=0x04000
+    def get-flags [...flag: string] {
+        let CFLAGS = {
+            general: [
+                '-fverbose-asm'
+                '-nostdinc'
+                '-nostdlib'
+                '-mips1'
+                '-mno-abicalls'
+                '-g'
+                '-O'
+            ]
+            header: [
+                '-D_KERNEL'
+            ]
+            linkfmt: [
+                '-Umips'
+                '-U_MAIN'
+                '-D_LOADER'
+                '-DMEMSTART=0x80000000'
+                '-DMEMSIZE=0x04000'
+            ]
+        }
+
+        $flag | each {|$e| $CFLAGS | get $e | str join ' ' } | str join ' '
+    }
+
+    def compile-object [options: string] {
+        let argv = ($options | split row (char newline) | filter {|e| not ($e | is-empty) } | str trim | str join ' ')
+        nu -c $'mipsel-linux-gcc ($argv)'
+    }
 
     # compile testcases
     let testcases = (get-all-testcases $srcDir)
-    for obj in $testcases {
+    $testcases | par-each {|obj|
         let source = $'($buildDir)/.src/($obj.target)/($obj.testcase).S'
-        mipsel-linux-gcc -c $source -o $'($objDir)/($obj.testcase).obj' $'-I($srcDir)/($obj.target)' $'-I($srcDir)/include' -fno-builtin -fno-pic -fverbose-asm -nostdinc -nostdlib -mips1 -mno-abicalls -g -O2 -D_KERNEL
+        if ($source | path exists) {
+            compile-object $'
+                -c ($source)
+                -o ($objDir)/($obj.testcase).obj
+                -I($srcDir)/($obj.target) -I($srcDir)/include
+                (get-flags general header)
+            '
+        }
     }
 
     # compile start.S
-    mipsel-linux-gcc -c $'($buildDir)/.src/start.S' -o $'($objDir)/start.obj' $'-I($srcDir)/include' -fno-builtin -fno-pic -fverbose-asm -nostdinc -nostdlib -mips1 -mno-abicalls -g -O2 -D_KERNEL $'-DTEST_NUM=($testcases | length)'
+    compile-object $'
+        -c ($buildDir)/.src/start.S
+        -o ($objDir)/start.obj
+        -I($srcDir)/include
+        (get-flags general header)
+        -DTEST_NUM=($testcases | length)
+    '
 
     # compile bin.lds.S
-    mipsel-linux-gcc -E -P $'($buildDir)/.src/bin.lds.S' -o $'($objDir)/bin.lds' -Umips -D_LOADER -U_MAIN $'-I($srcDir)/include' -fno-builtin -fno-pic -fverbose-asm -nostdinc -nostdlib -mips1 -mno-abicalls -g -O2 -D_KERNEL -DMEMSTART=0x80000000 -DMEMSIZE=0x04000
+    compile-object $'
+        -E -P ($buildDir)/.src/bin.lds.S
+        -o ($objDir)/bin.lds
+        -I($srcDir)/include
+        (get-flags general header linkfmt)
+    '
 
     # link main.elf
     cd $objDir
-    mipsel-linux-ld -g *.obj -T bin.lds -o main.elf
+    mipsel-linux-ar -cr libtestcase.a n*.obj
+    mipsel-linux-ld -g -T bin.lds -o main.elf start.obj -L. -ltestcase
 }
 
-def main [buildDir: string = 'build'] {
+def main [
+    buildDir: string = 'build'
+    --exclude (-e): string = ''
+] {
     let srcDir = ($env.FILE_PWD | path dirname)
 
-    if not ($buildDir | path exists) {
-        mkdir $buildDir
+    if ($buildDir | path exists) {
+        rm -rf $buildDir
     }
-
-    install-source $srcDir $buildDir
-
-    compile $srcDir $buildDir
+    mkdir $buildDir
 
     let BINSRC = $'($buildDir)/.obj/main.elf'
+
+    install-source $srcDir $buildDir --exclude ($exclude | split row ',')
+
+    compile $srcDir $buildDir
 
     mipsel-linux-objcopy -O binary -j .text $BINSRC $'($buildDir)/text.bin'
     mipsel-linux-objcopy -O binary -j .data $BINSRC $'($buildDir)/data.bin'

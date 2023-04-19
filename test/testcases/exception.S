@@ -21,6 +21,7 @@ tlb_ex_handler:
 //! any other exceptions
 .org 0x380
 exception_dispatch:
+1:
     mfhi k0
     mflo k1
     li  k0, 0x800d0000

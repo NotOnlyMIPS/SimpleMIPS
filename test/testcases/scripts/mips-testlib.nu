@@ -26,6 +26,10 @@ export def extract-coe [
     [
         $'memory_initialization_radix = ($radix);'
         'memory_initialization_vector =',
-        (bin2hex (open $binpath | into binary) -l 4 -e)
+        (try {
+            ^cat $binpath | ^xxd -c 4 -g 32 -e | ^cut -d ' ' -f 2 | into string | str trim
+        } catch {
+            bin2hex (open $binpath | into binary) -l 4 -e
+        })
     ] | str join "\n" | save -f $'($output).coe'
 }

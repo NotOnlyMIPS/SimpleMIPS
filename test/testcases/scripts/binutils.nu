@@ -1,3 +1,4 @@
+# Convert binary stream to formatted hex string.
 export def bin2hex [
     raw: binary                 # binary stream for conversion
     --length (-l): int = 16     # number of bytes per group
