@@ -45,6 +45,7 @@ wire [31:0] rs_d;
 wire [31:0] rt_d;
 wire [31:0] rd_d;
 wire [31:0] sa_d;
+wire        code_d;
 wire [63:0] func_d;
 
 //! arithmetic op inst.
@@ -215,7 +216,7 @@ assign inst_tlbwi  = (inst == 32'h42000002);
 // cache
 always_comb begin
     if(~op_d[6'h2f]) begin
-        inst_cache = Cache_Code_EMPTY;
+        inst_cache = EMPTY;
     end
     else case(inst[20:16])
         5'b00000: inst_cache = I_Index_Invalid;
@@ -225,18 +226,18 @@ always_comb begin
         5'b01001: inst_cache = D_Index_Store_Tag;
         5'b10001: inst_cache = D_Hit_Invalid;
         5'b10101: inst_cache = D_Hit_Writeback_Invalid;
-        default:  inst_cache = Cache_Code_EMPTY;
+        default:  inst_cache = EMPTY;
     endcase
 end
 // invalid
 assign inst_invalid= (~|alu_op) & (~|hi_lo_op) & (~|br_op)
                     & ~inst_syscall & ~inst_break & ~inst_mfc0 & ~inst_mtc0 & ~inst_eret
-                    & ~inst_tlbp    & ~inst_tlbr  & ~inst_tlbwi & (inst_cache == Cache_Code_EMPTY);
+                    & ~inst_tlbp    & ~inst_tlbr  & ~inst_tlbwi & (inst_cache == EMPTY);
 
 
 assign alu_ov     = inst_add  | inst_addi | inst_sub;
 assign alu_op[ 0] = inst_addu | inst_add  | inst_addiu  | inst_addi  | res_from_mem | res_to_mem |
-                    inst_jal  | inst_jalr | inst_bltzal | inst_bgezal| (inst_cache != Cache_Code_EMPTY);
+                    inst_jal  | inst_jalr | inst_bltzal | inst_bgezal| (inst_cache != EMPTY);
 assign alu_op[ 1] = inst_subu | inst_sub;
 assign alu_op[ 2] = inst_slt  | inst_slti;
 assign alu_op[ 3] = inst_sltu | inst_sltiu;
@@ -302,7 +303,7 @@ assign src1_is_sa   = inst_sll   | inst_srl     | inst_sra;
 assign src1_is_pc   = inst_jal   | inst_jalr    | inst_bgezal | inst_bltzal;
 assign src2_is_simm = inst_addiu | inst_addi    |
                       inst_lui   | res_from_mem | res_to_mem  |
-                      inst_slti  | inst_sltiu   | (inst_cache != Cache_Code_EMPTY);
+                      inst_slti  | inst_sltiu   | (inst_cache != EMPTY);
 assign src2_is_zimm = inst_andi  | inst_ori     | inst_xori;
 assign src2_is_8    = inst_jal   | inst_jalr    | inst_bgezal | inst_bltzal;
 assign res_from_mem = |load_op;
@@ -312,7 +313,7 @@ assign dst_is_rt    = inst_addiu | inst_addi   |
                       inst_lui   | res_from_mem| inst_mfc0 |
                       inst_slti  | inst_sltiu  |
                       inst_andi  | inst_ori    | inst_xori;
-assign rf_we        = ~(res_to_mem) & (inst_cache == Cache_Code_EMPTY)
+assign rf_we        = ~(res_to_mem) & (inst_cache == EMPTY)
                     & ~inst_beq  & ~inst_bne   & ~inst_bgez & ~inst_bgtz
                     & ~inst_blez & ~inst_bltz  & ~inst_j    & ~inst_jr
                     & ~inst_div  & ~inst_divu  & ~inst_mult & ~inst_multu

@@ -1,4 +1,4 @@
-`include "../common.svh"
+`include "cpu.svh"
 
 module cpu_axi_interface
 (

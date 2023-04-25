@@ -4,13 +4,13 @@ module branch_control (
     input  es_valid,
 
     input  logic [11:0] br_op,
-    output logic [ 2:0] br_type,
 
     input  uint32_t rs_value,
     input  uint32_t rt_value,
 
-    input  virt_t       jump_target,
-    input  virt_t       branch_target,
+    input  virt_t       delay_slot_pc,
+    input  uint16_t     imm,
+    input  logic [25:0] jidx,
 
     input  logic        predict_is_taken,
     input  virt_t       predict_target  ,
@@ -32,9 +32,6 @@ logic  inst_jal;
 logic  inst_jr;
 logic  inst_jalr;
 
-logic type_branch, type_jump, type_call, type_return;
-logic target_jump, target_jump_r, target_branch;
-
 assign  inst_beq        = br_op[0];
 assign  inst_bne        = br_op[1];
 assign  inst_bgez       = br_op[2];
@@ -47,17 +44,6 @@ assign  inst_j          = br_op[8];
 assign  inst_jal        = br_op[9];
 assign  inst_jr         = br_op[10];
 assign  inst_jalr       = br_op[11];
-
-assign type_branch = inst_beq    || inst_bne 
-                  || inst_bgez   || inst_bgtz || inst_blez || inst_bltz
-                  || inst_bgezal || inst_bltzal;
-assign type_jump   = inst_j;
-assign type_call   = inst_jal || inst_jalr;
-assign type_return = inst_jr;
-assign br_type = {3{type_jump  }} & `B_IS_J     
-               | {3{type_call  }} & `B_IS_CALL
-               | {3{type_return}} & `B_IS_RET
-               | {3{type_branch}} & `B_IS_BRA;
 
 assign rs_eq_rt = (rs_value == rt_value);
 assign rs_eq_z  = ~|rs_value;
@@ -77,14 +63,9 @@ assign br_taken = (    inst_beq                  &&  rs_eq_rt
                    ||  inst_jr
                    ||  inst_jalr
                   ) && es_valid;
-
-
-assign target_jump   = inst_j   || inst_jal;
-assign target_jump_r = inst_jr  || inst_jalr;
-assign target_branch = type_branch;
-assign br_target = {32{target_jump  }} & jump_target |
-                   {32{target_jump_r}} & rs_value    |
-                   {32{target_branch}} & branch_target;
+assign br_target = (inst_j  || inst_jal ) ? {delay_slot_pc[31:28], jidx[25:0], 2'b0}:
+                   (inst_jr || inst_jalr) ? rs_value :
+                  /*inst_bXX*/              (delay_slot_pc + {{14{imm[15]}}, imm[15:0], 2'b0});
 
 assign predict_sucess = br_taken && predict_is_taken && (br_target == predict_target) || !(br_taken || predict_is_taken);
 

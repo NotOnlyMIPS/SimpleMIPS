@@ -42,10 +42,8 @@
 `define CR_STATUS   12
 `define CR_CAUSE    13
 `define CR_EPC      14
-`define CR_PRID     15
-`define CR_EBASE	47 // sel 1
 `define CR_CONFIG0  16
-`define CR_CONFIG1  48 // sel 1
+`define CR_CONFIG1  48
 `define CR_TAGLO    28
 
 // cause register exc_code field
@@ -65,7 +63,7 @@
 
 //Cache
 typedef enum logic [2:0] {
-	Cache_Code_EMPTY,
+	EMPTY,
 
 	I_Index_Invalid,
 	I_Index_Store_Tag,
@@ -83,7 +81,6 @@ typedef struct packed {
 	logic 					isDcache;
 } CacheType;
 
-
 // exception
 typedef struct packed {
 	//TLB
@@ -95,6 +92,15 @@ typedef struct packed {
     virt_t 		 badvaddr;
 } exception_t;
 
+typedef struct packed {
+	logic flush;
+	logic ex;
+	logic eret;
+	logic tlb_op;
+	logic cache_op;
+	logic tlb_refill;
+} pipeline_flush_t;
+
 // BPU
 typedef struct packed {
 	logic [31:10]	tag;
@@ -102,6 +108,12 @@ typedef struct packed {
 	logic [2:0]     br_type;
 	logic [1:0]     count;
 } BHT_entry_t;
+
+typedef struct packed {
+	logic [2:0]    br_type;
+	logic 		   br_verify_ready;
+	virt_t         pc;
+} ds_to_bpu_bus_t;
 
 typedef struct packed {
 	logic          valid;
@@ -120,19 +132,23 @@ typedef struct packed {
 	virt_t		   pc;
 } verify_result_t;
 
+
 // RAS
 typedef struct packed {
 	logic valid;
 	virt_t data;
 } ras_t;
 
-/*-------------------------- pipeline -----------------------*/
-
 // pre_IF stage
 typedef struct packed {
+	// pipeline
+	logic 	 	valid;
 	// pre_IF to IF
 	logic   	inst_valid;
 	uint32_t	inst;
+	logic 		data_cancel;
+	logic 		addr_ok;
+	logic 	 	br_op;
 	virt_t	 	pc;
 	// exception
 	exception_t exception;
@@ -140,6 +156,8 @@ typedef struct packed {
 
 // IF stage
 typedef struct packed {
+	// pipeline
+	logic 		 valid;
 	// IF to ID
     uint32_t 	 inst;
     virt_t 		 pc;
@@ -184,9 +202,12 @@ typedef struct packed {
 } decoded_inst_t;
 
 typedef struct packed {
-	// to EXE
+	// pipeline
+	logic 		 valid;
+	// ID to EXE
 	logic [11:0] alu_op;
 	logic 		 alu_ov;
+	logic [ 2:0] br_type;
 	logic [11:0] br_op;
 	logic [ 6:0] load_op;
 	logic [ 4:0] store_op;
@@ -198,22 +219,19 @@ typedef struct packed {
 	logic  		 src2_is_simm;
 	logic 		 src2_is_zimm;
 	logic 		 src2_is_8;
-	logic 		 res_from_alu;
-	logic 		 res_from_hi_lo;
-	logic 		 res_from_rt;
 	logic 		 res_from_mem;
 	logic 		 res_to_mem;
 	logic 		 rf_we;
 	reg_addr_t 	 dest;
 	uint16_t 	 imm;
+	logic [25:0] jidx;
 	uint32_t 	 rs_value;
 	uint32_t 	 rt_value;
 	virt_t 	 	 pc;
 	// branch prediction
-	virt_t 		     jump_target;
-	virt_t 		     branch_target;
-	predict_result_t predict_result;
-	BHT_entry_t  	 predict_entry;
+	logic  		 predict_is_taken;
+	virt_t		 predict_target;
+	BHT_entry_t  predict_entry;
     // ex
 	exception_t  exception;
 	// tlb
@@ -225,9 +243,21 @@ typedef struct packed {
 
 // EXE stage
 typedef struct packed {
+	logic 		op_mfc0;
+	logic 		op_load;
+	logic       op_tlb_cache;
+	reg_addr_t 	dest;
+	uint32_t 	result;
+} es_forward_bus_t;
+
+typedef struct packed {
+	// pipeline
+	logic 		 valid;
 	// EXE to pre_MEM
 	logic [ 6:0] load_op;
 	logic [ 4:0] store_op;
+    logic [ 2:0] c0_op;
+	logic [ 7:0] c0_addr;
 	logic 		 res_from_mem;
 	logic 		 res_to_mem;
 	logic 		 rf_we;
@@ -235,51 +265,102 @@ typedef struct packed {
 	reg_addr_t 	 dest;
 	uint32_t 	 result;
     virt_t 		 pc;
-    // ex, tlb, cache
+    // ex
 	exception_t  exception;
-    logic [ 2:0] c0_op;
-	logic [ 7:0] c0_addr;
+	// tlb
 	logic   [2:0]tlb_op;
+	// cache
 	CacheCodeType cache_op;
 } es_to_pms_bus_t;
 
 // pre_MEM stage
 typedef struct packed {
+	logic 		op_mfc0;
+	logic 		op_load;
+	logic       op_tlb_cache;
+	reg_addr_t 	dest;
+	uint32_t 	result;
+} pms_forward_bus_t;
+
+typedef struct packed {
+	// pipeline
+	logic 		 valid;
 	// pre_MEM to MEM
 	logic [ 6:0] load_op;
+    logic [ 2:0] c0_op;
+	logic [ 7:0] c0_addr;
+	logic 		 req_ok;
 	logic 		 res_from_mem;
 	logic 		 res_to_mem;
 	logic 		 rf_we;
-	virt_t		 mem_addr;
 	reg_addr_t 	 dest;
 	uint32_t 	 result;
     virt_t 		 pc;
-    // ex, tlb, cache
+    // ex
 	exception_t  exception;
-    logic [ 2:0] c0_op;
-	logic [ 7:0] c0_addr;
+	// tlb
+	// phys_t	     phy_addr;
 	logic  [2:0] tlb_op;
+	// cache
 	CacheCodeType cache_op;
 } pms_to_ms_bus_t;
 
 // MEM stage
 typedef struct packed {
+	logic 		 op_mfc0;
+	logic 		 op_load;
+	logic        op_tlb_cache;
+	logic [ 3:0] rf_we;
+	reg_addr_t 	 dest;
+	uint32_t 	 result;
+} ms_forward_bus_t;
+
+typedef struct packed {
+	// pipeline
+	logic 		 valid;
 	// MEM to WB
+    logic [ 2:0] c0_op;
+	logic [ 7:0] c0_addr;
 	logic [ 3:0] rf_we;
 	reg_addr_t 	 dest;
 	uint32_t 	 result;
     virt_t 		 pc;
-    // ex, tlb, cache
-	exception_t   exception;
-	logic [2:0]	  c0_op;
-	logic [7:0]   c0_addr;
-	CacheCodeType cache_op;
-	logic [2:0]   tlb_op;
-	phys_t        phy_addr;
+    // ex
+	exception_t  exception;
+	// tlb
+	phys_t	     phy_addr;
+	logic   [2:0]tlb_op;
 	// cache
+	CacheCodeType cache_op;
 } ms_to_ws_bus_t;
 
 // WB stage
+typedef struct packed {
+	logic 		 op_mfc0;
+	logic        op_tlb_cache;
+	logic [ 3:0] rf_we;
+	reg_addr_t 	 dest;
+	uint32_t 	 result;
+} ws_forward_bus_t;
+
+typedef struct packed {
+	logic [ 3:0] we;
+	reg_addr_t   waddr;
+	uint32_t     wdata;
+} ws_to_rf_bus_t;
+
+
+typedef struct packed {
+	logic 		 eret_flush;
+	exception_t  exception;
+	virt_t 		 pc;
+	// TLB
+	logic  [2:0] tlb_op;
+	// Cache
+	virt_t		 cache_vaddr;
+	phys_t	     cache_paddr;
+	CacheCodeType cache_op;
+} ws_to_c0_bus_t;
 
 // CP0
 typedef struct packed {
@@ -322,8 +403,171 @@ typedef struct packed {
 	logic[2:0] cache_flag;
 	logic  invalid, miss, dirty, illegal;
 } mmu_result_t;
+interface C0_TLB_Interface();
+	//for TLBR/TLBWI/TLWR
+	tlb_index_t  tlbrw_index;
+	logic        tlbrw_we;
+	tlb_entry_t  tlbrw_wdata;
+	tlb_entry_t  tlbrw_rdata;
+	// for TLBP
+	uint32_t     tlbp_entry_hi;
+	uint32_t     tlbp_index;
 
-/*----------------------- interface -----------------------*/
-`include "cpu_interface.svh"
+	modport C0(
+		output  tlbrw_index,
+		output  tlbrw_we,
+		output  tlbrw_wdata,
+		input   tlbrw_rdata,
+		output  tlbp_entry_hi,
+		input   tlbp_index
+	);
+
+	modport TLB(
+		input  tlbrw_index,
+        input  tlbrw_we,
+        input  tlbrw_wdata,
+        output tlbrw_rdata,
+        input  tlbp_entry_hi,
+        output tlbp_index
+	);
+endinterface
+
+
+/*--------------------------------------Interface Definition-----------------------------------------------*/
+
+// CP0
+interface WB_C0_Interface();
+	logic 		 we;
+	logic [ 7:0] addr;
+	uint32_t 	 wdata;
+	uint32_t 	 rdata;
+
+	modport WB(
+		output we,
+		output addr,
+		output wdata,
+		input  rdata
+	);
+
+	modport C0(
+		input  we,
+		input  addr,
+		input  wdata,
+		output rdata
+	);
+
+endinterface
+
+// ICache
+interface CPU_ICache_Interface();
+	logic 	     req;
+	logic 		 addr_ok;
+	logic 		 iscache;
+	logic [ 3:0] offset;
+	logic [ 7:0] index;
+	logic [19:0] tag;
+	logic 		 data_ok;
+	uint32_t	 rdata;
+	// Cache Instruction
+	CacheType    cachetype;
+	logic        cache_valid;
+	logic [19:0] cache_tag;
+	logic [ 7:0] cache_index;
+
+	modport	ICache(
+		input  req,
+		input  iscache,
+		input  offset,
+		input  index,
+		input  tag,
+		input  cachetype,
+		input  cache_valid,
+		input  cache_tag,
+		input  cache_index,
+		output addr_ok,
+		output data_ok,
+		output rdata
+	);
+
+	modport CPU(
+		output req,
+		output iscache,
+		output offset,
+		output index,
+		output tag,
+		output cachetype,
+		output cache_valid,
+		output cache_tag,
+		output cache_index,
+		input  addr_ok,
+		input  data_ok,
+		input  rdata
+	);
+endinterface
+
+// DCache
+interface CPU_DCache_Interface();
+	logic		 req;
+	logic 		 iscache;
+	logic	     wr;
+	logic [ 3:0] offset;
+	logic [ 7:0] index;
+	logic [19:0] tag;
+	logic [ 3:0] wstrb;
+	logic [ 2:0] size;
+	uint32_t	 wdata;
+	uint32_t	 rdata;
+	logic 		 addr_ok;
+	logic 		 data_ok;
+	// Cache Instruction
+	CacheType    cachetype;
+	logic        cache_valid;
+	logic [19:0] cache_tag;
+	logic        cache_way;
+	logic        cache_dirty;
+	logic [ 7:0] cache_index;
+
+	modport	DCache(
+		input  req,
+		input  iscache,
+		input  wr,
+		input  offset,
+		input  index,
+		input  tag,
+		input  wstrb,
+		input  size,
+		input  wdata,
+		input  cachetype,
+		input  cache_valid,
+		input  cache_tag,
+		input  cache_way,
+		input  cache_dirty,
+		input  cache_index,
+		output addr_ok,
+		output data_ok,
+		output rdata
+	);
+
+	modport CPU(
+		output req,
+		output iscache,
+		output wr,
+		output offset,
+		output index,
+		output tag,
+		output wstrb,
+		output size,
+		output wdata,
+		output cachetype,
+		output cache_valid,
+		output cache_tag,
+		output cache_way,
+		output cache_dirty,
+		output cache_index,
+		input  addr_ok,
+		input  data_ok,
+		input  rdata
+	);
+endinterface
 
 `endif

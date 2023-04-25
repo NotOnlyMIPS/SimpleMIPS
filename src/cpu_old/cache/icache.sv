@@ -32,8 +32,9 @@ module icache #(
     output logic [ 31:0]   rd_addr,
     input  logic           rd_rdy,
     input  logic           ret_valid,
-    input  logic [127:0]   ret_data
-
+    input  logic [127:0]   ret_data,
+    // exception
+    input  exception_t     inst_tlb_ex
 );
 localparam int unsigned BYTES_WORD     = 4;
 localparam int unsigned INDEX_WIDTH    = $clog2(GROUP_NUM) ;
@@ -121,9 +122,9 @@ logic                                                         pipe_wr;
 
 //cpu
 //地址握手信号
-assign IBus.addr_ok    = req_buffer_en && IBus.req;
+assign IBus.addr_ok    = req_buffer_en;
 //数据握手信号
-assign IBus.data_ok    = req_buffer.valid && state_next == LOOKUP;
+assign IBus.data_ok    = (state_next == LOOKUP && req_buffer.valid) ;
 //返回给cpu的数据
 assign IBus.rdata      =  req_buffer.valid ? data_rdata_final2 : '0;
 //axi
@@ -138,7 +139,7 @@ assign rd_addr    = {req_buffer.tag, req_buffer.index, req_buffer.is_cache ? {OF
 assign cache_hit        = |hit;//ok
 //读ram地址
 assign read_addr        = state_next == REFILLDONE ? req_buffer.index : IBus.index;
-assign tagv_addr        = IBus.cache_type.isIcache ? IBus.cache_index :
+assign tagv_addr        = IBus.cachetype.isIcache ? IBus.cache_index :
                                 state == REFILL ? req_buffer.index :
                                 IBus.index;
 
@@ -157,8 +158,8 @@ endgenerate
 //只有重填时tag有值
 // assign tagv_wdata       = (state == REFILL) ? {1'b1, req_buffer.tag} : '0;
 always_comb begin : tagv_wdata_blockName
-    if(IBus.cache_type.isIcache)begin
-        case (IBus.cache_type.cacheCode)
+    if(IBus.cachetype.isIcache)begin
+        case (IBus.cachetype.cacheCode)
             I_Index_Store_Tag:begin
                 tagv_wdata = {IBus.cache_valid, IBus.cache_tag};
             end
@@ -248,9 +249,9 @@ always_comb begin : data_rdata_final2__blockname
 end
 
 always_comb begin : tagv_we_blockName
-    if(IBus.cache_type.isIcache)begin
+    if(IBus.cachetype.isIcache)begin
         if(ASSOC_NUM==2) begin
-            case (IBus.cache_type.cacheCode)
+            case (IBus.cachetype.cacheCode)
                 I_Index_Invalid, I_Index_Store_Tag:begin
                     tagv_we = (IBus.cache_tag[0]) ? 2'b10 : 2'b01;
                 end
@@ -262,7 +263,7 @@ always_comb begin : tagv_we_blockName
                 end
             endcase
         end else if(ASSOC_NUM == 4) begin
-            case (IBus.cache_type.cacheCode)
+            case (IBus.cachetype.cacheCode)
                 I_Index_Invalid,I_Index_Store_Tag:begin
                     tagv_we =   (IBus.cache_tag[1:0] == 2'b00) ? 4'b0001 :
                                 (IBus.cache_tag[1:0] == 2'b01) ? 4'b0010 :
@@ -332,7 +333,7 @@ always_ff @( posedge clk_g ) begin : req_buffer_block
         req_buffer.index    <=  IBus.index;
         req_buffer.offset   <=  IBus.offset;
         req_buffer.is_cache  <=  IBus.iscache;
-        req_buffer.cache_type<=  IBus.cache_type;
+        req_buffer.cache_type<=  IBus.cachetype;
     end else if(state_next == LOOKUP) 
         req_buffer.valid    <= '0;
 
@@ -358,9 +359,7 @@ always_comb begin : state_next_blockName
 
     unique case (state)
         LOOKUP:begin
-            if(IBus.tlb_ex)
-                state_next = LOOKUP;
-            else if ( req_buffer.valid && req_buffer.is_cache == 1'b0) begin
+            if ( req_buffer.valid && req_buffer.is_cache == 1'b0) begin
                 state_next = MISSCLEAN;
             end else begin
                 if(req_buffer.valid && req_buffer.is_cache == 1'b1) begin

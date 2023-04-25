@@ -3,68 +3,31 @@
 module reg_cp0 (
     input clk   ,
     input reset ,
-    //from WB
-    input ws_to_c0_bus_t ws_to_c0_bus,
-    // WB_C0_Interface
-    WB_C0_Interface.C0   c0_wb_bus,
-    // interrupt
-    input  [ 5:0] ext_int_in,
-    output [ 5:0] c0_hw,
-    output [ 1:0] c0_sw,
-    // C0_TLB_Interface
-    output logic[7:0]   tlb_asid,
-    output tlb_index_t  tlbrw_index,
-    output logic        tlbrw_we,
-    output tlb_entry_t  tlbrw_wdata,
-    input  tlb_entry_t  tlbrw_rdata,
-    output uint32_t     tlbp_entry_hi,
-    input  uint32_t     tlbp_index,
-    // Cache
-    output logic         cache_valid,
-    output logic [19:0]  cache_tag,
-    output logic         cache_dirty,
-    output CacheCodeType cache_op,
-    output logic [7:0]   cache_index,
-    // epc
-    output virt_t epc,
-    // kseg0
-    output logic  kseg0_uncached
+
+    // control
+    CP0_Control_Interface.CP0 control
+
 );
 
-// from WB
-logic       eret_flush;
+
 exception_t exception;
-virt_t      wb_pc;
-logic [2:0] tlb_op;
-virt_t		  cache_vaddr;
-phys_t	      cache_paddr;
+assign exception = control.exception;
 
-assign { eret_flush,
-         exception,
-         wb_pc,
-         tlb_op,
-         cache_vaddr, 
-         cache_paddr, 
-         cache_op } = ws_to_c0_bus;
-
-// WB_C0_Interface
-logic        cp0_we   ;
-logic [ 7:0] cp0_addr ;
-uint32_t     cp0_wdata;
-
-assign cp0_we    = c0_wb_bus.we;
-assign cp0_addr  = c0_wb_bus.addr;
-assign cp0_wdata = c0_wb_bus.wdata;
 
 //CP0_STATUS: CR_STATUS, SEL 0
 logic [31:0] cp0_status_out;
 cp0_status_t cp0_status;
 
-assign cp0_status.bev = 1'b1;
+always @(posedge clk) begin
+    if(reset)
+        cp0_status.bev <= 1'b1;
+    else if(control.we && control.addr == `CR_STATUS)
+        cp0_status.bev <= control.wdata[22];
+end
 
 always @(posedge clk) begin
-    if(cp0_we && cp0_addr == `CR_STATUS)
-        cp0_status.im <= cp0_wdata[15:8];
+    if(control.we && control.addr == `CR_STATUS)
+        cp0_status.im <= control.wdata[15:8];
 end
 
 always @(posedge clk) begin
@@ -72,17 +35,17 @@ always @(posedge clk) begin
         cp0_status.exl <= 1'b0;
     else if(exception.ex)
         cp0_status.exl <= 1'b1;
-    else if(eret_flush)
+    else if(control.eret_flush)
         cp0_status.exl <= 1'b0;
-    else if(cp0_we && cp0_addr == `CR_STATUS)
-        cp0_status.exl <= cp0_wdata[1];
+    else if(control.we && control.addr == `CR_STATUS)
+        cp0_status.exl <= control.wdata[1];
 end
 
 always @(posedge clk) begin
     if(reset)
         cp0_status.ie <= 1'b0;
-    else if(cp0_we && cp0_addr == `CR_STATUS)
-        cp0_status.ie <= cp0_wdata[0];
+    else if(control.we && control.addr == `CR_STATUS)
+        cp0_status.ie <= control.wdata[0];
 end
 
 assign cp0_status_out = {9'b0, cp0_status.bev, 6'b0, cp0_status.im, 6'b0, cp0_status.exl, cp0_status.ie};
@@ -102,7 +65,7 @@ logic count_eq_compare;
 always @(posedge clk) begin
     if(reset)
         cp0_cause.ti <= 1'b0;
-    else if(cp0_we && cp0_addr == `CR_COMPARE)
+    else if(control.we && control.addr == `CR_COMPARE)
         cp0_cause.ti <= 1'b0;
     else if(count_eq_compare)
         cp0_cause.ti <= 1'b1;
@@ -112,14 +75,14 @@ always @(posedge clk) begin
     if(reset)
         cp0_cause.ip[7:2] <= 6'b0;
     else begin
-        cp0_cause.ip[7]   <= ext_int_in[5] | cp0_cause.ti;
-        cp0_cause.ip[6:2] <= ext_int_in[4:0];
+        cp0_cause.ip[7]   <= control.ext_int[5] | cp0_cause.ti;
+        cp0_cause.ip[6:2] <= control.ext_int[4:0];
     end
 
     if(reset)
         cp0_cause.ip[1:0] <= 2'b0;
-    else if(cp0_we && cp0_addr == `CR_CAUSE)
-        cp0_cause.ip[1:0] <= cp0_wdata[9:8];
+    else if(control.we && control.addr == `CR_CAUSE)
+        cp0_cause.ip[1:0] <= control.wdata[9:8];
 end
 
 always @(posedge clk) begin
@@ -135,9 +98,9 @@ assign cp0_cause_out = {cp0_cause.bd, cp0_cause.ti, 14'b0, cp0_cause.ip, 1'b0, c
 virt_t cp0_epc;
 always @(posedge clk) begin
     if(exception.ex && !cp0_status.exl)
-        cp0_epc <= exception.bd ? wb_pc-3'h4 : wb_pc;
-    else if(cp0_we && cp0_addr == `CR_EPC)
-        cp0_epc <= cp0_wdata;
+        cp0_epc <= exception.bd ? control.pc-3'h4 : control.pc;
+    else if(control.we && control.addr == `CR_EPC)
+        cp0_epc <= control.wdata;
 end
 
 //CP0_BADVADDR: CR_BADVADDR, SEL 0
@@ -158,8 +121,8 @@ always @(posedge clk) begin
     else
         tick <= ~tick;
 
-    if(cp0_we && cp0_addr == `CR_COUNT)
-        cp0_count <= cp0_wdata;
+    if(control.we && control.addr == `CR_COUNT)
+        cp0_count <= control.wdata;
     else if(tick)
         cp0_count <= cp0_count + 1'b1;
 end
@@ -167,19 +130,20 @@ end
 //CP0_COMPARE: CR_COMPARE, SEl 0
 reg [31:0] cp0_compare;
 always @(posedge clk) begin
-    if(cp0_we && cp0_addr == `CR_COMPARE)
-        cp0_compare <= cp0_wdata;
+    if(control.we && control.addr == `CR_COMPARE)
+        cp0_compare <= control.wdata;
 end
 
 assign count_eq_compare = cp0_count == cp0_compare;
 
 //TLB
-logic [31:0] cp0_entry_hi, cp0_entry_lo0, cp0_entry_lo1, cp0_index;
+uint32_t cp0_entry_hi, cp0_entry_lo0, cp0_entry_lo1, cp0_index;
+tlb_entry_t tlbrw_rdata;
 
-assign tlb_asid    = cp0_entry_hi[7:0];
-assign tlbrw_index = cp0_index[$clog2(`TLB_ENTRIES_NUM)-1:0];
-assign tlbrw_we    = tlb_op[`TLBOP_TLBWI];
-assign tlbrw_wdata = {
+assign control.tlb_asid    = cp0_entry_hi[7:0];
+assign control.tlbrw_index = cp0_index[$clog2(`TLB_ENTRIES_NUM)-1:0];
+assign control.tlbrw_we    = control.tlb_op[`TLBOP_TLBWI];
+assign control.tlbrw_wdata = {
     cp0_entry_lo0[ 5: 3],
     cp0_entry_lo1[ 5: 3],
     cp0_entry_hi [ 7: 0],
@@ -192,7 +156,9 @@ assign tlbrw_wdata = {
     cp0_entry_lo1[1],
     cp0_entry_lo0[0] & cp0_entry_lo1[0]
 };
-assign tlbp_entry_hi = cp0_entry_hi;
+assign control.tlbp_entry_hi = cp0_entry_hi;
+
+assign tlbrw_rdata = control.tlbrw_rdata;
 
 
 always @(posedge clk) begin
@@ -201,20 +167,20 @@ always @(posedge clk) begin
                     || exception.exccode == `EXCCODE_TLBS
                     || exception.exccode == `EXCCODE_MOD))
         cp0_entry_hi[31:13] <= exception.badvaddr[31:13];
-    else if(tlb_op[`TLBOP_TLBR])
+    else if(control.tlb_op[`TLBOP_TLBR])
         cp0_entry_hi <= {
             tlbrw_rdata.vpn2,
             5'b0,
             tlbrw_rdata.asid
         };
-    else if(cp0_we && cp0_addr == `CR_ENTRYHI)
+    else if(control.we && control.addr == `CR_ENTRYHI)
         cp0_entry_hi <= {
-            cp0_wdata[31:13],
+            control.wdata[31:13],
             5'b0,
-            cp0_wdata[7:0]
+            control.wdata[7:0]
         };
 
-    if(tlb_op[`TLBOP_TLBR])
+    if(control.tlb_op[`TLBOP_TLBR])
         cp0_entry_lo0 <= {
             6'b0,
             tlbrw_rdata.pfn0,
@@ -223,13 +189,13 @@ always @(posedge clk) begin
             tlbrw_rdata.v0,
             tlbrw_rdata.G
         };
-    else if(cp0_we && cp0_addr == `CR_ENTRYLO0)
+    else if(control.we && control.addr == `CR_ENTRYLO0)
         cp0_entry_lo0 <= {
             6'b0,
-            cp0_wdata[25:0]
+            control.wdata[25:0]
         };
 
-    if(tlb_op[`TLBOP_TLBR])
+    if(control.tlb_op[`TLBOP_TLBR])
         cp0_entry_lo1 <= {
             6'b0,
             tlbrw_rdata.pfn1,
@@ -238,16 +204,16 @@ always @(posedge clk) begin
             tlbrw_rdata.v1,
             tlbrw_rdata.G
         };
-    else if(cp0_we && cp0_addr == `CR_ENTRYLO1)
+    else if(control.we && control.addr == `CR_ENTRYLO1)
         cp0_entry_lo1 <= {
             6'b0,
-            cp0_wdata[25:0]
+            control.wdata[25:0]
         };
 
-    if(tlb_op[`TLBOP_TLBP])
-        cp0_index <= tlbp_index;
-    else if(cp0_we && cp0_addr == `CR_INDEX)
-        cp0_index <= {{(32-$clog2(`TLB_ENTRIES_NUM)){1'b0}},cp0_wdata[$clog2(`TLB_ENTRIES_NUM)-1:0]};
+    if(control.tlb_op[`TLBOP_TLBP])
+        cp0_index <= control.tlbp_index;
+    else if(control.we && control.addr == `CR_INDEX)
+        cp0_index <= {{(32-$clog2(`TLB_ENTRIES_NUM)){1'b0}},control.wdata[$clog2(`TLB_ENTRIES_NUM)-1:0]};
 end
 
 // Cache TagLo
@@ -255,20 +221,53 @@ logic [31:0] cp0_tag_lo;
 always @(posedge clk) begin
     if(reset)
         cp0_tag_lo <= '0;
-    if(cp0_we && cp0_addr == `CR_TAGLO)
-        cp0_tag_lo <= cp0_wdata[31:10];
+    if(control.we && control.addr == `CR_TAGLO)
+        cp0_tag_lo <= control.wdata[31:10];
 end
-logic  tag_from_cp0;
-logic  cache_is_index;
-assign tag_from_cp0 = (cache_op == I_Index_Store_Tag || cache_op == D_Index_Store_Tag);
-assign cache_is_index = (cache_op == I_Index_Invalid || cache_op == I_Index_Store_Tag 
-                       ||cache_op == D_Index_Store_Tag || cache_op == D_Index_Writeback_Invalid);
-assign cache_valid = cp0_tag_lo[10];
-assign cache_dirty = cp0_tag_lo[11];
-assign cache_tag   = tag_from_cp0 ?  cp0_tag_lo[31:12] : cache_is_index ? ws_to_c0_bus.cache_vaddr[31:12] : ws_to_c0_bus.cache_paddr[31:12];
-assign cache_index = ws_to_c0_bus.cache_vaddr[11:4];
+// logic  tag_from_cp0;
+// logic  cache_is_index;
+assign tag_from_cp0 = (control.cache_op == I_Index_Store_Tag || control.cache_op == D_Index_Store_Tag);
 
-// Configx
+assign control.cache_valid = cp0_tag_lo[10];
+assign control.cache_dirty = cp0_tag_lo[11];
+assign control.cache_tag   = tag_from_cp0 ? cp0_tag_lo[31:12] : control.cache_paddr[31:12];
+assign control.cache_way   = control.cache_paddr[12];
+assign control.cache_index = control.cache_vaddr[11:4];
+
+
+// CP0_PRID
+uint32_t cp0_prid;
+
+always_ff @(posedge clk) begin
+    if(reset)
+        cp0_prid <= 32'h0000_4220;
+end
+
+
+// CP0_EBase
+uint32_t cp0_ebase;
+uint32_t offset, base;
+
+always_ff @(posedge clk) begin
+    if(reset)
+        cp0_ebase <= 32'h8000_0000;
+    else if(control.we && control.addr == `CR_EBASE)
+        cp0_ebase <= control.wdata;
+end
+
+always_comb begin
+    unique case(control.exception.exccode)
+        `EXCCODE_TLBL, `EXCCODE_TLBS:
+            offset = (exception.tlb_refill) ? 32'h0 : 32'h180;
+        default:
+            offset = 32'h180;
+    endcase
+
+    base = (cp0_status.exl || exception.ex) ? 32'hbfc00200 : cp0_ebase;
+end
+
+
+// Config x
 logic [31:0] cp0_config0, cp0_config1;
 always @(posedge clk) begin
     if(reset) begin
@@ -300,29 +299,36 @@ always @(posedge clk) begin
             1'd0     // FP
         };
     end
-    if(cp0_we && cp0_addr == `CR_CONFIG0)
-        cp0_config0[2:0] <= cp0_wdata[2:0];
+    if(control.we && control.addr == `CR_CONFIG0)
+        cp0_config0[2:0] <= control.wdata[2:0];
 end
 
-assign kseg0_uncached = (cp0_config0[2:0] != 3'd3);
+assign control.kseg0_uncached = (cp0_config0[2:0] != 3'd3);
 
-// WB_C0_Interface
-assign c0_wb_bus.rdata = ({32{cp0_addr==`CR_BADVADDR}} & cp0_badvaddr   )
-                       | ({32{cp0_addr==`CR_COUNT   }} & cp0_count      )
-                       | ({32{cp0_addr==`CR_COMPARE }} & cp0_compare    )
-                       | ({32{cp0_addr==`CR_STATUS  }} & cp0_status_out )
-                       | ({32{cp0_addr==`CR_CAUSE   }} & cp0_cause_out  )
-                       | ({32{cp0_addr==`CR_EPC     }} & cp0_epc        )
-                       | ({32{cp0_addr==`CR_INDEX   }} & cp0_index      )
-                       | ({32{cp0_addr==`CR_ENTRYHI }} & cp0_entry_hi   )
-                       | ({32{cp0_addr==`CR_ENTRYLO0}} & cp0_entry_lo0  )
-                       | ({32{cp0_addr==`CR_ENTRYLO1}} & cp0_entry_lo1  )
-                       | ({32{cp0_addr==`CR_TAGLO   }} & cp0_tag_lo     )
-                       | ({32{cp0_addr==`CR_CONFIG0 }} & cp0_config0    )
-                       | ({32{cp0_addr==`CR_CONFIG1 }} & cp0_config1    );
 
-assign {c0_hw, c0_sw} = {8{~cp0_status.exl}} & {8{cp0_status.ie}} & cp0_cause.ip & cp0_status.im;
+// mtc0/mfc0
+assign control.rdata =   ({32{control.addr==`CR_INDEX   }} & cp0_index      )
+                       | ({32{control.addr==`CR_ENTRYLO0}} & cp0_entry_lo0  )
+                       | ({32{control.addr==`CR_ENTRYLO1}} & cp0_entry_lo1  )
+                       | ({32{control.addr==`CR_BADVADDR}} & cp0_badvaddr   )
+                       | ({32{control.addr==`CR_COUNT   }} & cp0_count      )
+                       | ({32{control.addr==`CR_ENTRYHI }} & cp0_entry_hi   )
+                       | ({32{control.addr==`CR_COMPARE }} & cp0_compare    )
+                       | ({32{control.addr==`CR_STATUS  }} & cp0_status_out )
+                       | ({32{control.addr==`CR_CAUSE   }} & cp0_cause_out  )
+                       | ({32{control.addr==`CR_EPC     }} & cp0_epc        )
+                       | ({32{control.addr==`CR_PRID    }} & cp0_prid       )
+                       | ({32{control.addr==`CR_EBASE   }} & cp0_ebase      )
+                       | ({32{control.addr==`CR_CONFIG0 }} & cp0_config0    )
+                       | ({32{control.addr==`CR_CONFIG1 }} & cp0_config1    )
+                       | ({32{control.addr==`CR_TAGLO   }} & cp0_tag_lo     );
 
-assign epc = cp0_epc;
+// interrupt
+assign {control.hw, control.sw} = {8{~cp0_status.exl}} & {8{cp0_status.ie}} & cp0_cause.ip & cp0_status.im;
+
+// exception
+assign control.epc = cp0_epc;
+assign control.exception_vector = offset + base;
+
 
 endmodule

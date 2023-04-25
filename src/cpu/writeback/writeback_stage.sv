@@ -3,22 +3,15 @@
 module writeback_stage (
     input  clk,
     input  reset,
-    // pipeline control
+    // pipeline
+    input  ms_to_valid,
     output ws_allowin,
-    // from MEM
+
     input  ms_to_ws_bus_t   ms_to_ws_bus,
-    // forward bus
-    output ws_forward_bus_t ws_forward_bus,
-    // to regfile
-    output ws_to_rf_bus_t   ws_to_rf_bus,
-    // to c0
-    output ws_to_c0_bus_t   ws_to_c0_bus,
-    // WB_C0_Interface
-    WB_C0_Interface.WB      wb_c0_bus,
-    // exception
-    output pipeline_flush_t pipeline_flush,
-    // tlb
-    output virt_t           tlb_cache_pc,
+
+    // control
+    Writeback_Control_Interface.Writeback control,
+
     // trace dubug interface
     output virt_t           debug_wb_pc,
     output logic [3:0]      debug_wb_rf_wen,
@@ -34,88 +27,84 @@ logic ws_ready_go;
 ms_to_ws_bus_t ms_to_ws_bus_r;
 
 // forward
-logic    op_mfc0;
-logic    op_tlb;
 uint32_t final_result;
 
-// cp0 and exception
-logic eret_flush;
+// Exception, CP0
 logic ex_en;
+logic op_eret;
+logic op_mtc0;
+logic op_mfc0;
+logic op_tlb;
+logic op_cache;
+
+// Exception, CP0, TLB, Cache
+logic pipeline_flush;
+
 
 // WB stage
 assign ws_ready_go = 1'b1;
 assign ws_allowin  = !ws_valid || ws_ready_go;
+
+assign control.pipeline_flush = pipeline_flush;
+
 always @(posedge clk) begin
-    if (reset) begin
-        ws_valid <= 1'b0;
-    end
-    else if(eret_flush | ex_en) begin
+    if (reset || pipeline_flush) begin
         ws_valid <= 1'b0;
     end
     else if (ws_allowin) begin
-        ws_valid <= ms_to_ws_bus.valid;
+        ws_valid <= ms_to_valid;
     end
 
-    if (ms_to_ws_bus.valid && ws_allowin) begin
+    if (ms_to_valid && ws_allowin) begin
         ms_to_ws_bus_r <= ms_to_ws_bus;
     end
 end
 
 // to regfile
-assign ws_to_rf_bus.we    = ms_to_ws_bus_r.rf_we & {4{ws_valid & ~ex_en}};
-assign ws_to_rf_bus.waddr = ms_to_ws_bus_r.dest;
-assign ws_to_rf_bus.wdata = final_result;
+assign control.rf_we    = {4{ws_valid & ~ex_en}} & ms_to_ws_bus_r.rf_we;
+assign control.rf_waddr = ms_to_ws_bus_r.dest;
+assign control.rf_wdata = final_result;
 
-// forward bus
-assign op_mfc0 = ms_to_ws_bus_r.c0_op[2] & ws_valid;
-assign op_tlb  = (ms_to_ws_bus_r.tlb_op[`TLBOP_TLBWI]|
-                  ms_to_ws_bus_r.tlb_op[`TLBOP_TLBP] |
-                  ms_to_ws_bus_r.tlb_op[`TLBOP_TLBR] ) & ws_valid;
-assign op_cache = (ms_to_ws_bus_r.cache_op != EMPTY) & ws_valid;
-assign final_result = op_mfc0 ? wb_c0_bus.rdata : ms_to_ws_bus_r.result;
-assign ws_forward_bus = {op_mfc0,
-                         op_tlb | op_cache,
-                         ms_to_ws_bus_r.rf_we,
-                         ms_to_ws_bus_r.dest & {5{ws_valid}},
-                         final_result
-                         };
 
-// cp0 and exception
-assign ws_to_c0_bus.cache_vaddr = ms_to_ws_bus_r.result;
-assign ws_to_c0_bus.cache_paddr = ms_to_ws_bus_r.phy_addr;
+// bypass
+assign final_result = op_mfc0 ? control.cp0_rdata : ms_to_ws_bus_r.result;
 
-exception_control u_exception_control (
-    .ws_valid   (ws_valid               ),
+assign control.dest   = {5{ws_valid}} & ms_to_ws_bus_r.dest;
+assign control.result = final_result;
 
-    .c0_op      (ms_to_ws_bus_r.c0_op   ),
-    .ws_c0_addr (ms_to_ws_bus_r.c0_addr ),
-    .ws_result  (ms_to_ws_bus_r.result  ),
-    // cp0 interface
-    .c0_we      (wb_c0_bus.we           ),
-    .c0_addr    (wb_c0_bus.addr         ),
-    .c0_wdata   (wb_c0_bus.wdata        ),
-    .c0_rdata   (wb_c0_bus.rdata        ),
-    // exception
-    .eret_flush (eret_flush             ),
-    .ex_en      (ex_en                  ),
-    // to cp0
-    .ws_pc          (ms_to_ws_bus_r.pc          ),
-    .ws_exception   (ms_to_ws_bus_r.exception   ),
-    .c0_eret_flush  (ws_to_c0_bus.eret_flush    ),
-    .c0_exception   (ws_to_c0_bus.exception     ),
-    .c0_pc          (ws_to_c0_bus.pc            )
-);
 
-assign tlb_cache_pc = ms_to_ws_bus_r.pc;
+// Exception
+assign pipeline_flush = ws_valid & (ms_to_ws_bus_r.exception.ex | op_eret | op_tlb | op_cache);
 
-// tlb
-assign ws_to_c0_bus.tlb_op = ws_valid ? ms_to_ws_bus_r.tlb_op : 3'b0;
+assign ex_en    = ws_valid & ms_to_ws_bus_r.exception.ex;
+assign op_eret  = ws_valid & ms_to_ws_bus_r.c0_op[0];
+assign op_mtc0  = ws_valid & ms_to_ws_bus_r.c0_op[1];
+assign op_mfc0  = ws_valid & ms_to_ws_bus_r.c0_op[2];
+assign op_tlb   = ws_valid & (|ms_to_ws_bus_r.tlb_op);
+assign op_cache = ws_valid & (ms_to_ws_bus_r.cache_op != Cache_Code_EMPTY);
 
-// cache
-assign ws_to_c0_bus.cache_op = ws_valid ? ms_to_ws_bus_r.cache_op: EMPTY;
+assign control.wr_disable = ex_en  | op_eret;
+assign control.mfc0       = op_mfc0;
+assign control.stall      = op_tlb | op_cache;
 
-assign pipeline_flush = {ex_en | eret_flush | op_tlb | op_cache ,
-                        ex_en, eret_flush, op_tlb, op_cache, ms_to_ws_bus_r.exception.tlb_refill};
+assign control.eret      = op_eret;
+assign control.exception = ws_valid ? ms_to_ws_bus_r.exception : 'b0;
+assign control.pc        = ms_to_ws_bus_r.pc;
+assign control.cache_tlb_op = op_tlb | op_cache;
+
+// CP0
+assign control.cp0_we    = ws_valid & op_mtc0;
+assign control.cp0_addr  = ms_to_ws_bus_r.c0_addr;
+assign control.cp0_wdata = ms_to_ws_bus_r.result;
+
+// TLB
+assign control.tlb_op = {3{ws_valid}} & ms_to_ws_bus_r.tlb_op;
+
+// Cache
+assign control.cache_op    = ws_valid ? ms_to_ws_bus_r.cache_op : Cache_Code_EMPTY;
+assign control.cache_vaddr = ms_to_ws_bus_r.result;
+assign control.cache_paddr = ms_to_ws_bus_r.phy_addr;
+
 
 // trace debug interface
 assign debug_wb_pc       = ms_to_ws_bus_r.pc;

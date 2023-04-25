@@ -18,7 +18,7 @@ module alu(
     input  uint16_t     imm,
 
     output uint32_t     alu_result,
-    // overflow
+    // 溢出检测
     input   alu_ov,
     output  alu_ex
 );

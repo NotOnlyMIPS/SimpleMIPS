@@ -3,8 +3,6 @@
 module reg_hilo (
     input clk,
     input reset,
-    input pipeline_flush,
-    input es_valid,
 
     input logic [12:0] hi_lo_op,
     input uint32_t src1,
@@ -35,19 +33,19 @@ wire        op_maddu;
 wire        op_msub ;
 wire        op_msubu;
 
-assign op_mthi  = hi_lo_op[ 0] & es_valid;
-assign op_mtlo  = hi_lo_op[ 1] & es_valid;
-assign op_mfhi  = hi_lo_op[ 2] & es_valid;
-assign op_mflo  = hi_lo_op[ 3] & es_valid;
-assign op_div   = hi_lo_op[ 4] & es_valid;
-assign op_divu  = hi_lo_op[ 5] & es_valid;
-assign op_mult  = hi_lo_op[ 6] & es_valid;
-assign op_multu = hi_lo_op[ 7] & es_valid;
-assign op_mul   = hi_lo_op[ 8] & es_valid;
-assign op_madd  = hi_lo_op[ 9] & es_valid;
-assign op_maddu = hi_lo_op[10] & es_valid;
-assign op_msub  = hi_lo_op[11] & es_valid;
-assign op_msubu = hi_lo_op[12] & es_valid;
+assign op_mthi  = hi_lo_op[ 0];
+assign op_mtlo  = hi_lo_op[ 1];
+assign op_mfhi  = hi_lo_op[ 2];
+assign op_mflo  = hi_lo_op[ 3];
+assign op_div   = hi_lo_op[ 4];
+assign op_divu  = hi_lo_op[ 5];
+assign op_mult  = hi_lo_op[ 6];
+assign op_multu = hi_lo_op[ 7];
+assign op_mul   = hi_lo_op[ 8];
+assign op_madd  = hi_lo_op[ 9];
+assign op_maddu = hi_lo_op[10];
+assign op_msub  = hi_lo_op[11];
+assign op_msubu = hi_lo_op[12];
 
 // mul
 logic        mul_op;
@@ -72,7 +70,7 @@ assign abs_src2 = (is_signed && src2[31]) ? -src2 : src2;
 assign mul_ready = mul_count == 3;
 
 always_ff @(posedge clk) begin
-    if(reset || pipeline_flush)
+    if(reset)
         mul_count <= 2'b0;
     else if(mul_op)
         mul_count <= mul_count + 2'd1;
@@ -108,7 +106,7 @@ wire [63:0] div_res          ;
 wire [63:0] divu_res         ;
 
 always @(posedge clk) begin
-    if(reset || pipeline_flush) begin
+    if(reset) begin
         div_in_valid <= 1'b0;
     end
     else if(div_res_tvalid || divu_res_tvalid) begin
@@ -171,11 +169,11 @@ assign hi_lo_ready = op_div  && div_res_tvalid
                   || mul_op  && mul_ready
                   || hi_lo_op[3:0] != 4'h0;
 
-assign hi_lo_result = ({32{op_mfhi          }} & hi             )
-                    | ({32{op_mflo          }} & lo             )
-                    | ({32{op_div           }} & div_res[63:32] )
-                    | ({32{op_divu          }} & divu_res[63:32])
-                    | ({32{mul_op           }} & mul_res[31:0]  )
-                    | ({32{op_mthi | op_mtlo}} & src1           );
+assign hi_lo_result = ({32{op_mfhi           }} & hi                 )
+                    | ({32{op_mflo           }} & lo                 )
+                    | ({32{op_div            }} & div_res[63:32]     )
+                    | ({32{op_divu           }} & divu_res[63:32]    )
+                    | ({32{mul_op            }} & mul_res[31:0]      )
+                    | ({32{op_mthi | op_mtlo }} & src1               );
 
 endmodule

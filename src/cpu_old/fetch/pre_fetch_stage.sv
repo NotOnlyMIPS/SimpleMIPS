@@ -84,7 +84,7 @@ always_ff @(posedge clk) begin
         pc <= c0_epc - 32'h4;
     end
     else if(pipeline_flush.tlb_op || pipeline_flush.cache_op) begin
-        pc <= tlb_cache_pc + 32'h4;
+        pc <= tlb_cache_pc;
     end
     else if (to_pfs_valid && fs_allowin && pfs_ready_go) begin
         pc <= next_pc;

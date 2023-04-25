@@ -9,6 +9,7 @@
 `default_nettype wire
 `timescale 1ns / 1ps
 
+typedef logic [  4:0] reg_addr_t;
 typedef logic [  7:0] uint8_t;
 typedef logic [ 15:0] uint16_t;
 typedef logic [ 31:0] uint32_t;

@@ -205,12 +205,13 @@ logic fifo_wr_rst_busy;
 
 //----------------------------------------cpu axi fifo-------------------------------------------------
 assign fifo_din   = {DBus.tag,req_buffer.index,req_buffer.offset,req_buffer.wdata,req_buffer.wstrb,req_buffer.size};
-assign fifo_wr_en = ~fifo_wr_rst_busy && ~fifo_full && req_buffer.valid && req_buffer.wr && ~DBus.iscache && state == LOOKUP;
+assign fifo_wr_en = ~fifo_wr_rst_busy && ~fifo_full && req_buffer.valid && req_buffer.wr && ~DBus.iscache;
 assign fifo_rd_en = (uwr_rdy && (!fifo_empty) && (!fifo_rd_rst_busy)) ? 1'b1 :1'b0;
 //cpu
 
-assign DBus.addr_ok   = req_buffer_en && DBus.req;
-assign DBus.data_ok   = (state == LOOKUP && req_buffer.valid && DBus.tlb_ex) || (state == LOOKUP && ~DBus.iscache && req_buffer.wr && req_buffer.valid) || ( (state == REFILLDONE || ((state == LOOKUP && ((cache_hit && DBus.iscache) || (~DBus.iscache && req_buffer.wr))))) && req_buffer.valid);
+assign DBus.addr_ok   = req_buffer_en;
+assign DBus.data_ok   = (state == LOOKUP && ~DBus.iscache && DBus.wr && req_buffer.valid) || ( (state == REFILLDONE || ((state == LOOKUP && ((cache_hit && DBus.iscache) || (~DBus.iscache && req_buffer.wr))))) && req_buffer.valid);
+
 assign DBus.rdata     =  req_buffer.valid ? data_rdata_final1 : '0;
 //axi
 assign rd_req = req_buffer.is_cache & (state == MISSCLEAN);
@@ -682,9 +683,7 @@ always_comb begin : state_next_blockName
 
     unique case (state)
         LOOKUP:begin
-            if(DBus.tlb_ex)
-                state_next = LOOKUP;
-            else if ( req_buffer.cache_type.isDcache &&
+            if ( req_buffer.cache_type.isDcache &&
                  ((req_buffer.cache_type.cacheCode == D_Index_Writeback_Invalid && dirty_rdata[req_buffer.cache_way])||
                  (req_buffer.cache_type.cacheCode == D_Hit_Writeback_Invalid && ins_hit && dirty_rdata[clog2(cache_ins_hit)]) ))
                 state_next = MISSDIRTY;
