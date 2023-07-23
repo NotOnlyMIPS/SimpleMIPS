@@ -138,6 +138,7 @@ def main [
 
     mipsel-linux-objcopy -O binary -j .text $BINSRC $'($buildDir)/text.bin'
     mipsel-linux-objcopy -O binary -j .data $BINSRC $'($buildDir)/data.bin'
+    mipsel-linux-objdump -z -d -j .text $BINSRC | save -f $'($buildDir)/text.bin.d'
 
     extract-coe $'($buildDir)/text.bin' $'($buildDir)/inst_ram'
     extract-coe $'($buildDir)/data.bin' $'($buildDir)/data_ram'
