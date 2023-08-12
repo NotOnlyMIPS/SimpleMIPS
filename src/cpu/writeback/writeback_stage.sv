@@ -13,6 +13,7 @@ module writeback_stage (
     Writeback_Control_Interface.Writeback control,
 
     // trace dubug interface
+    output logic            debug_wb_valid,
     output virt_t           debug_wb_pc,
     output logic [3:0]      debug_wb_rf_wen,
     output reg_addr_t       debug_wb_rf_wnum,
@@ -107,6 +108,7 @@ assign control.cache_paddr = ms_to_ws_bus_r.phy_addr;
 
 
 // trace debug interface
+assign debug_wb_valid    = ws_valid;
 assign debug_wb_pc       = ms_to_ws_bus_r.pc;
 assign debug_wb_rf_wen   = ms_to_ws_bus_r.rf_we & {4{ws_valid & ~ex_en}};
 assign debug_wb_rf_wnum  = ms_to_ws_bus_r.dest;

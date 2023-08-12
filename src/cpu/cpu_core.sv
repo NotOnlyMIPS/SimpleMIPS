@@ -10,6 +10,7 @@ module cpu_core(
     // DCache
     CPU_DCache_Interface.CPU DBus,
     // trace debug interface
+    output        debug_wb_valid,
     output [31:0] debug_wb_pc,
     output [ 3:0] debug_wb_rf_wen,
     output [ 4:0] debug_wb_rf_wnum,
@@ -199,6 +200,7 @@ writeback_stage u_wb_stage(
     .control (writeback_control.Writeback),
 
     //trace debug interface
+    .debug_wb_valid   ,
     .debug_wb_pc      ,
     .debug_wb_rf_wen  ,
     .debug_wb_rf_wnum ,

@@ -89,11 +89,13 @@ soc_axi_lite_top #(.SIMULATION(1'b1)) soc_lite
 //"rf" means regfiles in cpu
 //"w" in "wen/wnum/wdata" means writing
 wire soc_clk;
+wire        debug_wb_valid;
 wire [31:0] debug_wb_pc;
 wire [3 :0] debug_wb_rf_wen;
 wire [4 :0] debug_wb_rf_wnum;
 wire [31:0] debug_wb_rf_wdata;
 assign soc_clk           = soc_lite.cpu_clk;
+assign debug_wb_valid    = soc_lite.debug_wb_valid;
 assign debug_wb_pc       = soc_lite.debug_wb_pc;
 assign debug_wb_rf_wen   = soc_lite.debug_wb_rf_wen;
 assign debug_wb_rf_wnum  = soc_lite.debug_wb_rf_wnum;
@@ -117,6 +119,7 @@ always @(posedge soc_clk)
 begin 
     #1;
     if(|debug_wb_rf_wen && debug_wb_rf_wnum!=5'd0 && !debug_end && `CONFREG_OPEN_TRACE)
+    // if(|debug_wb_rf_wen && debug_wb_rf_wnum!=5'd0 && !debug_end)
     begin
         trace_cmp_flag=1'b0;
         while (!trace_cmp_flag && !($feof(trace_ref)))
@@ -139,6 +142,19 @@ assign   ref_wb_rf_wdata_v[23:16] =   ref_wb_rf_wdata[23:16] & {8{debug_wb_rf_we
 assign   ref_wb_rf_wdata_v[15: 8] =   ref_wb_rf_wdata[15: 8] & {8{debug_wb_rf_wen[1]}};
 assign   ref_wb_rf_wdata_v[7 : 0] =   ref_wb_rf_wdata[7 : 0] & {8{debug_wb_rf_wen[0]}};
 
+// IPC
+reg [31:0] inst_count, circle_count;
+
+always @(posedge soc_clk) begin
+    if(!resetn) begin
+        inst_count <= 32'd0;
+        circle_count <= 32'd0;
+    end
+    else begin
+        inst_count <= inst_count + debug_wb_valid;
+        circle_count <= circle_count + 1;
+    end
+end
 
 //compare result in rsing edge 
 reg debug_wb_err;
@@ -150,6 +166,7 @@ begin
         debug_wb_err <= 1'b0;
     end
     else if(|debug_wb_rf_wen && debug_wb_rf_wnum!=5'd0 && !debug_end && `CONFREG_OPEN_TRACE)
+    // else if(|debug_wb_rf_wen && debug_wb_rf_wnum!=5'd0 && !debug_end)
     begin
         if (  (debug_wb_pc!==ref_wb_pc) || (debug_wb_rf_wnum!==ref_wb_rf_wnum)
             ||(debug_wb_rf_wdata_v!==ref_wb_rf_wdata_v) )
@@ -252,6 +269,7 @@ begin
     else if(test_end && !debug_end)
     begin
         debug_end <= 1'b1;
+        $display("inst/circle: %d/%d", inst_count, circle_count);
         $display("==============================================================");
         $display("Test end!");
         #40;

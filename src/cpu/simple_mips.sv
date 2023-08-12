@@ -48,6 +48,7 @@ module SimpleMIPS(
     input           bvalid ,
     output          bready ,
     // trace debug interface
+    output        debug_wb_valid,
     output [31:0] debug_wb_pc,
     output [ 3:0] debug_wb_rf_wen,
     output [ 4:0] debug_wb_rf_wnum,
@@ -104,6 +105,7 @@ cpu_core u_cpu_core(
     // data_sram
     .DBus             (CPU_DCache.CPU   ),
     //debug interface
+    .debug_wb_valid   (debug_wb_valid   ),
     .debug_wb_pc      (debug_wb_pc      ),
     .debug_wb_rf_wen  (debug_wb_rf_wen  ),
     .debug_wb_rf_wnum (debug_wb_rf_wnum ),

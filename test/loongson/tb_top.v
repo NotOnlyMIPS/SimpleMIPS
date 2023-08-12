@@ -7,33 +7,32 @@ All rights reserved.
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-1. Redistributions of source code must retain the above copyright notice, this
+1. Redistributions of source code must retain the above copyright notice, this 
 list of conditions and the following disclaimer.
 
-2. Redistributions in binary form must reproduce the above copyright notice,
+2. Redistributions in binary form must reproduce the above copyright notice, 
 this list of conditions and the following disclaimer in the documentation and/or
 other materials provided with the distribution.
 
-3. Neither the name of Loongson Technology Corporation Limited nor the names of
-its contributors may be used to endorse or promote products derived from this
+3. Neither the name of Loongson Technology Corporation Limited nor the names of 
+its contributors may be used to endorse or promote products derived from this 
 software without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
 DISCLAIMED. IN NO EVENT SHALL LOONGSON TECHNOLOGY CORPORATION LIMITED BE LIABLE
-TO ANY PARTY FOR DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
-GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+TO ANY PARTY FOR DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE 
+GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT 
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --------------------------------------------------------------------------------
 ------------------------------------------------------------------------------*/
 `timescale 1ns / 1ps
 
-//! FIXME: trace file may need to be changed when running different tests
-`define TRACE_REF_FILE "../../../../../../../../share/cpu132_gettrace/golden_trace.txt"
+`define TRACE_REF_FILE "../../../../../../golden_trace.txt"
 `define CONFREG_NUM_REG      soc_lite.u_confreg.num_data
 `define CONFREG_OPEN_TRACE   soc_lite.u_confreg.open_trace
 `define CONFREG_NUM_MONITOR  soc_lite.u_confreg.num_monitor
@@ -41,7 +40,7 @@ THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 `define CONFREG_UART_DATA    soc_lite.u_confreg.write_uart_data
 `define END_PC 32'hbfc00100
 
-module tb_cpu_top;
+module tb_top( );
 reg resetn;
 reg clk;
 
@@ -69,9 +68,9 @@ end
 always #5 clk=~clk;
 soc_axi_lite_top #(.SIMULATION(1'b1)) soc_lite
 (
-       .resetn      (resetn     ),
+       .resetn      (resetn     ), 
        .clk         (clk        ),
-
+    
         //------gpio-------
         .num_csn    (num_csn    ),
         .num_a_g    (num_a_g    ),
@@ -82,7 +81,7 @@ soc_axi_lite_top #(.SIMULATION(1'b1)) soc_lite
         .btn_key_col(btn_key_col),
         .btn_key_row(btn_key_row),
         .btn_step   (btn_step   )
-    );
+    );   
 
 //soc lite signals
 //"soc_clk" means clk in cpu
@@ -90,11 +89,13 @@ soc_axi_lite_top #(.SIMULATION(1'b1)) soc_lite
 //"rf" means regfiles in cpu
 //"w" in "wen/wnum/wdata" means writing
 wire soc_clk;
+wire        debug_wb_valid;
 wire [31:0] debug_wb_pc;
 wire [3 :0] debug_wb_rf_wen;
 wire [4 :0] debug_wb_rf_wnum;
 wire [31:0] debug_wb_rf_wdata;
 assign soc_clk           = soc_lite.cpu_clk;
+assign debug_wb_valid    = soc_lite.debug_wb_valid;
 assign debug_wb_pc       = soc_lite.debug_wb_pc;
 assign debug_wb_rf_wen   = soc_lite.debug_wb_rf_wen;
 assign debug_wb_rf_wnum  = soc_lite.debug_wb_rf_wnum;
@@ -110,56 +111,35 @@ assign debug_wb_rf_wdata_v[7 : 0] = debug_wb_rf_wdata[7 : 0] & {8{debug_wb_rf_we
 // open the trace file;
 integer trace_ref;
 initial begin
-    trace_ref = $fopen(`TRACE_REF_FILE, "r");
+    trace_ref = $fopen(`TRACE_REF_FILE, "w");
 end
 
-//get reference result in falling edge
-reg        trace_cmp_flag;
 reg        debug_end;
-
-reg [31:0] ref_wb_pc;
-reg [4 :0] ref_wb_rf_wnum;
-reg [31:0] ref_wb_rf_wdata_v;
-
+// generate trace
 always @(posedge soc_clk)
 begin
-    #1;
-    if(|debug_wb_rf_wen && debug_wb_rf_wnum!=5'd0 && !debug_end && `CONFREG_OPEN_TRACE)
-    begin
-        trace_cmp_flag=1'b0;
-        while (!trace_cmp_flag && !($feof(trace_ref)))
-        begin
-            $fscanf(trace_ref, "%h %h %h %h", trace_cmp_flag,
-                    ref_wb_pc, ref_wb_rf_wnum, ref_wb_rf_wdata_v);
-        end
+    // if(|debug_wb_rf_wen && debug_wb_rf_wnum!=5'd0)
+    // begin
+    //     $fdisplay(trace_ref, "%h %h %h %h", 1'b1,
+    //         debug_wb_pc, debug_wb_rf_wnum, debug_wb_rf_wdata_v);
+    // end
+    if(debug_wb_valid) begin
+        $fdisplay(trace_ref, "%h %h %h %h", |debug_wb_rf_wen && debug_wb_rf_wnum!=5'd0,
+            debug_wb_pc, debug_wb_rf_wnum, debug_wb_rf_wdata_v);
     end
 end
 
-//compare result in rsing edge
-reg debug_wb_err;
-always @(posedge soc_clk)
-begin
-    #2;
-    if(!resetn)
-    begin
-        debug_wb_err <= 1'b0;
+// IPC
+reg [31:0] inst_count, circle_count;
+
+always @(posedge clk) begin
+    if(!resetn) begin
+        inst_count <= 32'd0;
+        circle_count <= 32'd0;
     end
-    else if(|debug_wb_rf_wen && debug_wb_rf_wnum!=5'd0 && !debug_end && `CONFREG_OPEN_TRACE)
-    begin
-        if (  (debug_wb_pc!==ref_wb_pc) || (debug_wb_rf_wnum!==ref_wb_rf_wnum)
-            ||(debug_wb_rf_wdata_v!==ref_wb_rf_wdata_v) )
-        begin
-            $display("--------------------------------------------------------------");
-            $display("[%t] Error!!!",$time);
-            $display("    reference: PC = 0x%8h, wb_rf_wnum = 0x%2h, wb_rf_wdata = 0x%8h",
-                      ref_wb_pc, ref_wb_rf_wnum, ref_wb_rf_wdata_v);
-            $display("    mycpu    : PC = 0x%8h, wb_rf_wnum = 0x%2h, wb_rf_wdata = 0x%8h",
-                      debug_wb_pc, debug_wb_rf_wnum, debug_wb_rf_wdata_v);
-            $display("--------------------------------------------------------------");
-            debug_wb_err <= 1'b1;
-            #40;
-            $finish;
-        end
+    else begin
+        inst_count <= inst_count + debug_wb_valid;
+        circle_count <= circle_count + 1;
     end
 end
 
@@ -226,7 +206,7 @@ begin
     begin
         if(uart_data==8'hff)
         begin
-            ;//$finish;
+            $finish;
         end
         else
         begin
@@ -236,7 +216,6 @@ begin
 end
 
 //test end
-wire global_err = debug_wb_err || (err_count!=8'd0);
 wire test_end = (debug_wb_pc==`END_PC) || (uart_display && uart_data==8'hff);
 always @(posedge soc_clk)
 begin
@@ -247,19 +226,21 @@ begin
     else if(test_end && !debug_end)
     begin
         debug_end <= 1'b1;
-        $display("==============================================================");
-        $display("Test end!");
-        #40;
-        $fclose(trace_ref);
-        if (global_err)
+        $display("inst/circle: %d/%d", inst_count, circle_count);
+	    $display("==============================================================");
+	    $display("gettrace end!");
+		 #10;
+	    $fclose(trace_ref);
+        if (err_count!=8'd0)
         begin
-            $display("Fail!!!Total %d errors!",err_count);
+            $display("Fail in generating trace file!!! Total %d errors!",err_count);
         end
         else
         begin
-            $display("----PASS!!!");
+            $display("----Succeed in generating trace file!");
         end
 	    $finish;
 	end
 end
+
 endmodule

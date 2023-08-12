@@ -79,6 +79,7 @@ module soc_axi_lite_top #(parameter SIMULATION=1'b0)
     input  [1 :0] btn_step
 );
 //debug signals
+wire        debug_wb_valid;
 wire [31:0] debug_wb_pc;
 wire [3 :0] debug_wb_rf_wen;
 wire [4 :0] debug_wb_rf_wnum;
@@ -364,6 +365,7 @@ SimpleMIPS u_cpu(
     .bready    (cpu_bready    ),
 
     //debug interface
+    .debug_wb_valid   (debug_wb_valid   ),
     .debug_wb_pc      (debug_wb_pc      ),
     .debug_wb_rf_wen  (debug_wb_rf_wen  ),
     .debug_wb_rf_wnum (debug_wb_rf_wnum ),
