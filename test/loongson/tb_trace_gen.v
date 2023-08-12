@@ -32,7 +32,7 @@ THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 `timescale 1ns / 1ps
 
-`define TRACE_REF_FILE "../../../../../../../../share/cpu132_gettrace/golden_trace.txt"
+`define TRACE_REF_FILE "../../../../../../perf_func-SimpleMIPS.txt"
 `define CONFREG_NUM_REG      soc_lite.u_confreg.num_data
 `define CONFREG_OPEN_TRACE   soc_lite.u_confreg.open_trace
 `define CONFREG_NUM_MONITOR  soc_lite.u_confreg.num_monitor
@@ -40,7 +40,7 @@ THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 `define CONFREG_UART_DATA    soc_lite.u_confreg.write_uart_data
 `define END_PC 32'hbfc00100
 
-module tb_top( );
+module tb_trace_gen( );
 reg resetn;
 reg clk;
 
@@ -89,7 +89,6 @@ soc_axi_lite_top #(.SIMULATION(1'b1)) soc_lite
 //"rf" means regfiles in cpu
 //"w" in "wen/wnum/wdata" means writing
 wire soc_clk;
-wire        debug_wb_valid;
 wire [31:0] debug_wb_pc;
 wire [3 :0] debug_wb_rf_wen;
 wire [4 :0] debug_wb_rf_wnum;
@@ -101,87 +100,26 @@ assign debug_wb_rf_wen   = soc_lite.debug_wb_rf_wen;
 assign debug_wb_rf_wnum  = soc_lite.debug_wb_rf_wnum;
 assign debug_wb_rf_wdata = soc_lite.debug_wb_rf_wdata;
 
-// open the trace file;
-integer trace_ref;
-initial begin
-    trace_ref = $fopen(`TRACE_REF_FILE, "r");
-end
-
-//get reference result in falling edge
-reg        trace_cmp_flag;
-reg        debug_end;
-
-reg [31:0] ref_wb_pc;
-reg [4 :0] ref_wb_rf_wnum;
-reg [31:0] ref_wb_rf_wdata;
-
-always @(posedge soc_clk)
-begin
-    #1;
-    if(|debug_wb_rf_wen && debug_wb_rf_wnum!=5'd0 && !debug_end && `CONFREG_OPEN_TRACE)
-    // if(|debug_wb_rf_wen && debug_wb_rf_wnum!=5'd0 && !debug_end)
-    begin
-        trace_cmp_flag=1'b0;
-        while (!trace_cmp_flag && !($feof(trace_ref)))
-        begin
-            $fscanf(trace_ref, "%h %h %h %h", trace_cmp_flag,
-                    ref_wb_pc, ref_wb_rf_wnum, ref_wb_rf_wdata);
-        end
-    end
-end
-
 //wdata[i*8+7 : i*8] is valid, only wehile wen[i] is valid
 wire [31:0] debug_wb_rf_wdata_v;
-wire [31:0] ref_wb_rf_wdata_v;
 assign debug_wb_rf_wdata_v[31:24] = debug_wb_rf_wdata[31:24] & {8{debug_wb_rf_wen[3]}};
 assign debug_wb_rf_wdata_v[23:16] = debug_wb_rf_wdata[23:16] & {8{debug_wb_rf_wen[2]}};
 assign debug_wb_rf_wdata_v[15: 8] = debug_wb_rf_wdata[15: 8] & {8{debug_wb_rf_wen[1]}};
 assign debug_wb_rf_wdata_v[7 : 0] = debug_wb_rf_wdata[7 : 0] & {8{debug_wb_rf_wen[0]}};
-assign   ref_wb_rf_wdata_v[31:24] =   ref_wb_rf_wdata[31:24] & {8{debug_wb_rf_wen[3]}};
-assign   ref_wb_rf_wdata_v[23:16] =   ref_wb_rf_wdata[23:16] & {8{debug_wb_rf_wen[2]}};
-assign   ref_wb_rf_wdata_v[15: 8] =   ref_wb_rf_wdata[15: 8] & {8{debug_wb_rf_wen[1]}};
-assign   ref_wb_rf_wdata_v[7 : 0] =   ref_wb_rf_wdata[7 : 0] & {8{debug_wb_rf_wen[0]}};
 
-// IPC
-reg [31:0] inst_count, circle_count;
-
-always @(posedge soc_clk) begin
-    if(!resetn) begin
-        inst_count <= 32'd0;
-        circle_count <= 32'd0;
-    end
-    else begin
-        inst_count <= inst_count + debug_wb_valid;
-        circle_count <= circle_count + 1;
-    end
+// open the trace file;
+integer trace_ref;
+initial begin
+    trace_ref = $fopen(`TRACE_REF_FILE, "w");
 end
 
-//compare result in rsing edge
-reg debug_wb_err;
+reg        debug_end;
+// generate trace
 always @(posedge soc_clk)
 begin
-    #2;
-    if(!resetn)
-    begin
-        debug_wb_err <= 1'b0;
-    end
-    else if(|debug_wb_rf_wen && debug_wb_rf_wnum!=5'd0 && !debug_end && `CONFREG_OPEN_TRACE)
-    // else if(|debug_wb_rf_wen && debug_wb_rf_wnum!=5'd0 && !debug_end)
-    begin
-        if (  (debug_wb_pc!==ref_wb_pc) || (debug_wb_rf_wnum!==ref_wb_rf_wnum)
-            ||(debug_wb_rf_wdata_v!==ref_wb_rf_wdata_v) )
-        begin
-            $display("--------------------------------------------------------------");
-            $display("[%t] Error!!!",$time);
-            $display("    reference: PC = 0x%8h, wb_rf_wnum = 0x%2h, wb_rf_wdata = 0x%8h",
-                      ref_wb_pc, ref_wb_rf_wnum, ref_wb_rf_wdata_v);
-            $display("    mycpu    : PC = 0x%8h, wb_rf_wnum = 0x%2h, wb_rf_wdata = 0x%8h",
-                      debug_wb_pc, debug_wb_rf_wnum, debug_wb_rf_wdata_v);
-            $display("--------------------------------------------------------------");
-            debug_wb_err <= 1'b1;
-            #40;
-            $finish;
-        end
+    if (debug_wb_valid) begin
+        $fdisplay(trace_ref, "%h %h %h %h", `CONFREG_OPEN_TRACE,
+            debug_wb_pc, debug_wb_rf_wnum, debug_wb_rf_wdata_v);
     end
 end
 
@@ -248,7 +186,7 @@ begin
     begin
         if(uart_data==8'hff)
         begin
-            ;//$finish;
+            $finish;
         end
         else
         begin
@@ -258,7 +196,6 @@ begin
 end
 
 //test end
-wire global_err = debug_wb_err || (err_count!=8'd0);
 wire test_end = (debug_wb_pc==`END_PC) || (uart_display && uart_data==8'hff);
 always @(posedge soc_clk)
 begin
@@ -269,20 +206,20 @@ begin
     else if(test_end && !debug_end)
     begin
         debug_end <= 1'b1;
-        $display("inst/circle: %d/%d", inst_count, circle_count);
-        $display("==============================================================");
-        $display("Test end!");
-        #40;
-        $fclose(trace_ref);
-        if (global_err)
+	    $display("==============================================================");
+	    $display("gettrace end!");
+		 #10;
+	    $fclose(trace_ref);
+        if (err_count!=8'd0)
         begin
-            $display("Fail!!!Total %d errors!",err_count);
+            $display("Fail in generating trace file!!! Total %d errors!",err_count);
         end
         else
         begin
-            $display("----PASS!!!");
+            $display("----Succeed in generating trace file!");
         end
 	    $finish;
 	end
 end
+
 endmodule
